@@ -44,7 +44,7 @@ app.use(express.urlencoded())
 app.use(express.json())
 app.use(express.methodOverride());
 app.use(app.router);
-app.use(express.static("./public"));
+app.use(express.static(__dirname + "/public"));
 
 // development only
 app.use(express.errorHandler());
