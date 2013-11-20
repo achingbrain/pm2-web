@@ -1,6 +1,6 @@
 # PM2-Web
 
-A web based monitor for [PM2](https://github.com/Unitech/pm2)
+A web based monitor for [PM2](https://github.com/Unitech/pm2). Originally based on work done by [dunxrion](https://github.com/dunxrion).
 
 ![Screenshot of web monitor](https://raw.github.com/achingbrain/pm2-web/master/assets/screenshot.png)
 
