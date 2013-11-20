@@ -3,7 +3,6 @@
 	"version": "0.0.1",
 	"description": "A web based monitor for PM2",
 	"main": "pm2-web.js",
-	"readme": "README.md",
 	"scripts": {
 		"start": "node pm2-web.js",
 		"browserify": "browserify public/js/main.js -o public/js/monitor.js"
