@@ -1,6 +1,6 @@
 {
 	"name": "pm2-web",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "A web based monitor for PM2",
 	"main": "pm2-web.js",
 	"scripts": {
