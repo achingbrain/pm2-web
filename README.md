@@ -1,8 +1,8 @@
 # PM2-Web
 
-![Screenshot of web monitor](https://raw.github.com/achingbrain/pm2-web/master/assets/screenshot.jpg)
-
 A web based monitor for [PM2](https://github.com/Unitech/pm2)
+
+![Screenshot of web monitor](https://raw.github.com/achingbrain/pm2-web/master/assets/screenshot.png)
 
 ## To run
 
