@@ -1,0 +1,33 @@
+{
+	"name": "pm2-web",
+	"version": "0.0.1",
+	"description": "A web based monitor for PM2",
+	"main": "pm2-web.js",
+	"readme": "README.md",
+	"scripts": {
+		"start": "node pm2-web.js",
+		"browserify": "browserify public/js/main.js -o public/js/monitor.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/achingbrain/pm2-web.git"
+	},
+	"dependencies": {
+		"express": "~3.4",
+		"mustache-express": "~0.2",
+		"winston": "~0.7",
+		"underscore.string": "~2.3",
+		"nconf": "~0.6",
+		"wantsit": "1.0",
+		"mdns2": "~2.1.0",
+		"pm2-interface": "~0.0"
+	},
+	"devDependencies": {
+		"grunt-browserify": "~1.2",
+		"grunt-contrib-watch": "~0.5"
+	},
+	"preferGlobal": "true",
+	"bin": {
+		"pm2-web" : "bin/pm2-web.sh"
+	}
+}

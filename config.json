@@ -1,0 +1,9 @@
+{
+	"www": {
+		"port": 9000,
+		"title": "PM2 Monitor"
+	},
+	"mdns": {
+		"name": "pm2-web"
+	}
+}
