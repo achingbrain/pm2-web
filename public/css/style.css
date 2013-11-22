@@ -1,12 +1,23 @@
 @import url(http://fonts.googleapis.com/css?family=Abel);
-
 @import url(font-awesome.min.css);
-
 @import url("reset.css");
 body {
   background: url(../img/satinweave.png);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: #3a3a3b;
+}
+h1 {
+  height: 0;
+  padding: 60px 0 0 0;
+  overflow: hidden;
+  background: url(../img/logo.png) no-repeat;
+  margin: 20px 0 10px 0;
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {
+  h1 {
+    background-image: url(../img/logo@2x.png);
+    background-size: auto 60px;
+  }
 }
 .column {
   display: inline-block;
@@ -28,13 +39,6 @@ body {
 .wrapper {
   width: 90%;
   margin: 0 auto;
-}
-.title {
-  font-size: 48px;
-  font-weight: bold;
-  margin: 12px 0;
-  font-family: 'Abel', sans-serif;
-  text-transform: uppercase;
 }
 .refresh-bar {
   float: right;
@@ -98,12 +102,7 @@ body {
   margin-bottom: 18px;
   margin-right: 18px;
 }
-.process-list .list {
-  max-height: 420px;
-  overflow: scroll;
-}
 .process-list .process {
-  height: 40px;
   padding: 4px;
   border-radius: 6px;
   cursor: pointer;
@@ -136,6 +135,7 @@ body {
   margin: 0 12px;
   font-family: Monaco, monospace;
   color: #c8bfb8;
+  white-space: nowrap;
 }
 .process-list .process .actions {
   width: 20%;
@@ -171,13 +171,6 @@ body {
 }
 .process-list .process:hover {
   background: #ebf9fa;
-}
-.process-list .process.self {
-  opacity: 0.3;
-  cursor: auto;
-}
-.process-list .process.self:hover {
-  background: none;
 }
 .process-list .process.head {
   height: 20px;
@@ -219,6 +212,10 @@ body {
 .process-list .process.head {
   background: inherit;
 }
+.process-list .resources-graph {
+  width: 100%;
+  height: 100px;
+}
 .system {
   margin-bottom: 18px;
 }
@@ -240,7 +237,7 @@ body {
   color: rgba(0, 0, 0, 0.4);
 }
 .system #memory div:first-child {
-  background: #fbe9e0;
+  background: #e5fade;
   -webkit-border-top-left-radius: 6px;
   -webkit-border-bottom-left-radius: 6px;
   -moz-border-radius-topleft: 6px;
@@ -249,7 +246,7 @@ body {
   border-bottom-left-radius: 6px;
 }
 .system #memory div:last-child {
-  background: #ea8958;
+  background: #fcb6b7;
   -webkit-border-top-right-radius: 6px;
   -webkit-border-bottom-right-radius: 6px;
   -moz-border-radius-topright: 6px;

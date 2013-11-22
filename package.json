@@ -13,17 +13,28 @@
 	},
 	"dependencies": {
 		"express": "~3.4",
-		"mustache-express": "~0.2",
+		"jade": "~0.35",
 		"winston": "~0.7",
 		"underscore.string": "~2.3",
 		"nconf": "~0.6",
 		"wantsit": "1.0",
 		"mdns2": "~2.1.0",
-		"pm2-interface": "~0.0"
+		"pm2-interface": "~0.0",
+		"ws": "~0.4",
+		"defaults": "~1.0",
+		"wildemitter": "~0.0",
+		"angular": "~1.2",
+
+		"zepto-browserify": "~1.0",
+		"browserify-xcharts": "~0.3",
+		"moment": "~2.4",
+		"mustache": "~0.7",
+		"d3": "~3.3"
 	},
 	"devDependencies": {
 		"grunt-browserify": "~1.2",
-		"grunt-contrib-watch": "~0.5"
+		"grunt-contrib-watch": "~0.5",
+		"grunt-contrib-less": "~0.8"
 	},
 	"preferGlobal": "true",
 	"bin": {

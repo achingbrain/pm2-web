@@ -3,15 +3,26 @@ module.exports = function(grunt) {
 
 		browserify: {
 			dist: {
-				src: "./public/js/main.js",
+				src: "ui/index.js",
 				dest: "./public/js/monitor.js"
+			}
+		},
+
+		less: {
+			development: {
+				files: {
+					"./public/css/style.css": "./public/css/style.less"
+				}
 			}
 		},
 
 		watch: {
 			scripts: {
-				files: ["./public/js/*.js"],
-				tasks: ['browserify'],
+				files: [
+					"./ui/*.js",
+					"./public/css/*.less"
+				],
+				tasks: ["browserify", "less"],
 				options: {
 					spawn: false
 				}
@@ -21,7 +32,9 @@ module.exports = function(grunt) {
 
 	grunt.loadNpmTasks("grunt-browserify");
 	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks('grunt-contrib-less');
+
 
 	// default task
-	grunt.registerTask("default", ["browserify", "watch"]);
+	grunt.registerTask("default", ["browserify", "less", "watch"]);
 };

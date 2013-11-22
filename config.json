@@ -1,9 +1,17 @@
 {
 	"www": {
 		"port": 9000,
-		"title": "PM2 Monitor"
+		"title": "PM2 Process Monitor"
 	},
 	"mdns": {
 		"name": "pm2-web"
-	}
+	},
+	"ws": {
+		"port": 9001
+	},
+	"pm2": [{
+		"host": "localhost",
+		"rpc": 6666,
+		"events": 6667
+	}]
 }

@@ -1,3 +1,46 @@
+var $ = require("zepto-browserify").$,
+	Mustache = require("Mustache"),
+	Moment = require("moment"),
+	xChart = require("browserify-xcharts"),
+	d3 = require("d3");
+
+if (!window["WebSocket"]) {
+	alert("Well, this isn't going to work out.");
+}
+
+var socketResponder = {
+	"systemData": function(systemData) {
+		Monitor.view.dashboard.displayStats(systemData);
+		Monitor.view.dashboard.displayProcesses(systemData);
+	}
+}
+
+// Let us open a web socket
+var webSocket = new WebSocket(settings.ws);
+webSocket.onopen = function() {
+	webSocket.send("Message to send");
+	console.info("WebSocket", settings.ws, "open");
+};
+webSocket.onmessage = function(message) {
+	var event = JSON.parse(message.data);
+
+	if(!event.event || !event.data) {
+		console.warn("Invalid event", event);
+
+		return;
+	}
+
+	if(socketResponder[event.event]) {
+		console.info("Received", event.event);
+		socketResponder[event.event](event.data);
+	} else {
+		console.warn("Unknown event", event.event);
+	}
+};
+webSocket.onclose = function() {
+	console.info("Connection is closed...");
+};
+
 var Monitor = {
 	view: {
 		dashboard: {
@@ -5,16 +48,16 @@ var Monitor = {
 				//Display the system information
 				var $system = $(".system");
 				var args = {
-					hostname: data.system_info.hostname,
+					hostname: data.system.hostname,
 					process_count: (data.processes) ? data.processes.length : 0,
-					cpu_count: (data.monit.cpu) ? data.monit.cpu.length : 0,
+					cpu_count: data.system.cpus.length,
 					load_avg: (function() {
 						//convert the load averages to strings and cap at two decimal places
-						return data.monit.loadavg.map(function(v) { return v.toString().replace(/(\.\d\d).+/, "$1"); });
+						return data.system.load.map(function(v) { return v.toString().replace(/(\.\d\d).+/, "$1"); });
 					})(),
-					uptime: moment.duration(data.system_info.uptime, "seconds").humanize(),
-					memory_free_percent: (data.monit.free_mem/data.monit.total_mem) * 100,
-					memory_used_percent: 100 - ((data.monit.free_mem/data.monit.total_mem) * 100)
+					uptime: Moment.duration(data.system.uptime, "seconds").humanize(),
+					memory_free_percent: (data.system.memory.free/data.system.memory.total) * 100,
+					memory_used_percent: 100 - ((data.system.memory.free/data.system.memory.total) * 100)
 				};
 				$system.html(Mustache.render($system.html(), args));
 			},
@@ -24,13 +67,73 @@ var Monitor = {
 				$(".list").html(Mustache.render(Monitor.view.template("process-list"), {
 					processes: data.processes,
 					uptime: function() {
-						return moment.duration(this.pm2_env.pm_uptime - Date.now()).humanize()
+						return Moment.duration(this.pm2_env.pm_uptime - Date.now()).humanize()
 					},
-					_class: function() {
+					className: function() {
+						if(!this.pm2_env) {
+							debugger;
+						}
+
 						if(this.pm2_env.name.match(/Pm2Http/)) return "self";
 						else return false;
 					}
 				}));
+
+				data.processes.forEach(function(process) {
+					var data = {
+						"xScale": "time",
+						"yScale": "linear",
+						"main": [
+							{
+								"className": ".pizza",
+								"data": [
+									{
+										"x": "2012-11-05",
+										"y": 6
+									},
+									{
+										"x": "2012-11-06",
+										"y": 6
+									},
+									{
+										"x": "2012-11-07",
+										"y": 8
+									},
+									{
+										"x": "2012-11-08",
+										"y": 3
+									},
+									{
+										"x": "2012-11-09",
+										"y": 4
+									},
+									{
+										"x": "2012-11-10",
+										"y": 9
+									},
+									{
+										"x": "2012-11-11",
+										"y": 6
+									}
+								]
+							}
+						]
+					};
+					var opts = {
+						"dataFormatX": function (x) { return d3.time.format('%Y-%m-%d').parse(x); },
+						"tickFormatX": function (x) { return d3.time.format('%A')(x); },
+						"mouseover": function (d, i) {
+							var pos = $(this).offset();
+							$(tt).text(d3.time.format('%A')(d.x) + ': ' + d.y)
+								.css({top: topOffset + pos.top, left: pos.left + leftOffset})
+								.show();
+						},
+						"mouseout": function (x) {
+							$(tt).hide();
+						}
+					};
+					new xChart('line-dotted', data, "#resources-" +  process.pid, opts);
+				});
 
 				//Bind the events
 				setTimeout(function() {
@@ -81,9 +184,9 @@ var Monitor = {
 			get: function(callback) {
 				//Phew, it's been a while since I've used a library
 				//The simplicity here is refreshing.
-				$.getJSON("/api", function(data) {
+				/*$.getJSON("/api", function(data) {
 					callback(data);
-				});
+				});*/
 			}
 		},
 

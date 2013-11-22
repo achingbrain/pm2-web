@@ -10,40 +10,30 @@ var API = function() {
 };
 
 API.prototype.afterPropertiesSet = function() {
-	var pm2 = new PM2();
+	/*var pm2 = new PM2();
 	pm2.on("ready", function() {
 		this._pm2 = pm2;
 	}.bind(this));
 	pm2.on("error", function(error) {
 		LOG.error("API", error.message);
 		this._pm2 = null;
-	}.bind(this));
+	}.bind(this));*/
 };
 
 API.prototype.get = function(request, response){
-	var output = {
-		system_info: {
-			hostname: os.hostname(),
-			uptime: os.uptime()
-		},
-		monit: {
-			cpu: os.cpus(),
-			loadavg: os.loadavg(),
-			free_mem: os.freemem(),
-			total_mem: os.totalmem()
-		},
-		processes: []
-	};
+	//if(!this._pm2) {
+		return response.json({error: "Not connected to pm2"});
+	//}
 
-	if(!this._pm2) {
-		response.json(output);
-	}
+	/*this._pm2.rpc.getSystemData({}, function(error, data) {
+		if(error) {
+			return response.json({
+				error: error.message
+			});
+		}
 
-	this._pm2.rpc.getMonitorData({}, function(error, data) {
-		output.processes = data;
-
-		response.json(output);
-	});
+		response.json(data);
+	});*/
 };
 
 module.exports = API;

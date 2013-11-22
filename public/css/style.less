@@ -13,10 +13,31 @@
 @darkgray: #3A3A3B;
 @yellow: #FBF586;
 
+@freememory: #E5FADE;
+@usedmemory: #fcb6b7;
+
 body {
 	background: url(../img/satinweave.png);
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	color: @darkgray;
+}
+
+h1 {
+	height: 0;
+	padding: 60px 0 0 0;
+	overflow: hidden;
+	background: url(../img/logo.png) no-repeat;
+	margin: 20px 0 10px 0;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+	h1 {
+		background-image: url(../img/logo@2x.png);
+		background-size: auto 60px;
+	}
 }
 
 .column {
@@ -34,14 +55,6 @@ body {
 .wrapper {
 	width: 90%;
 	margin: 0 auto;
-}
-
-.title {
-	font-size: 48px;
-	font-weight: bold;
-	margin: 12px 0;
-	font-family: 'Abel', sans-serif;
-	text-transform: uppercase;
 }
 
 .refresh-bar {
@@ -115,13 +128,7 @@ body {
 	margin-bottom: 18px;
 	margin-right: 18px;
 
-	.list {
-		max-height: 420px;
-		overflow: scroll;
-	}
-
 	.process {
-		height: 40px;
 		padding: 4px;
 		border-radius: 6px;
 		cursor: pointer;
@@ -158,6 +165,7 @@ body {
 				margin: 0 12px;
 				font-family: Monaco, monospace;
 				color: darken(@cardboard, 10%);
+				white-space: nowrap;
 			}
 		}
 
@@ -201,16 +209,7 @@ body {
 	}
 
 	.process:hover {
-		background: @lightblue; //lighten(@sand, 4%);
-	}
-
-	.process.self {
-		opacity: 0.3;
-		cursor: auto;
-	}
-
-	.process.self:hover {
-		background: none;
+		background: @lightblue;
 	}
 
 	//This is a bit messy
@@ -262,6 +261,11 @@ body {
 	.process.head {
 		background: inherit;
 	}
+
+	.resources-graph {
+		width: 100%;
+		height:100px;
+	}
 }
 
 .system {
@@ -288,7 +292,7 @@ body {
 		}
 
 		div:first-child {
-			background: @sand;
+			background: @freememory;
 			-webkit-border-top-left-radius: 6px;
 			-webkit-border-bottom-left-radius: 6px;
 			-moz-border-radius-topleft: 6px;
@@ -298,7 +302,7 @@ body {
 		}
 
 		div:last-child {
-			background: darken(@sand, 30%);
+			background: @usedmemory;
 			-webkit-border-top-right-radius: 6px;
 			-webkit-border-bottom-right-radius: 6px;
 			-moz-border-radius-topright: 6px;

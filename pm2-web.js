@@ -1,11 +1,11 @@
-var LOG = require("winston"),
+var winston = require("winston"),
 	config = require("nconf"),
 	Container = require("wantsit").Container
 	express = require("express"),
 	http = require("http"),
 	path = require("path"),
 	mdns = require("mdns2"),
-	mustacheExpress = require("mustache-express");
+	WebSocketServer = require("ws").Server;
 
 // set up arguments
 config.argv().env().file(__dirname + "/config.json");
@@ -13,9 +13,28 @@ config.argv().env().file(__dirname + "/config.json");
 var container = new Container();
 container.register("config", config);
 
+// set up logging
+container.createAndRegister("logger", winston.Logger, {
+	transports: [
+		new (winston.transports.Console)({
+			timestamp: true,
+			colorize: true
+		})
+	]
+});
+
 // web controllers
 container.createAndRegister("homeController", require(__dirname + "/routes/Home"));
 container.createAndRegister("apiController", require(__dirname + "/routes/API"));
+
+// listens for events
+container.createAndRegister("pm2Listener", require(__dirname + "/components/PM2Listener"));
+
+// client interactions
+container.createAndRegister("webSocketResponder", require(__dirname + "/components/WebSocketResponder"));
+container.createAndRegister("webSocketServer", WebSocketServer, {
+	port: config.get("ws:port")
+});
 
 // inject a dummy seaport - we'll overwrite this when the real one becomes available
 container.register("seaport", {
@@ -33,11 +52,9 @@ var route = function(controller, url, method) {
 	app[method](url, component[method].bind(component));
 }
 
-app.engine("mustache", mustacheExpress());
-
 // all environments
 app.set("port", port);
-app.set("view engine", "mustache");
+app.set("view engine", "jade");
 app.set("views", __dirname + "/views");
 app.use(express.logger("dev"));
 app.use(express.urlencoded())
@@ -49,11 +66,11 @@ app.use(express.static(__dirname + "/public"));
 // development only
 app.use(express.errorHandler());
 
-//route("homeController", "/", "get");
+route("homeController", "/", "get");
 route("apiController", "/api", "get");
 
 http.createServer(app).listen(app.get("port"), function(){
-	LOG.info("Express server listening on port " + app.get("port"));
+	container.find("logger").info("Express server listening on port " + app.get("port"));
 });
 
 // publish via Bonjour
