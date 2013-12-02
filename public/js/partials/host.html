@@ -1,0 +1,72 @@
+<h1>PM2 Process Monitor</h1>
+<ul class="nav nav-tabs" ng-controller="HostListController">
+	<li ng-repeat="tab in tabs" ng-class="{active: tab.selected}">
+		<a ng-click="changeHost(tab.title)" data-toggle="tab">{{tab.title}}</a>
+	</li>
+</ul>
+<section class="system">
+	<h2>System</h2>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Processes</th>
+				<th>CPUs</th>
+				<th>Load</th>
+				<th>Uptime</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{system.process_count}}</td>
+				<td>{{system.cpu_count}}</td>
+				<td><span ng-repeat="load in system.load_avg track by $index">{{load | decimalPlaces:2}}</span></td>
+				<td>{{system.uptime | humanise}}</td>
+			</tr>
+		</tbody>
+	</table>
+	<figure id="memory">
+		<figcaption>Memory ({{system.memory_total | memory}} total)</figcaption>
+		<div style="width: {{system.memory_free_percent}}%">{{system.memory_free | memory}} Free</div><div style="width: {{system.memory_used_percent}}%">{{system.memory_used | memory}} Used</div>
+	</figure>
+</section>
+<section class="processes" ng-controller="ProcessListController">
+	<h2>Processes</h2>
+	<table class="table">
+		<thead>
+			<tr>
+				<th class="pid">PID</th>
+				<th class="script">Script</th>
+				<th class="uptime">Uptime</th>
+				<th class="restarts">Restarts</th>
+				<th class="status">Online</th>
+				<th class="cpu">CPU</th>
+				<th class="memory">Memory</th>
+				<th class="actions">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="process in processes">
+				<td class="pid">{{process.pid}}</td>
+				<td class="script">
+					<p>
+						<span class="name">{{process.name}}</span>
+						<span class="executable" title="{{process.script}}">{{process.script}}</span>
+					</p>
+				</td>
+				<td class="uptime">{{process.uptime | humanise}}</td>
+				<td class="restarts">{{process.restarts}}</td>
+				<td class="status">
+					<i ng-hide="process.status != 'online'" class="icon-ok-circle {{process.status}}"></i>
+					<i ng-hide="process.status == 'online'" class="icon-ban-circle {{process.status}}"></i>
+				</td>
+				<td class="cpu">{{process.cpu | decimalPlaces:2}}%</td>
+				<td class="memory">{{process.memory | memory}}</td>
+				<td class="actions">
+					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id)"></a>
+					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id)"></a>
+					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id)"></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</section>

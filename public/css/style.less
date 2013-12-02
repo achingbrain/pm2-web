@@ -15,6 +15,12 @@
 
 @freememory: #E5FADE;
 @usedmemory: #fcb6b7;
+@processactions: #888;
+@killaction: #F10;
+@restartaction: @green;
+@processonline: #33B763;
+@processoffline: #920e00;
+@scriptname: #BBB;
 
 body {
 	background: url(../img/satinweave.png);
@@ -27,7 +33,7 @@ h1 {
 	padding: 60px 0 0 0;
 	overflow: hidden;
 	background: url(../img/logo.png) no-repeat;
-	margin: 20px 0 10px 0;
+	margin: 10px 0;
 }
 
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
@@ -40,83 +46,56 @@ only screen and (min-device-pixel-ratio: 1.5) {
 	}
 }
 
-.column {
-	display: inline-block;
-	vertical-align: top;
+/* Bootstrap overrides */
+.nav, .pagination, .carousel a {
+	cursor: pointer;
 }
+.nav {
+	margin-bottom: 10px;
+}
+.table {
+	margin: 0;
+}
+.table th {
+	padding-left: 5px;
+	font-weight: normal;
+}
+.table td {
+	text-align: left;
+	padding-left: 5px;
+}
+/* /Bootstrap overrides */
 
-.column.third { width: 33%; }
-.column.twothirds { width: 66%; }
-
-//Infoclasses
-.message { text-align: center; padding-top: 100px; }
-.neutral { color: lighten(@blue, 20%); }
-
-.wrapper {
+article {
 	width: 90%;
 	margin: 0 auto;
+	background: #FFF;
+	padding: 10px 10px 10px 10px;
 }
 
-.refresh-bar {
-	float: right;
-	margin: 6px 0 0;
-	text-align: right;
-
-	h5 {
-		margin-bottom: 4px;
-		font-weight: bold;
-		font-size: 14px;
-		opacity: 1;
-
-		input {
-			border: 0;
-			font-size: 14px;
-			width: 20px;
-			text-align: center;
-			background: 0;
-			border-bottom: 1px dotted rgba(0,0,0,0.6);
-		}
-
-		i {
-			float: left;
-			margin-top: 6px;
-			cursor: pointer;
-		}
-	}
-
-	h5:hover {
-		opacity: 1;
-	}
-
-	div {
-		border-radius: 6px;
-		height: 8px;
-		background: rgba(0,0,0,0.4);
-		width: 140px;
-		float: right;
-		background: @darkgray;
-
-		div {
-			float: none;
-			width: 40%;
-			background: @blue;
-		}
-	}
+th, figcaption {
+	font-weight: bold;
+	color: rgba(0,0,0,0.3);
+	font-size: 13px;
+	padding: 4px;
+	text-align: left;
 }
 
-.dashboard {
-	background: #fff;
-	padding: 18px;
+section {
+	clear: both;
+	background-color: #F8F8F8;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
 	border-radius: 6px;
-	box-shadow: 0 1px 0 darken(#fff, 10%), 0 2px 0 #eee, 0 3px 0 #ddd;
+	padding: 10px;
 
-	h3 {
+	h2 {
 		font-size: 14px;
 		font-family: 'Abel', sans-serif;
 		text-transform: uppercase;
 		letter-spacing: 2px;
-		margin: 0 0 12px;
-		padding: 6px 8px;
+		margin: 0 0 0 5px;
+		padding: 5px 0;
 		-webkit-border-bottom-left-radius: 6px;
 		-moz-border-radius-bottomleft: 6px;
 		border-bottom-left-radius: 6px;
@@ -124,161 +103,25 @@ only screen and (min-device-pixel-ratio: 1.5) {
 	}
 }
 
-.process-list {
-	margin-bottom: 18px;
-	margin-right: 18px;
-
-	.process {
-		padding: 4px;
-		border-radius: 6px;
-		cursor: pointer;
-
-		div {
-			display: inline-block;
-			vertical-align: top;
-		}
-
-		.pid {
-			height: 40px;
-			width: 8%;
-			border-right: 1px solid #ddd;
-			text-align: center;
-
-			span {
-				display: inline-block;
-				padding-top: 12px;
-				font-weight: bold;
-			}
-		}
-
-		.name {
-			width: 62%;
-
-			h4 {
-				font-size: 18px;
-				margin: 2px 12px 4px;
-				font-weight: bold;
-			}
-
-			h5 {
-				font-size: 14px;
-				margin: 0 12px;
-				font-family: Monaco, monospace;
-				color: darken(@cardboard, 10%);
-				white-space: nowrap;
-			}
-		}
-
-		.actions {
-			width: 20%;
-			padding-top: 8px;
-
-			i {
-				font-size: 24px;
-				margin: 6px;
-			}
-
-			.icon-remove {
-				color: darken(@sand, 30%);
-			}
-
-			.icon-refresh {
-				color: @green;
-			}
-		}
-
-		.uptime, .restarts {
-			width: 8%;
-			text-align: center;
-
-			span {
-				display: block;
-				margin-top: 12px;
-			}
-		}
-
-		.status {
-			text-align: center;
-			width: 8%;
-			padding-top: 12px;
-
-			.online {
-				color: @lighterblue;
-			}
-		}
-	}
-
-	.process:hover {
-		background: @lightblue;
-	}
-
-	//This is a bit messy
-	.process.head {
-		height: 20px;
-		cursor: auto;
-
-		span {
-			color: #ccc;
-			font-weight: bold;
-			font-size: 12px;
-			margin-left: 12px;
-		}
-
-		.pid {
-			height: 20px;
-
-			span {
-				padding-top: 0;
-				margin-left: 0;
-			}
-		}
-
-		.actions {
-			padding-top: 0;
-
-			span {
-				margin-left: 0;
-			}
-		}
-
-		.uptime, .restarts {
-			text-align: left;
-
-			span {
-				margin-top: 4px;
-			}
-		}
-
-		.status {
-			padding-top: 0;
-
-			span {
-				margin-left: 0;
-			}
-		}
-	}
-
-	.process.head {
-		background: inherit;
-	}
-
-	.resources-graph {
-		width: 100%;
-		height:100px;
-	}
-}
-
 .system {
-	margin-bottom: 18px;
-
-	h4 {
-		font-weight: bold;
-		color: rgba(0,0,0,0.3);
-		font-size: 13px;
-		padding: 4px;
+	table {
+		width: 50%;
+		float: left;
 	}
 
-	#memory {
+	figure {
+		display: inline-block;
+		width: 50%;
+		margin-top: 10px;
+		margin-bottom: 10px;
+
+		figcaption {
+			border-bottom: 1px solid #DDD;
+			padding-bottom: 9px;
+			margin-bottom: 17px;
+			font-weight: normal;
+		}
+
 		div {
 			display: inline-block;
 			vertical-align: top;
@@ -291,7 +134,7 @@ only screen and (min-device-pixel-ratio: 1.5) {
 			color: rgba(0,0,0,0.4);
 		}
 
-		div:first-child {
+		div:nth-child(2) {
 			background: @freememory;
 			-webkit-border-top-left-radius: 6px;
 			-webkit-border-bottom-left-radius: 6px;
@@ -312,102 +155,74 @@ only screen and (min-device-pixel-ratio: 1.5) {
 		}
 	}
 
-	.stats {
-		margin-bottom: 14px;
-
-		div {
-			display: inline-block;
-			vertical-align: top;
-			width: 25%;
-			text-align: center;
-
-			span {
-				font-weight: bold;
-				font-size: 54px;
-			}
+	table {
+		span {
+			display: block;
 		}
-
-		.avg {
-			span {
-				display: block;
-				width: 100%;
-				text-align: center;
-				font-size: 16px;
-			}
-		}
-
-		.uptime {
-			span {
-				display: block;
-				margin-top: 16px;
-				font-size: 15px;
-			}
-		}
-	}
-
-	#hostname {
-		float: right;
-		font-family: Monaco, monospace;
-		color: @darkgray;
-		margin-top: 2px;
 	}
 }
 
-.process-log {
-	#log-type {
-		float: right;
-		opacity: 0.3;
-		margin: 8px;
-	}
+.processes {
+	margin-top: 10px;
 
-	#log-type:hover {
-		opacity: 1;
-	}
-
-	#terminal {
-		background: @darkgray;
-		height: 200px;
-		border-radius: 8px;
-		padding: 12px;
-		color: @green;
-		font-family: monaco, monospace;
-		font-size: 14px;
+	.script {
+		width: auto;
 
 		p {
-			margin-bottom: 6px;	
+			width: 100%;
+			overflow: hidden;
 		}
 
-		p:last-child:after{
-			content: '  \258B';
-			-webkit-animation: blink 1200ms infinite;
+		.name {
+			font-size: 18px;
+			margin: 2px 0 4px 0;
+			font-weight: bold;
+		}
+
+		.executable {
+			display: block;
+			font-size: 14px;
+			margin: 5px 0 0 0;
+			font-family: Monaco, monospace;
+			color: @scriptname;
 		}
 	}
-}
 
-@-webkit-keyframes blink {
-	0% {
-		opacity: 0;
+	.status {
+		i.icon-ok-circle {
+			color: @processonline
+		}
+
+		i.icon-ok-circle.offline {
+			display: none;
+		}
+
+		i.icon-ban-circle {
+			color: @processoffline
+		}
+
+		i.icon-ban-circle.online {
+			display: none;
+		}
 	}
 
-	49% {
-		opacity: 0;
-	}
+	.actions {
+		a {
+			color: @processactions;
+			cursor: pointer;
+			text-decoration: none;
+		}
 
-	50% {
-		opacity: 1;
-	}
+		a.icon-play:hover {
+			color: @restartaction;
+		}
 
-	100% {
-		opacity: 1;
-	}
-}
+		a.icon-remove:hover {
+			color: @killaction;
+		}
 
-@-webkit-keyframes progress {
-	0% {
-		width: 0%;
-	}
-
-	100% {
-		width: 100%;
+		a.icon-refresh:hover {
+			color: @restartaction;
+		}
 	}
 }

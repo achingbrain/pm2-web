@@ -1,30 +1,179 @@
-//var Monitor = require("./Monitor"),
-var angular = require("angular");
+"use strict";
 
-var pm2Web = angular.module("pm2-web", []);
+var WebSocketResponder = require("./WebSocketResponder"),
+	HostList = require("./HostList"),
+	Moment = require("moment");
+
+var pm2Web = angular.module("pm2-web", [
+	"ngRoute",
+	"ui.bootstrap"
+]);
 
 pm2Web.config(["$routeProvider",
 	function($routeProvider) {
 		$routeProvider.
-			when("/hosts:host", {
-				templateUrl: "partials/host.html",
-				controller: "PhoneListCtrl"
+			when("/hosts/:host", {
+				templateUrl: "/js/partials/host.html",
+				controller: "HostController"
 			}).
 			otherwise({
-				templateUrl: "partials/host.html",
-				controller: "PhoneListCtrl"
+				templateUrl: "/js/partials/connecting.html",
+				controller: "ConnectionController"
 			});
 	}
 ]);
+pm2Web.factory("hostList", function() {
+	return new HostList();
+});
+pm2Web.factory("webSocketResponder", ["$window", "hostList", function($window, hostList) {
+	return new WebSocketResponder($window.settings.ws, hostList);
+}]);
+pm2Web.filter("decimalPlaces", function() {
+	return function(number, decimalPlaces) {
+		return number.toFixed(decimalPlaces);
+	}
+});
+pm2Web.filter("humanise", function() {
+	return function(date) {
+		return Moment.duration(date, "seconds").humanize();
+	}
+});
+pm2Web.filter("memory", function() {
+	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
 
-pm2Web.controller("ProcessListController", function ($scope) {
-	$scope.processes = [{
-		pid: "pid",
-		script: "script",
-		uptime: "uptime",
-		restarts: "restarts",
-		status: "online"
-	}];
+	return function(bytes) {
+		for(var i = sizes.length; i > 0; i--) {
+			var step = Math.pow(1024, i);
+
+			if (bytes > step) {
+				return (bytes / step).toFixed(2) + " " + sizes[i];
+			}
+		}
+
+		return bytes;
+	}
 });
 
-//new Monitor(settings);
+// sets up the websocket and waits for data
+pm2Web.controller("ConnectionController", ["$scope", "$location", "webSocketResponder", "hostList", function($scope, $location, webSocketResponder, hostList) {
+	if(!window["WebSocket"]) {
+		$scope.alerts = [{
+			type: "error",
+			message: "Your browser does not support web sockets, please consider upgrading."
+		}];
+
+		return;
+	}
+
+	$scope.alerts = [{
+		type: "info",
+		message: "Connecting to " + settings.ws
+	}];
+
+	webSocketResponder.on("open", function() {
+		$scope.$apply(function() {
+			$scope.alerts = [{
+				type: "success",
+				message: "Waiting for hosts..."
+			}];
+		});
+	});
+	webSocketResponder.on("closed", function() {
+		$scope.$apply(function() {
+			$location.path("/");
+		});
+	});
+	hostList.once("newHost", function(host) {
+		console.info("Redirecting to /hosts/" + host);
+		$scope.$apply(function() {
+			$location.path("/hosts/" + host);
+		});
+	});
+}]);
+
+// shows the status of a host
+pm2Web.controller("HostController", ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
+	var updateScope = function() {
+		var hostData = hostList.find($routeParams.host);
+
+		if(!hostData) {
+			return $location.path("/");
+		}
+
+		$scope.system = hostData.system;
+	};
+	updateScope();
+
+	hostList.on("update", function(hostName) {
+		// only update scope if the update was for our host
+		if(hostName == $routeParams.host) {
+			$scope.$apply(updateScope);
+		}
+	});
+}]);
+
+// shows a list of processes
+pm2Web.controller("ProcessListController", ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
+	var updateScope = function() {
+		var hostData = hostList.find($routeParams.host);
+
+		if(!hostData) {
+			console.warn("Could not load host data for", $routeParams.host);
+
+			return $location.path("/");
+		}
+
+		$scope.processes = hostData.processes;
+
+		$scope.start = function(pm_id) {
+			webSocketResponder.startProcess(hostData.name, pm_id);
+		};
+		$scope.stop = function(pm_id) {
+			webSocketResponder.stopProcess(hostData.name, pm_id);
+		};
+		$scope.restart = function(pm_id) {
+			webSocketResponder.restartProcess(hostData.name, pm_id);
+		};
+	};
+	updateScope();
+
+	hostList.on("update", function(hostName) {
+		// only update scope if the update was for our host
+		if(hostName == $routeParams.host) {
+			$scope.$apply(updateScope);
+		}
+	});
+}]);
+
+pm2Web.controller("HostListController", ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
+	$scope.tabs = [];
+
+	var updateScope = function() {
+		$scope.tabs.length = 0;
+
+		hostList.hosts().forEach(function(hostName) {
+			$scope.tabs.push({
+				title: hostName,
+				selected: $routeParams.host == hostName
+			})
+		});
+
+		$scope.changeHost = function(hostName) {
+			if(hostName == $scope.hostname) {
+				return;
+			}
+
+			$scope.tabs.forEach(function(tab) {
+				tab.selected = $routeParams.host == tab.hostName;
+			});
+
+			$location.path("/hosts/" + hostName);
+		}
+	};
+	updateScope();
+
+	// redraw tabs when new host is found
+	hostList.once("newHost", function() {
+		$scope.$apply(updateScope);
+	});
+}]);

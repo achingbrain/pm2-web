@@ -13,5 +13,9 @@
 		"host": "localhost",
 		"rpc": 6666,
 		"events": 6667
+	}, {
+		"host": "ninkasi.local",
+		"rpc": 6666,
+		"events": 6667
 	}]
 }

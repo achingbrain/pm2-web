@@ -50,9 +50,15 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Details, pm2Interface) {
 
 	// listen for all events
 	pm2Interface.bus.on("*", function(event, data){
-		this._logger.info("PM2Listener", pm2Details.host, event, data.pm2_env.name);
+		if(event == "process:exception") {
+			this._logger.warn("PM2Listener", pm2Details.host, event, data.name);
 
-		this.emit(event, data.pm2_env.name);
+			this.emit(event, data.name);
+		} else {
+			this._logger.info("PM2Listener", pm2Details.host, event, data.pm2_env.name);
+
+			this.emit(event, data.pm2_env.name);
+		}
 	}.bind(this));
 
 	var interval = setInterval(function() {
@@ -60,6 +66,10 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Details, pm2Interface) {
 			if(error) {
 				return this._logger.warn("PM2Listener", "Error retrieving system data", error.message);
 			}
+
+			this._logger.info("PM2Listener", pm2Details.host, "has", data.processes.length, "processes");
+
+			data.name = pm2Details.host;
 
 			this.emit("systemData", data);
 		}.bind(this));
@@ -88,5 +98,28 @@ PM2Listener.prototype._pm2EventSocketClosed = function(pm2Details, pm2Interface)
 PM2Listener.prototype._pm2EventSocketReconnecting = function(pm2Details, pm2Interface) {
 	this._logger.info("PM2Listener", pm2Details.host, "event socket reconnecting");
 };
+
+PM2Listener.prototype.stopProcess = function(host, pm_id) {
+	this._doByProcessId(host, pm_id, "stopProcessId");
+};
+
+PM2Listener.prototype.startProcess = function(host, pm_id) {
+	this._doByProcessId(host, pm_id, "startProcessId");
+};
+
+PM2Listener.prototype.restartProcess = function(host, pm_id) {
+	this._doByProcessId(host, pm_id, "restartProcessId");
+};
+
+PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
+	if(!this._pm2List[host]) {
+		return this._logger.info("PM2Listener", "Invalid host", host, "not in", Object.keys(this._pm2List));
+	}
+
+	this._logger.info("PM2Listener", host, pm_id, action);
+	this._pm2List[host].remote.rpc[action](pm_id, function(error) {
+
+	});
+}
 
 module.exports = PM2Listener;
