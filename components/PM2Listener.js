@@ -2,7 +2,7 @@ var Autowire = require("wantsit").Autowire,
 	EventEmitter = require("wildemitter"),
 	util = require("util"),
 	defaults = require("defaults"),
-	PM2Interface = require("pm2-interface");
+	pm2Interface = require("pm2-interface");
 
 var PM2Listener = function() {
 	EventEmitter.call(this);
@@ -29,76 +29,68 @@ PM2Listener.prototype._connect = function(pm2Details) {
 
 	this._logger.info("PM2Listener", "Connecting to", pm2Details.host, "RPC port", pm2Details.rpc, "Event port", pm2Details.events);
 
-	var remote = new PM2Interface({
+	var remote = pm2Interface({
 		sub_port: pm2Details.events,
 		rpc_port: pm2Details.rpc,
 		bind_host: pm2Details.host
 	});
 
-	remote.on("ready", this._pm2RPCSocketReady.bind(this, pm2Details, remote));
-	remote.on("closed", this._pm2RPCSocketClosed.bind(this, pm2Details, remote));
-	remote.on("close", this._pm2EventSocketClosed.bind(this, pm2Details, remote));
-	remote.on("reconnecting", this._pm2EventSocketReconnecting.bind(this, pm2Details, remote));
+	remote.on("ready", this._pm2RPCSocketReady.bind(this, remote));
+	remote.on("closed", this._pm2RPCSocketClosed.bind(this, remote));
+	remote.on("close", this._pm2EventSocketClosed.bind(this, remote));
+	remote.on("reconnecting", this._pm2EventSocketReconnecting.bind(this, remote));
 }
 
-PM2Listener.prototype._pm2RPCSocketReady = function(pm2Details, pm2Interface) {
-	if(this._pm2List[pm2Details.host]) {
+PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
+	if(this._pm2List[pm2Interface.bind_host]) {
 		return;
 	}
 
-	this._logger.info("PM2Listener", pm2Details.host, "RPC socket ready");
+	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
 
 	// listen for all events
 	pm2Interface.bus.on("*", function(event, data){
 		if(event == "process:exception") {
-			this._logger.warn("PM2Listener", pm2Details.host, event, data.name);
+			this._logger.warn("PM2Listener", pm2Interface.bind_host, event, data.name);
 
 			this.emit(event, data.name);
 		} else {
-			this._logger.info("PM2Listener", pm2Details.host, event, data.pm2_env.name);
+			this._logger.info("PM2Listener", pm2Interface.bind_host, event, data.pm2_env.name);
 
 			this.emit(event, data.pm2_env.name);
 		}
 	}.bind(this));
 
-	var hostName = pm2Details.host;
-
-	var interval = setInterval(function() {
+	var getSystemData = function() {
 		pm2Interface.rpc.getSystemData({}, function(error, data) {
 			if(error) {
-				return this._logger.warn("PM2Listener", "Error retrieving system data", error.message);
+				this._logger.warn("PM2Listener", "Error retrieving system data", error.message);
+			} else {
+				data.name = pm2Interface.bind_host;
+
+				this.emit("systemData", data);
 			}
 
-			this._logger.info("PM2Listener", hostName, "is really called", data.system.hostname);
-
-			data.name = hostName;
-
-			this.emit("systemData", data);
+			setTimeout(getSystemData, this._config.get("updateFrequency"));
 		}.bind(this));
-	}.bind(this), this._config.get("updateFrequency"));
+	}.bind(this);
+	getSystemData();
 
-	this._pm2List[pm2Details.host] = {
-		remote: pm2Interface,
-		interval: interval
-	};
+	this._pm2List[pm2Interface.bind_host] = pm2Interface;
 };
 
-PM2Listener.prototype._pm2RPCSocketClosed = function(pm2Details, pm2Interface) {
-	this._logger.info("PM2Listener", pm2Details.host, "RPC socket closed");
-
-	if(this._pm2List[pm2Details.host].interval) {
-		clearInterval(this._pm2List[pm2Details.host].interval);
-	}
+PM2Listener.prototype._pm2RPCSocketClosed = function(pm2Interface) {
+	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket closed");
 
 	delete this._pm2List[pm2Details.host];
 };
 
-PM2Listener.prototype._pm2EventSocketClosed = function(pm2Details, pm2Interface) {
-	this._logger.info("PM2Listener", pm2Details.host, "event socket close");
+PM2Listener.prototype._pm2EventSocketClosed = function(pm2Interface) {
+	this._logger.info("PM2Listener", pm2Interface.bind_host, "event socket close");
 };
 
-PM2Listener.prototype._pm2EventSocketReconnecting = function(pm2Details, pm2Interface) {
-	this._logger.info("PM2Listener", pm2Details.host, "event socket reconnecting");
+PM2Listener.prototype._pm2EventSocketReconnecting = function(pm2Interface) {
+	this._logger.info("PM2Listener", pm2Interface.bind_host, "event socket reconnecting");
 };
 
 PM2Listener.prototype.stopProcess = function(host, pm_id) {
@@ -119,7 +111,7 @@ PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
 	}
 
 	this._logger.info("PM2Listener", host, pm_id, action);
-	this._pm2List[host].remote.rpc[action](pm_id, function(error) {
+	this._pm2List[host].rpc[action](pm_id, function(error) {
 
 	});
 }
