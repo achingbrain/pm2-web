@@ -8,6 +8,10 @@ HostList = function() {
 };
 util.inherits(HostList, EventEmitter);
 
+HostList.prototype.empty = function() {
+	this._hosts = {};
+};
+
 HostList.prototype.addOrUpdate = function(data) {
 	var newHost = false;
 

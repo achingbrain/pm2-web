@@ -55,7 +55,7 @@ pm2Web.filter("memory", function() {
 });
 
 // sets up the websocket and waits for data
-pm2Web.controller("ConnectionController", ["$scope", "$location", "webSocketResponder", "hostList", function($scope, $location, webSocketResponder, hostList) {
+pm2Web.controller("ConnectionController", ["$window", "$scope", "$location", "webSocketResponder", "hostList", function($window, $scope, $location, webSocketResponder, hostList) {
 	if(!window["WebSocket"]) {
 		$scope.alerts = [{
 			type: "error",
@@ -65,11 +65,14 @@ pm2Web.controller("ConnectionController", ["$scope", "$location", "webSocketResp
 		return;
 	}
 
-	$scope.alerts = [{
-		type: "info",
-		message: "Connecting to " + settings.ws
-	}];
-
+	webSocketResponder.on("connecting", function() {
+		$scope.$apply(function() {
+			$scope.alerts = [{
+				type: "info",
+				message: "Connecting to " + $window.settings.ws
+			}];
+		});
+	});
 	webSocketResponder.on("open", function() {
 		$scope.$apply(function() {
 			$scope.alerts = [{
@@ -79,8 +82,23 @@ pm2Web.controller("ConnectionController", ["$scope", "$location", "webSocketResp
 		});
 	});
 	webSocketResponder.on("closed", function() {
+		hostList.empty();
+
 		$scope.$apply(function() {
+			/*$scope.alerts = [{
+				type: "error",
+				message: "Socket dropped connection"
+			}];*/
+
 			$location.path("/");
+		});
+	});
+	webSocketResponder.on("error", function() {
+		$scope.$apply(function() {
+			$scope.alerts = [{
+				type: "error",
+				message: "Socket error"
+			}];
 		});
 	});
 	hostList.once("newHost", function(host) {

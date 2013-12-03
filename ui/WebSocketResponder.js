@@ -1,16 +1,25 @@
 var EventEmitter = require("wildemitter"),
 	util = require("util");
 
+var READYSTATE = {
+	CONNECTING: 0,
+	OPEN: 1,
+	CLOSING: 2,
+	CLOSED: 3
+};
+
 WebSocketResponder = function(socketUrl, hostList) {
 	EventEmitter.apply(this);
 
 	this._hostList = hostList;
 
-	// Let us open a web socket
-	this._ws = new WebSocket(socketUrl);
-	this._ws.onopen = function() {
-		console.info("WebSocket", socketUrl, "open");
+	console.info("WebSocketResponder", "Connecting to", socketUrl);
 
+	this._ws = new ReconnectingWebSocket(socketUrl);
+	this._ws.onconnecting = function() {
+		this.emit("connecting");
+	}.bind(this);
+	this._ws.onopen = function() {
 		this.emit("open");
 	}.bind(this);
 	this._ws.onmessage = function(message) {
@@ -23,19 +32,31 @@ WebSocketResponder = function(socketUrl, hostList) {
 		}
 
 		if(this[event.event]) {
-			//console.info("Received", event.event);
 			this[event.event](event.data);
 		} else {
 			console.warn("Unknown event", event.event);
 		}
 	}.bind(this);
 	this._ws.onclose = function() {
-		console.info("WebSocket", socketUrl, "closed");
-
 		this.emit("closed");
+	}.bind(this);
+	this._ws.onerror = function(event) {
+		this.emit("error", event);
 	}.bind(this);
 };
 util.inherits(WebSocketResponder, EventEmitter);
+
+WebSocketResponder.prototype.isClosed = function() {
+	return this._ws.readyState == READYSTATE.CLOSED;
+};
+
+WebSocketResponder.prototype.isConnecting = function() {
+	return this._ws.readyState == READYSTATE.CONNECTING;
+};
+
+WebSocketResponder.prototype.isOpen = function() {
+	return this._ws.readyState == READYSTATE.OPEN;
+};
 
 WebSocketResponder.prototype.systemData = function(data) {
 	//console.info("Got data for", data.system.hostname);
