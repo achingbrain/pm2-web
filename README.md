@@ -25,5 +25,34 @@ $ pm2-web
 You can override several arguments:
 
 ```
-$ pm2-web --www:port 9000 --mdns:name pm2-web
+$ pm2-web --www:port 9000 --mdns:name pm2-web --ws:port 9001 --updateFrequency 5000
+```
+
+ - `--www:port 9000` This is the port the web interface listens on.
+ - `--mdns:name pm2-web` Publish an mdns (Bonjour/Zeroconf) advert with the specified name
+ - `--ws:port 9001` The port the websocket that the ui connects to listens on
+ - `--updateFrequency 5000` How often in ms we poll pm2 for it's status
+
+### Specifying multiple hosts
+
+By default pm2-web will monitor localhost but you can specify hosts as command line arguments:
+
+```
+$ pm2-web --pm2.host localhost --pm2.host another.host --pm2.host yet.another.host
+```
+
+### Overriding ports
+
+pm2 listens on a port for RPC connections and publishes events on another so pm2-web needs to connect to them.
+
+You can override the ports pm2-web will try to connect to like so:
+
+```
+$ pm2-web --pm2.host localhost --pm2.rpc 6666 --pm2.events 6667
+```
+
+And with multiple hosts like so:
+
+```
+$ pm2-web --pm2.host localhost --pm2.rpc 6666 --pm2.events 6667 --pm2.host another.host --pm2.rpc 6666 --pm2.events 6667
 ```

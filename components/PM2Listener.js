@@ -9,24 +9,19 @@ var PM2Listener = function() {
 
 	this._config = Autowire;
 	this._logger = Autowire;
+	this._pm2ArgumentParser = Autowire;
 
 	this._pm2List = {};
 }
 util.inherits(PM2Listener, EventEmitter);
 
 PM2Listener.prototype.afterPropertiesSet = function() {
-	this._config.get("pm2").forEach(function(pm2Details) {
+	this._pm2ArgumentParser.findHosts().forEach(function(pm2Details) {
 		this._connect(pm2Details);
 	}.bind(this));
 }
 
 PM2Listener.prototype._connect = function(pm2Details) {
-	pm2Details = defaults(pm2Details, {
-		"host": "localhost",
-		"rpc": 6666,
-		"events": 6667
-	});
-
 	this._logger.info("PM2Listener", "Connecting to", pm2Details.host, "RPC port", pm2Details.rpc, "Event port", pm2Details.events);
 
 	var remote = pm2Interface({
@@ -77,33 +72,33 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 	getSystemData();
 
 	this._pm2List[pm2Interface.bind_host] = pm2Interface;
-};
+}
 
 PM2Listener.prototype._pm2RPCSocketClosed = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket closed");
 
 	delete this._pm2List[pm2Details.host];
-};
+}
 
 PM2Listener.prototype._pm2EventSocketClosed = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "event socket close");
-};
+}
 
 PM2Listener.prototype._pm2EventSocketReconnecting = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "event socket reconnecting");
-};
+}
 
 PM2Listener.prototype.stopProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "stopProcessId");
-};
+}
 
 PM2Listener.prototype.startProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "startProcessId");
-};
+}
 
 PM2Listener.prototype.restartProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "restartProcessId");
-};
+}
 
 PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
 	if(!this._pm2List[host]) {

@@ -29,6 +29,7 @@ container.createAndRegister("apiController", require(__dirname + "/routes/API"))
 
 // listens for events
 container.createAndRegister("pm2Listener", require(__dirname + "/components/PM2Listener"));
+container.createAndRegister("pm2ArgumentParser", require(__dirname + "/components/PM2ArgumentParser"));
 
 // client interactions
 container.createAndRegister("webSocketResponder", require(__dirname + "/components/WebSocketResponder"));
