@@ -3529,7 +3529,7 @@ pm2Web.controller("HostListController", ["$scope", "$routeParams", "$location", 
 		});
 
 		$scope.changeHost = function(hostName) {
-			if(hostName == $scope.hostname) {
+			if(hostName == $routeParams.host) {
 				return;
 			}
 
