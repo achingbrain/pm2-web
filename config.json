@@ -10,12 +10,13 @@
 		"port": 9001
 	},
 	"pm2": [{
-		"host": "localhost",
+		"host": "127.0.0.1",
 		"rpc": 6666,
 		"events": 6667
 	}, {
-		"host": "ninkasi.local",
+		"host": "10.152.130.156",
 		"rpc": 6666,
 		"events": 6667
-	}]
+	}],
+	"updateFrequency": 5000
 }

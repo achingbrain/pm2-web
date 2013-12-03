@@ -61,19 +61,21 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Details, pm2Interface) {
 		}
 	}.bind(this));
 
+	var hostName = pm2Details.host;
+
 	var interval = setInterval(function() {
 		pm2Interface.rpc.getSystemData({}, function(error, data) {
 			if(error) {
 				return this._logger.warn("PM2Listener", "Error retrieving system data", error.message);
 			}
 
-			this._logger.info("PM2Listener", pm2Details.host, "has", data.processes.length, "processes");
+			this._logger.info("PM2Listener", hostName, "is really called", data.system.hostname);
 
-			data.name = pm2Details.host;
+			data.name = hostName;
 
 			this.emit("systemData", data);
 		}.bind(this));
-	}.bind(this), 5000);
+	}.bind(this), this._config.get("updateFrequency"));
 
 	this._pm2List[pm2Details.host] = {
 		remote: pm2Interface,

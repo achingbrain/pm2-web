@@ -20,6 +20,7 @@
 @restartaction: @green;
 @processonline: #33B763;
 @processoffline: #920e00;
+@processerror: #F10;
 @scriptname: #BBB;
 
 body {
@@ -132,6 +133,9 @@ section {
 			font-size: 14px;
 			text-transform: uppercase;
 			color: rgba(0,0,0,0.4);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
 		}
 
 		div:nth-child(2) {
@@ -193,16 +197,12 @@ section {
 			color: @processonline
 		}
 
-		i.icon-ok-circle.offline {
-			display: none;
-		}
-
 		i.icon-ban-circle {
 			color: @processoffline
 		}
 
-		i.icon-ban-circle.online {
-			display: none;
+		i.icon-exclamation-sign {
+			color: @processerror
 		}
 	}
 

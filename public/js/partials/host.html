@@ -56,8 +56,9 @@
 				<td class="uptime">{{process.uptime | humanise}}</td>
 				<td class="restarts">{{process.restarts}}</td>
 				<td class="status">
-					<i ng-hide="process.status != 'online'" class="icon-ok-circle {{process.status}}"></i>
-					<i ng-hide="process.status == 'online'" class="icon-ban-circle {{process.status}}"></i>
+					<i ng-show="process.status == 'online'" class="icon-ok-circle {{process.status}}"></i>
+					<i ng-show="process.status == 'offline'" class="icon-ban-circle {{process.status}}"></i>
+					<i ng-show="process.status == 'errored'" class="icon-exclamation-sign {{process.status}}"></i>
 				</td>
 				<td class="cpu">{{process.cpu | decimalPlaces:2}}%</td>
 				<td class="memory">{{process.memory | memory}}</td>

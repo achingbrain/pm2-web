@@ -100,6 +100,9 @@ section h2 {
   font-size: 14px;
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .system figure div:nth-child(2) {
   background: #e5fade;
@@ -147,14 +150,11 @@ section h2 {
 .processes .status i.icon-ok-circle {
   color: #33b763;
 }
-.processes .status i.icon-ok-circle.offline {
-  display: none;
-}
 .processes .status i.icon-ban-circle {
   color: #920e00;
 }
-.processes .status i.icon-ban-circle.online {
-  display: none;
+.processes .status i.icon-exclamation-sign {
+  color: #ff1100;
 }
 .processes .actions a {
   color: #888888;

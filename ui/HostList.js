@@ -36,6 +36,8 @@ HostList.prototype.addOrUpdate = function(data) {
 	}.bind(this));
 
 	this.emit(newHost ? "newHost" : "update", data.name);
+
+	console.dir(this._hosts);
 };
 
 HostList.prototype._mapSystem = function(hostData) {
