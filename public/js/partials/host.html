@@ -4,7 +4,7 @@
 		<a ng-click="changeHost(tab.title)" data-toggle="tab">{{tab.title}}</a>
 	</li>
 </ul>
-<section class="system">
+<section class="system" ng-controller="SystemController">
 	<h2>{{system.hostname}}</h2>
 	<table class="table">
 		<thead>

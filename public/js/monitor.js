@@ -3393,64 +3393,8 @@ WebSocketResponder.prototype.restartProcess = function(host, pm_id) {
 
 module.exports = WebSocketResponder;
 },{"util":2,"wildemitter":4}],7:[function(require,module,exports){
-"use strict";
 
-var WebSocketResponder = require("./WebSocketResponder"),
-	HostList = require("./HostList"),
-	Moment = require("moment");
-
-var pm2Web = angular.module("pm2-web", [
-	"ngRoute",
-	"ui.bootstrap"
-]);
-
-pm2Web.config(["$routeProvider",
-	function($routeProvider) {
-		$routeProvider.
-			when("/hosts/:host", {
-				templateUrl: "/js/partials/host.html",
-				controller: "HostController"
-			}).
-			otherwise({
-				templateUrl: "/js/partials/connecting.html",
-				controller: "ConnectionController"
-			});
-	}
-]);
-pm2Web.factory("hostList", function() {
-	return new HostList();
-});
-pm2Web.factory("webSocketResponder", ["$window", "hostList", function($window, hostList) {
-	return new WebSocketResponder($window.settings.ws, hostList);
-}]);
-pm2Web.filter("decimalPlaces", function() {
-	return function(number, decimalPlaces) {
-		return number.toFixed(decimalPlaces);
-	}
-});
-pm2Web.filter("humanise", function() {
-	return function(date) {
-		return Moment.duration(date, "seconds").humanize();
-	}
-});
-pm2Web.filter("memory", function() {
-	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
-
-	return function(bytes) {
-		for(var i = sizes.length; i > 0; i--) {
-			var step = Math.pow(1024, i);
-
-			if (bytes > step) {
-				return (bytes / step).toFixed(2) + " " + sizes[i];
-			}
-		}
-
-		return bytes;
-	}
-});
-
-// sets up the websocket and waits for data
-pm2Web.controller("ConnectionController", ["$window", "$scope", "$location", "webSocketResponder", "hostList", function($window, $scope, $location, webSocketResponder, hostList) {
+module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostList", function($window, $scope, $location, webSocketResponder, hostList) {
 	if(!window["WebSocket"]) {
 		$scope.alerts = [{
 			type: "error",
@@ -3481,9 +3425,9 @@ pm2Web.controller("ConnectionController", ["$window", "$scope", "$location", "we
 
 		$scope.$apply(function() {
 			/*$scope.alerts = [{
-				type: "error",
-				message: "Socket dropped connection"
-			}];*/
+			 type: "error",
+			 message: "Socket dropped connection"
+			 }];*/
 
 			$location.path("/");
 		});
@@ -3502,63 +3446,11 @@ pm2Web.controller("ConnectionController", ["$window", "$scope", "$location", "we
 			$location.path("/hosts/" + host);
 		});
 	});
-}]);
+}];
 
-// shows the status of a host
-pm2Web.controller("HostController", ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
-	var updateScope = function() {
-		var hostData = hostList.find($routeParams.host);
+},{}],8:[function(require,module,exports){
 
-		if(!hostData) {
-			return $location.path("/");
-		}
-
-		$scope.system = hostData.system;
-	};
-	updateScope();
-
-	hostList.on("update", function(hostName) {
-		// only update scope if the update was for our host
-		if(hostName == $routeParams.host) {
-			$scope.$apply(updateScope);
-		}
-	});
-}]);
-
-// shows a list of processes
-pm2Web.controller("ProcessListController", ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
-	var updateScope = function() {
-		var hostData = hostList.find($routeParams.host);
-
-		if(!hostData) {
-			console.warn("Could not load host data for", $routeParams.host);
-
-			return $location.path("/");
-		}
-
-		$scope.processes = hostData.processes;
-
-		$scope.start = function(pm_id) {
-			webSocketResponder.startProcess(hostData.name, pm_id);
-		};
-		$scope.stop = function(pm_id) {
-			webSocketResponder.stopProcess(hostData.name, pm_id);
-		};
-		$scope.restart = function(pm_id) {
-			webSocketResponder.restartProcess(hostData.name, pm_id);
-		};
-	};
-	updateScope();
-
-	hostList.on("update", function(hostName) {
-		// only update scope if the update was for our host
-		if(hostName == $routeParams.host) {
-			$scope.$apply(updateScope);
-		}
-	});
-}]);
-
-pm2Web.controller("HostListController", ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
+module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
 	$scope.tabs = [];
 
 	var updateScope = function() {
@@ -3589,7 +3481,144 @@ pm2Web.controller("HostListController", ["$scope", "$routeParams", "$location", 
 	hostList.once("newHost", function() {
 		$scope.$apply(updateScope);
 	});
+}];
+
+},{}],9:[function(require,module,exports){
+
+module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
+	var updateScope = function() {
+		var hostData = hostList.find($routeParams.host);
+
+		if(!hostData) {
+			console.warn("Could not load host data for", $routeParams.host);
+
+			return $location.path("/");
+		}
+
+		$scope.processes = hostData.processes;
+
+		$scope.start = function(pm_id) {
+			webSocketResponder.startProcess(hostData.name, pm_id);
+		};
+		$scope.stop = function(pm_id) {
+			webSocketResponder.stopProcess(hostData.name, pm_id);
+		};
+		$scope.restart = function(pm_id) {
+			webSocketResponder.restartProcess(hostData.name, pm_id);
+		};
+	};
+	updateScope();
+
+	hostList.on("update", function(hostName) {
+		// only update scope if the update was for our host
+		if(hostName == $routeParams.host) {
+			$scope.$apply(updateScope);
+		}
+	});
+}];
+
+},{}],10:[function(require,module,exports){
+
+module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
+	var updateScope = function() {
+		var hostData = hostList.find($routeParams.host);
+
+		if(!hostData) {
+			return $location.path("/");
+		}
+
+		$scope.system = hostData.system;
+	};
+	updateScope();
+
+	hostList.on("update", function(hostName) {
+		// only update scope if the update was for our host
+		if(hostName == $routeParams.host) {
+			$scope.$apply(updateScope);
+		}
+	});
+}];
+
+},{}],11:[function(require,module,exports){
+
+module.exports = function() {
+	return function(number, decimalPlaces) {
+		return number.toFixed(decimalPlaces);
+	}
+};
+
+},{}],12:[function(require,module,exports){
+var Moment = require("moment");
+
+module.exports = function() {
+	return function(date) {
+		return Moment.duration(date, "seconds").humanize();
+	}
+};
+
+},{"moment":3}],13:[function(require,module,exports){
+
+module.exports = function() {
+	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
+
+	return function(bytes) {
+		for(var i = sizes.length; i > 0; i--) {
+			var step = Math.pow(1024, i);
+
+			if (bytes >= step) {
+				return (bytes / step).toFixed(2) + " " + sizes[i];
+			}
+		}
+
+		return bytes + " B";
+	}
+};
+
+},{}],14:[function(require,module,exports){
+"use strict";
+
+var WebSocketResponder = require("./components/WebSocketResponder"),
+	HostList = require("./components/HostList");
+
+var pm2Web = angular.module("pm2-web", [
+	"ngRoute",
+	"ui.bootstrap"
+]);
+
+pm2Web.config(require("./routes"));
+pm2Web.factory("hostList", function() {
+	return new HostList();
+});
+pm2Web.factory("webSocketResponder", ["$window", "hostList", function($window, hostList) {
+	return new WebSocketResponder($window.settings.ws, hostList);
 }]);
 
-},{"./HostList":5,"./WebSocketResponder":6,"moment":3}]},{},[7])
+// filters
+pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));
+pm2Web.filter("humanise", require("./filters/humanise"));
+pm2Web.filter("memory", require("./filters/memory"));
+
+// controllers
+pm2Web.controller("ConnectionController", require("./controllers/connection"));
+pm2Web.controller("SystemController", require("./controllers/system"));
+pm2Web.controller("ProcessListController", require("./controllers/processList"));
+pm2Web.controller("HostListController", require("./controllers/hostList"));
+
+},{"./components/HostList":5,"./components/WebSocketResponder":6,"./controllers/connection":7,"./controllers/hostList":8,"./controllers/processList":9,"./controllers/system":10,"./filters/decimalPlaces":11,"./filters/humanise":12,"./filters/memory":13,"./routes":15}],15:[function(require,module,exports){
+
+module.exports = ["$routeProvider",
+	function($routeProvider) {
+		$routeProvider.
+			when("/hosts/:host", {
+				templateUrl: "/js/partials/host.html"/*,
+				 controller: "SystemController"*/
+			}).
+			otherwise({
+				templateUrl: "/js/partials/connecting.html",
+				controller: "ConnectionController"
+			});
+	}
+];
+
+},{}]},{},[14])
 ;

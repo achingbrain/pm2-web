@@ -4,8 +4,7 @@
 	"description": "A web based monitor for PM2",
 	"main": "pm2-web.js",
 	"scripts": {
-		"start": "node pm2-web.js",
-		"browserify": "browserify public/js/main.js -o public/js/monitor.js"
+		"test": "istanbul cover nodeunit test"
 	},
 	"repository": {
 		"type": "git",
@@ -34,7 +33,11 @@
 	"devDependencies": {
 		"grunt-browserify": "~1.2",
 		"grunt-contrib-watch": "~0.5",
-		"grunt-contrib-less": "~0.8"
+		"grunt-contrib-less": "~0.8",
+		"nodeunit": "~0.8",
+		"should": "~2.1",
+		"sinon": "~1.7",
+		"istanbul": "~0.1"
 	},
 	"preferGlobal": "true",
 	"bin": {
