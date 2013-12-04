@@ -10,7 +10,7 @@ var WebSocketResponder = function() {
 
 WebSocketResponder.prototype.afterPropertiesSet = function() {
 	this._webSocketServer.on("open", function() {
-		this._logger.info("WebSocketResponder", "Socket open on port", this._webSocketServer.port);
+		this._logger.info("WebSocketResponder", "Socket open on port", "ws://" + this._config.get("ws:host") + ":" + this._config.get("ws:port"));
 	}.bind(this));
 	this._webSocketServer.broadcast = function(data) {
 		var message = JSON.stringify(data);

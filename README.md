@@ -27,6 +27,7 @@ You can specify several command line arguments:
  - `--www:port 9000` This is the port the web interface listens on.
  - `--mdns:name pm2-web` Publish an mdns (Bonjour/Zeroconf) advert with the specified name
  - `--ws:port 9001` The port the websocket that the ui connects to listens on
+ - `--ws:host 127.0.0.1` This is the host the websocket that the ui connects to listens on
  - `--updateFrequency 5000` How often in ms we poll pm2 for it's status
 
 ### Specifying multiple hosts

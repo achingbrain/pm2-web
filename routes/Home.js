@@ -1,5 +1,4 @@
-var Autowire = require("wantsit").Autowire,
-	os = require("os");
+var Autowire = require("wantsit").Autowire;
 
 var HomeController = function() {
 	this._config = Autowire;
@@ -8,7 +7,7 @@ var HomeController = function() {
 HomeController.prototype.get = function(request, response){
 	response.render("index", {
 		title: this._config.get("www:title"),
-		ws: "ws://" + os.hostname() + ":" + this._config.get("ws:port")
+		ws: "ws://" + this._config.get("ws:host") + ":" + this._config.get("ws:port")
 	});
 };
 
