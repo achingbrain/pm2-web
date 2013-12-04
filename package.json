@@ -6,7 +6,7 @@
 	"main": "pm2-web.js",
 	"scripts": {
 		"test": "istanbul cover nodeunit test",
-		"coveralls": "istanbul cover --report lcovonly nodeunit test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+		"coveralls": "istanbul cover nodeunit test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
 	},
 	"repository": {
 		"type": "git",
