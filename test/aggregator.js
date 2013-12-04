@@ -1,5 +1,10 @@
 
 module.exports = {
+	"server": {
+		"components": {
+			"PM2ArgumentParser": require(__dirname + "/server/components/PM2ArgumentParserTest.js")
+		}
+	},
 	"ui": {
 		"components": {
 			"HostList": require(__dirname + "/ui/components/HostListTest.js"),

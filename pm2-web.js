@@ -23,15 +23,15 @@ container.createAndRegister("logger", winston.Logger, {
 });
 
 // web controllers
-container.createAndRegister("homeController", require(__dirname + "/routes/Home"));
-container.createAndRegister("apiController", require(__dirname + "/routes/API"));
+container.createAndRegister("homeController", require(__dirname + "/server/routes/Home"));
+container.createAndRegister("apiController", require(__dirname + "/server/routes/API"));
 
 // listens for events
-container.createAndRegister("pm2Listener", require(__dirname + "/components/PM2Listener"));
-container.createAndRegister("pm2ArgumentParser", require(__dirname + "/components/PM2ArgumentParser"));
+container.createAndRegister("pm2Listener", require(__dirname + "/server/components/PM2Listener"));
+container.createAndRegister("pm2ArgumentParser", require(__dirname + "/server/components/PM2ArgumentParser"));
 
 // client interactions
-container.createAndRegister("webSocketResponder", require(__dirname + "/components/WebSocketResponder"));
+container.createAndRegister("webSocketResponder", require(__dirname + "/server/components/WebSocketResponder"));
 container.createAndRegister("webSocketServer", WebSocketServer, {
 	port: config.get("ws:port")
 });
@@ -54,13 +54,13 @@ var route = function(controller, url, method) {
 // all environments
 app.set("port", config.get("www:port"));
 app.set("view engine", "jade");
-app.set("views", __dirname + "/views");
+app.set("views", __dirname + "/server/views");
 app.use(express.logger("dev"));
 app.use(express.urlencoded())
 app.use(express.json())
 app.use(express.methodOverride());
 app.use(app.router);
-app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "/server/public"));
 
 // development only
 app.use(express.errorHandler());
