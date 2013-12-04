@@ -9,6 +9,10 @@ var PM2ArgumentParser = function() {
 PM2ArgumentParser.prototype.findHosts = function() {
 	var args = this._config.get("pm2");
 
+	if(!args) {
+		args = {};
+	}
+
 	this._logger.info("PM2ArgumentParser", "Incoming arguments", JSON.stringify(args));
 
 	var output = [];
