@@ -4,14 +4,14 @@ module.exports = function(grunt) {
 		browserify: {
 			dist: {
 				src: "ui/index.js",
-				dest: "./public/js/monitor.js"
+				dest: "./server/public/js/monitor.js"
 			}
 		},
 
 		less: {
 			development: {
 				files: {
-					"./public/css/style.css": "./public/css/style.less"
+					"./server/public/css/style.css": "./server/public/css/style.less"
 				}
 			}
 		},
@@ -20,7 +20,7 @@ module.exports = function(grunt) {
 			scripts: {
 				files: [
 					"./ui/**/*.js",
-					"./public/css/*.less"
+					"./server/public/css/*.less"
 				],
 				tasks: ["browserify", "less"],
 				options: {

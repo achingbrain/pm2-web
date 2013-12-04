@@ -48,7 +48,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 	// broadcast all pm2 events
 	this._pm2Listener.on("*", function(event, data) {
 		this._webSocketServer.broadcast({
-			event: event,
+			method: event,
 			data: data
 		});
 	}.bind(this));

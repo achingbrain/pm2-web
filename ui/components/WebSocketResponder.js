@@ -25,16 +25,8 @@ WebSocketResponder = function(socketUrl, hostList) {
 	this._ws.onmessage = function(message) {
 		var event = JSON.parse(message.data);
 
-		if(!event.event || !event.data) {
-			console.warn("Invalid event", event);
-
-			return;
-		}
-
-		if(this[event.event]) {
-			this[event.event](event.data);
-		} else {
-			console.warn("Unknown event", event.event);
+		if(event && event.method && this[event.method]) {
+			this[event.method](event.data);
 		}
 	}.bind(this);
 	this._ws.onclose = function() {

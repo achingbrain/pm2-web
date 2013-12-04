@@ -3326,16 +3326,8 @@ WebSocketResponder = function(socketUrl, hostList) {
 	this._ws.onmessage = function(message) {
 		var event = JSON.parse(message.data);
 
-		if(!event.event || !event.data) {
-			console.warn("Invalid event", event);
-
-			return;
-		}
-
-		if(this[event.event]) {
-			this[event.event](event.data);
-		} else {
-			console.warn("Unknown event", event.event);
+		if(event && event.method && this[event.method]) {
+			this[event.method](event.data);
 		}
 	}.bind(this);
 	this._ws.onclose = function() {
@@ -3392,7 +3384,7 @@ module.exports = WebSocketResponder;
 },{"util":2,"wildemitter":4}],7:[function(require,module,exports){
 
 module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostList", function($window, $scope, $location, webSocketResponder, hostList) {
-	if(!window["WebSocket"]) {
+	if(!$window["WebSocket"]) {
 		$scope.alerts = [{
 			type: "error",
 			message: "Your browser does not support web sockets, please consider upgrading."
@@ -3438,7 +3430,6 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 		});
 	});
 	hostList.once("newHost", function(host) {
-		console.info("Redirecting to /hosts/" + host);
 		$scope.$apply(function() {
 			$location.path("/hosts/" + host);
 		});

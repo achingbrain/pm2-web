@@ -1,6 +1,6 @@
 
 module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostList", function($window, $scope, $location, webSocketResponder, hostList) {
-	if(!window["WebSocket"]) {
+	if(!$window["WebSocket"]) {
 		$scope.alerts = [{
 			type: "error",
 			message: "Your browser does not support web sockets, please consider upgrading."
@@ -46,7 +46,6 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 		});
 	});
 	hostList.once("newHost", function(host) {
-		console.info("Redirecting to /hosts/" + host);
 		$scope.$apply(function() {
 			$location.path("/hosts/" + host);
 		});

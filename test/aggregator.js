@@ -10,6 +10,9 @@ module.exports = {
 			"HostList": require(__dirname + "/ui/components/HostListTest.js"),
 			"WebSocketResponder": require(__dirname + "/ui/components/WebSocketResponderTest.js")
 		},
+		"controllers": {
+			"connection": require(__dirname + "/ui/controllers/connectionTest.js")
+		},
 		"filters": {
 			"decimalPlaces": require(__dirname + "/ui/filters/decimalPlacesTest.js"),
 			"humanise": require(__dirname + "/ui/filters/humaniseTest.js"),

@@ -83,5 +83,63 @@ module.exports = {
 		this._hostList.addOrUpdate.callCount.should.equal(1);
 
 		test.done();
+	},
+
+	"Should parse message": function(test) {
+		var message = {
+			method: "test",
+			data: {}
+		};
+
+		this._webSocketResponder.test = function() {
+			test.done();
+		};
+
+		this._webSocketResponder._ws.onmessage({data: JSON.stringify(message)});
+	},
+
+	"Should send message": function(test) {
+		var message = {
+			method: "test",
+			data: {}
+		};
+
+		this._webSocketResponder._ws.send = function(sent) {
+			JSON.stringify(message).should.equal(sent);
+
+			test.done();
+		};
+
+		this._webSocketResponder._send(message);
+	},
+
+	"Should send start process": function(test) {
+		this._webSocketResponder._ws.send = function(sent) {
+			JSON.parse(sent).method.should.equal("startProcess");
+
+			test.done();
+		};
+
+		this._webSocketResponder.startProcess();
+	},
+
+	"Should send stop process": function(test) {
+		this._webSocketResponder._ws.send = function(sent) {
+			JSON.parse(sent).method.should.equal("stopProcess");
+
+			test.done();
+		};
+
+		this._webSocketResponder.stopProcess();
+	},
+
+	"Should send restart process": function(test) {
+		this._webSocketResponder._ws.send = function(sent) {
+			JSON.parse(sent).method.should.equal("restartProcess");
+
+			test.done();
+		};
+
+		this._webSocketResponder.restartProcess();
 	}
 };
