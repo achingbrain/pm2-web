@@ -7,7 +7,7 @@ A web based monitor for [PM2](https://github.com/Unitech/pm2).
 
 ## Prerequisites
 
-pm2 must allow connections to an external port.  To do this, set the `PM2_BIND_ADDR` environmental variable to `0.0.0.0` before starting pm2.
+pm2 must allow connections to an external port.  To do this, set the `$PM2_BIND_ADDR` environmental variable to `0.0.0.0` on the host you wish to monitor before starting pm2.
 
 ## To run
 
