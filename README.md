@@ -1,4 +1,4 @@
-# PM2-Web
+# PM2-Web [![Dependency Status](https://david-dm.org/achingbrain/pm2-web.png)](https://david-dm.org/achingbrain/pm2-web) [![devDependency Status](https://david-dm.org/achingbrain/pm2-web/dev-status.png)](https://david-dm.org/achingbrain/pm2-web#info=devDependencies)
 
 A web based monitor for [PM2](https://github.com/Unitech/pm2).
 

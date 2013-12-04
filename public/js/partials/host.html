@@ -1,5 +1,5 @@
 <h1>PM2 Process Monitor</h1>
-<ul class="nav nav-tabs" ng-controller="HostListController">
+<ul class="nav nav-tabs" ng-controller="HostListController" ng-hide="tabs.length == 1">
 	<li ng-repeat="tab in tabs" ng-class="{active: tab.selected}">
 		<a ng-click="changeHost(tab.title)" data-toggle="tab">{{tab.title}}</a>
 	</li>
