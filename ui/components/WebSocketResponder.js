@@ -59,7 +59,6 @@ WebSocketResponder.prototype.isOpen = function() {
 };
 
 WebSocketResponder.prototype.systemData = function(data) {
-	//console.info("Got data for", data.system.hostname);
 	this._hostList.addOrUpdate(data);
 };
 

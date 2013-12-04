@@ -3233,8 +3233,6 @@ HostList.prototype.addOrUpdate = function(data) {
 	var newHost = false;
 
 	if(!this._hosts[data.name]) {
-		console.info("New host encountered", data.name);
-
 		newHost = true;
 
 		this._hosts[data.name] = {
@@ -3362,7 +3360,6 @@ WebSocketResponder.prototype.isOpen = function() {
 };
 
 WebSocketResponder.prototype.systemData = function(data) {
-	//console.info("Got data for", data.system.hostname);
 	this._hostList.addOrUpdate(data);
 };
 

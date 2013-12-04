@@ -16,8 +16,6 @@ HostList.prototype.addOrUpdate = function(data) {
 	var newHost = false;
 
 	if(!this._hosts[data.name]) {
-		console.info("New host encountered", data.name);
-
 		newHost = true;
 
 		this._hosts[data.name] = {
