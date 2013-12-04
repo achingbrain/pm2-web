@@ -3,9 +3,6 @@
 		"port": 9000,
 		"title": "PM2 Process Monitor"
 	},
-	"mdns": {
-		"name": "pm2-web"
-	},
 	"ws": {
 		"host": "127.0.0.1",
 		"port": 9001

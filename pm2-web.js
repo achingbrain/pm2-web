@@ -4,7 +4,6 @@ var winston = require("winston"),
 	express = require("express"),
 	http = require("http"),
 	path = require("path"),
-	mdns = require("mdns2"),
 	WebSocketServer = require("ws").Server;
 
 // set up arguments
@@ -44,7 +43,6 @@ container.register("seaport", {
 	}
 });
 
-var port = config.get("www:port");
 var app = express();
 
 var route = function(controller, url, method) {
@@ -54,7 +52,7 @@ var route = function(controller, url, method) {
 }
 
 // all environments
-app.set("port", port);
+app.set("port", config.get("www:port"));
 app.set("view engine", "jade");
 app.set("views", __dirname + "/views");
 app.use(express.logger("dev"));
@@ -75,8 +73,16 @@ http.createServer(app).listen(app.get("port"), function(){
 	container.find("logger").info("Express server listening on port " + app.get("port"));
 });
 
-// publish via Bonjour
-var advert = mdns.createAdvertisement(mdns.tcp("http"), port, {
-	name: config.get("mdns:name")
-});
-advert.start();
+if(config.get("mdns:name")) {
+	try {
+		var mdns = require("mdns2");
+
+		// publish via Bonjour
+		var advert = mdns.createAdvertisement(mdns.tcp("http"), config.get("www:port"), {
+			name: config.get("mdns:name")
+		});
+		advert.start();
+	} catch(e) {
+		container.find("logger").warn("Could not start mdns argument - did mdns2 install correctly?", e.message);
+	}
+}
