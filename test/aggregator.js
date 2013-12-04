@@ -11,7 +11,8 @@ module.exports = {
 			"WebSocketResponder": require(__dirname + "/ui/components/WebSocketResponderTest.js")
 		},
 		"controllers": {
-			"connection": require(__dirname + "/ui/controllers/connectionTest.js")
+			"connection": require(__dirname + "/ui/controllers/connectionTest.js"),
+			"hostList": require(__dirname + "/ui/controllers/hostListTest.js")
 		},
 		"filters": {
 			"decimalPlaces": require(__dirname + "/ui/filters/decimalPlacesTest.js"),

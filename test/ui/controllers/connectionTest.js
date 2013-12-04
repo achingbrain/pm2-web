@@ -2,8 +2,6 @@ var connection = require(__dirname + "/../../../ui/controllers/connection"),
 	sinon = require("sinon"),
 	should = require("should");
 
-var socketUrl = "ws://fake.socket:1234";
-
 module.exports = {
 	setUp: function(done) {
 		this._window = {
