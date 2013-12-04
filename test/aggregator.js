@@ -12,7 +12,8 @@ module.exports = {
 		},
 		"controllers": {
 			"connection": require(__dirname + "/ui/controllers/connectionTest.js"),
-			"hostList": require(__dirname + "/ui/controllers/hostListTest.js")
+			"hostList": require(__dirname + "/ui/controllers/hostListTest.js"),
+			"processList": require(__dirname + "/ui/controllers/processListTest.js")
 		},
 		"filters": {
 			"decimalPlaces": require(__dirname + "/ui/filters/decimalPlacesTest.js"),
