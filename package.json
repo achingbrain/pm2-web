@@ -42,7 +42,7 @@
 		"should": "~2.1",
 		"sinon": "~1.7",
 		"istanbul": "~0.1",
-		"coveralls": "~2.1"
+		"coveralls": "~2.5"
 	},
 	"preferGlobal": "true",
 	"bin": {
