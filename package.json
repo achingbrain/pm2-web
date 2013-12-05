@@ -5,8 +5,8 @@
 	"preferGlobal": true,
 	"main": "pm2-web.js",
 	"scripts": {
-		"test": "istanbul cover nodeunit test",
-		"coveralls": "istanbul cover nodeunit test && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+		"test": "istanbul cover nodeunit test/unit",
+		"coveralls": "istanbul cover nodeunit test/unit && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
 	},
 	"repository": {
 		"type": "git",
@@ -23,7 +23,6 @@
 		"ws": "~0.4",
 		"defaults": "~1.0",
 		"wildemitter": "~0.0",
-		"angular": "~1.2",
 
 		"zepto-browserify": "~1.0",
 		"browserify-xcharts": "~0.3",
@@ -42,7 +41,9 @@
 		"should": "~2.1",
 		"sinon": "~1.7",
 		"istanbul": "~0.1",
-		"coveralls": "~2.5"
+		"coveralls": "~2.5",
+		"angular": "~1.2",
+		"protractor": "~0.14"
 	},
 	"preferGlobal": "true",
 	"bin": {
