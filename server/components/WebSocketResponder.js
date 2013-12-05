@@ -9,9 +9,6 @@ var WebSocketResponder = function() {
 }
 
 WebSocketResponder.prototype.afterPropertiesSet = function() {
-	this._webSocketServer.on("open", function() {
-		this._logger.info("WebSocketResponder", "Socket open on port", "ws://" + this._config.get("ws:host") + ":" + this._config.get("ws:port"));
-	}.bind(this));
 	this._webSocketServer.broadcast = function(data) {
 		var message = JSON.stringify(data);
 
@@ -29,19 +26,9 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 
 			var request = JSON.parse(message);
 
-			if(!request.method || !request.args) {
-				this._logger.error("WebSocketResponder", "Request should send method and args");
-
-				return;
+			if(request.method && request.args && this[request.method]) {
+				this[request.method].apply(this, request.args);
 			}
-
-			if(!this[request.method]) {
-				this._logger.error("WebSocketResponder", "Unknown method", request.method);
-
-				return;
-			}
-
-			this[request.method].apply(this, request.args);
 		}.bind(this));
 	}.bind(this));
 

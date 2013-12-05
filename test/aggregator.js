@@ -2,7 +2,8 @@
 module.exports = {
 	"server": {
 		"components": {
-			"PM2ArgumentParser": require(__dirname + "/server/components/PM2ArgumentParserTest.js")
+			"PM2ArgumentParser": require(__dirname + "/server/components/PM2ArgumentParserTest.js"),
+			"WebSocketResponder": require(__dirname + "/server/components/WebSocketResponderTest.js")
 		}
 	},
 	"ui": {

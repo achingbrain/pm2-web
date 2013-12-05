@@ -67,7 +67,6 @@ app.use(express.errorHandler());
 
 route("homeController", "/", "get");
 route("homeController", "/hosts/:host", "get");
-//route("apiController", "/api", "get");
 
 http.createServer(app).listen(app.get("port"), function(){
 	container.find("logger").info("Express server listening on port " + app.get("port"));
