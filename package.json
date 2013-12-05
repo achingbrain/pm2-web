@@ -5,6 +5,7 @@
 	"preferGlobal": true,
 	"main": "pm2-web.js",
 	"scripts": {
+		"integration": "istanbul cover nodeunit test/integration",
 		"test": "istanbul cover nodeunit test/unit",
 		"coveralls": "istanbul cover nodeunit test/unit && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
 	},
@@ -42,8 +43,8 @@
 		"sinon": "~1.7",
 		"istanbul": "~0.1",
 		"coveralls": "~2.5",
-		"angular": "~1.2",
-		"protractor": "~0.14"
+
+		"node-phantom": "~0.2"
 	},
 	"preferGlobal": "true",
 	"bin": {
