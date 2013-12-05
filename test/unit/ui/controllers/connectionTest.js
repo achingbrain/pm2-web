@@ -1,4 +1,4 @@
-var connection = require(__dirname + "/../../../ui/controllers/connection"),
+var connection = require(__dirname + "/../../../../ui/controllers/connection"),
 	sinon = require("sinon"),
 	should = require("should");
 

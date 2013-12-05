@@ -1,4 +1,4 @@
-var processList = require(__dirname + "/../../../ui/controllers/processList"),
+var processList = require(__dirname + "/../../../../ui/controllers/processList"),
 	sinon = require("sinon"),
 	should = require("should");
 

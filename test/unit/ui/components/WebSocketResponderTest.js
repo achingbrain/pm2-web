@@ -1,4 +1,4 @@
-var WebSocketResponder = require(__dirname + "/../../../ui/components/WebSocketResponder"),
+var WebSocketResponder = require(__dirname + "/../../../../ui/components/WebSocketResponder"),
 	sinon = require("sinon"),
 	should = require("should");
 

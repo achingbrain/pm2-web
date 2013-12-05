@@ -1,4 +1,4 @@
-var system = require(__dirname + "/../../../ui/controllers/system"),
+var system = require(__dirname + "/../../../../ui/controllers/system"),
 	sinon = require("sinon"),
 	should = require("should");
 

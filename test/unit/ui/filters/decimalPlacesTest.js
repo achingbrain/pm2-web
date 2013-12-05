@@ -1,4 +1,4 @@
-var decimalPlaces = require(__dirname + "/../../../ui/filters/decimalPlaces"),
+var decimalPlaces = require(__dirname + "/../../../../ui/filters/decimalPlaces"),
 	sinon = require("sinon"),
 	should = require("should");
 

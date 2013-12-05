@@ -1,4 +1,4 @@
-var HostList = require(__dirname + "/../../../ui/components/HostList"),
+var HostList = require(__dirname + "/../../../../ui/components/HostList"),
 	sinon = require("sinon"),
 	should = require("should");
 

@@ -1,4 +1,4 @@
-var PM2Listener = require(__dirname + "/../../../server/components/PM2Listener"),
+var PM2Listener = require(__dirname + "/../../../../server/components/PM2Listener"),
 	sinon = require("sinon"),
 	should = require("should");
 

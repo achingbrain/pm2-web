@@ -1,4 +1,4 @@
-var PM2ArgumentParser = require(__dirname + "/../../../server/components/PM2ArgumentParser"),
+var PM2ArgumentParser = require(__dirname + "/../../../../server/components/PM2ArgumentParser"),
 	sinon = require("sinon"),
 	should = require("should");
 

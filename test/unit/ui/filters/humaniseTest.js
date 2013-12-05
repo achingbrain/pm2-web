@@ -1,4 +1,4 @@
-var humanise = require(__dirname + "/../../../ui/filters/humanise"),
+var humanise = require(__dirname + "/../../../../ui/filters/humanise"),
 	sinon = require("sinon"),
 	should = require("should");
 

@@ -1,4 +1,4 @@
-var memory = require(__dirname + "/../../../ui/filters/memory"),
+var memory = require(__dirname + "/../../../../ui/filters/memory"),
 	sinon = require("sinon"),
 	should = require("should");
 
