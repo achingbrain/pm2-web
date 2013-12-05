@@ -29,9 +29,6 @@ module.exports = {
 	},
 
 	"Should receive method invocation from client": function(test) {
-		var event = "foo";
-		var data = {bar: "baz"};
-
 		this._responder.afterPropertiesSet();
 
 		var client = {

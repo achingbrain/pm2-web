@@ -24,9 +24,9 @@ container.createAndRegister("logger", winston.Logger, {
 
 // web controllers
 container.createAndRegister("homeController", require(__dirname + "/server/routes/Home"));
-container.createAndRegister("apiController", require(__dirname + "/server/routes/API"));
 
 // listens for events
+container.register("pm2InterfaceFactory", require("pm2-interface"));
 container.createAndRegister("pm2Listener", require(__dirname + "/server/components/PM2Listener"));
 container.createAndRegister("pm2ArgumentParser", require(__dirname + "/server/components/PM2ArgumentParser"));
 

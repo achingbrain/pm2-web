@@ -1,8 +1,7 @@
 var Autowire = require("wantsit").Autowire,
 	EventEmitter = require("wildemitter"),
 	util = require("util"),
-	defaults = require("defaults"),
-	pm2Interface = require("pm2-interface");
+	defaults = require("defaults");
 
 var PM2Listener = function() {
 	EventEmitter.call(this);
@@ -10,6 +9,7 @@ var PM2Listener = function() {
 	this._config = Autowire;
 	this._logger = Autowire;
 	this._pm2ArgumentParser = Autowire;
+	this._pm2InterfaceFactory = Autowire;
 
 	this._pm2List = {};
 }
@@ -22,9 +22,9 @@ PM2Listener.prototype.afterPropertiesSet = function() {
 }
 
 PM2Listener.prototype._connect = function(pm2Details) {
-	this._logger.info("PM2Listener", "Connecting to", pm2Details.host, "RPC port", pm2Details.rpc, "Event port", pm2Details.events);
+	this._logger.debug("PM2Listener", "Connecting to", pm2Details.host, "RPC port", pm2Details.rpc, "Event port", pm2Details.events);
 
-	var remote = pm2Interface({
+	var remote = this._pm2InterfaceFactory({
 		sub_port: pm2Details.events,
 		rpc_port: pm2Details.rpc,
 		bind_host: pm2Details.host
@@ -41,10 +41,10 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 		return;
 	}
 
-	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
+	this._logger.debug("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
 
 	// listen for all events
-	pm2Interface.bus.on("*", function(event, data){
+	pm2Interface.bus.on("*", function(event, data) {
 		if(event == "process:exception") {
 			this._logger.warn("PM2Listener", pm2Interface.bind_host, event, data.name);
 
@@ -77,7 +77,7 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 PM2Listener.prototype._pm2RPCSocketClosed = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket closed");
 
-	delete this._pm2List[pm2Details.host];
+	delete this._pm2List[pm2Interface.bind_host];
 }
 
 PM2Listener.prototype._pm2EventSocketClosed = function(pm2Interface) {
