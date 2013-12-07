@@ -20,7 +20,7 @@
 		"underscore.string": "~2.3",
 		"nconf": "~0.6",
 		"wantsit": "1.0",
-		"pm2-interface": "~0.0",
+		"pm2-interface": "git://github.com/achingbrain/pm2-interface.git#9974dc59c95cf06c35e5d3fe52e5f6adae389c6f",
 		"ws": "~0.4",
 		"defaults": "~1.0",
 		"wildemitter": "~0.0",

@@ -3,7 +3,7 @@
 
 A web based monitor for [PM2](https://github.com/Unitech/pm2).
 
-![Screenshot of web monitor](https://raw.github.com/achingbrain/pm2-web/master/assets/screenshot.png)
+![Screenshot of web monitor](https://raw.github.com/achingbrain/pm2-web/master/assets/screenshot-1.0.png)
 
 ## Prerequisites
 
