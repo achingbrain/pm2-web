@@ -1,6 +1,6 @@
 {
 	"name": "pm2-web",
-	"version": "0.0.2",
+	"version": "1.0.0",
 	"description": "A web based monitor for PM2",
 	"preferGlobal": true,
 	"main": "pm2-web.js",
@@ -43,9 +43,7 @@
 		"sinon": "~1.7",
 		"istanbul": "~0.1",
 		"coveralls": "~2.6",
-		"protractor": "~0.14",
-		"webdrvr": "~2.37",
-		"selenium-webdriver": "~2.37"
+		"protractor": "~0.14"
 	},
 	"preferGlobal": "true",
 	"bin": {
