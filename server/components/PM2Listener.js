@@ -21,6 +21,12 @@ PM2Listener.prototype.afterPropertiesSet = function() {
 	}.bind(this));
 }
 
+PM2Listener.prototype.close = function() {
+	Object.keys(this._pm2List).forEach(function(key) {
+		this._pm2List[key].disconnect();
+	}.bind(this));
+}
+
 PM2Listener.prototype._connect = function(pm2Details) {
 	this._logger.debug("PM2Listener", "Connecting to", pm2Details.host, "RPC port", pm2Details.rpc, "Event port", pm2Details.events);
 

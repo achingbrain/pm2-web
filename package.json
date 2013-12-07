@@ -42,9 +42,10 @@
 		"should": "~2.1",
 		"sinon": "~1.7",
 		"istanbul": "~0.1",
-		"coveralls": "~2.5",
-
-		"node-phantom": "~0.2"
+		"coveralls": "~2.6",
+		"protractor": "~0.14",
+		"webdrvr": "~2.37",
+		"selenium-webdriver": "~2.37"
 	},
 	"preferGlobal": "true",
 	"bin": {

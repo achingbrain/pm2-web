@@ -4,3 +4,4 @@ data
 .idea
 *.iml
 coverage
+*.log

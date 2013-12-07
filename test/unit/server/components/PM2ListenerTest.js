@@ -254,5 +254,20 @@ module.exports = {
 		});
 
 		test.done();
+	},
+
+	"Should disconnect on close": function(test) {
+		var host = "foo";
+		this._listener._pm2List[host] = {
+			disconnect: sinon.stub()
+		};
+
+		this._listener._pm2List[host].disconnect.callCount.should.equal(0);
+
+		this._listener.close();
+
+		this._listener._pm2List[host].disconnect.callCount.should.equal(1);
+
+		test.done();
 	}
 };
