@@ -74,8 +74,7 @@ article {
 	padding: 10px 10px 10px 10px;
 }
 
-th, figcaption {
-	font-weight: bold;
+th, figcaption, .information h3 {
 	color: rgba(0,0,0,0.3);
 	font-size: 13px;
 	padding: 4px;
@@ -169,60 +168,121 @@ section {
 .processes {
 	margin-top: 10px;
 
-	.script {
-		width: auto;
+	article {
+		width: 100%;
+		background: transparent;
+		padding: 0;
+	}
 
-		p {
+	article:hover p {
+		background-color: #EEE;
+	}
+
+	article h3 {
+		display: none;
+	}
+
+	article:first-of-type h3 {
+		display: block;
+		border-bottom: 1px solid #DDD;
+		padding-bottom: 9px;
+	}
+
+	article:first-of-type li.actions p {
+		margin-top: 26px;
+		border-top: 1px solid #DDD;
+	}
+
+	article:first-of-type .information {
+		border-top: none;
+		margin-top: 7px;
+	}
+
+	.information {
+		border-top: 1px solid #DDD;
+		display: flex;
+
+		li {
+			display: inline-block;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			margin: 0;
+
+			p {
+				padding: 15px 4px;
+				margin: 0;
+			}
+		}
+
+		.pid {
+			width: 80px;
+			flex-grow: 0;
+		}
+
+		.script {
+			flex-grow: 1;
+		}
+
+		.restarts, .uptime, .status, .cpu, .memory, .actions {
+			width: 80px;
+			flex-grow: 0;
+
+			p, h3 {
+				text-align: center;
+			}
+		}
+
+		.status {
+			width: 50px;
+
+			i.icon-ok-circle {
+				color: @processonline
+			}
+
+			i.icon-ban-circle {
+				color: @processoffline
+			}
+
+			i.icon-exclamation-sign {
+				color: @processerror
+			}
+		}
+
+		.actions {
+			a {
+				color: @processactions;
+				cursor: pointer;
+				text-decoration: none;
+			}
+
+			a.icon-play:hover {
+				color: @restartaction;
+			}
+
+			a.icon-remove:hover {
+				color: @killaction;
+			}
+
+			a.icon-refresh:hover {
+				color: @restartaction;
+			}
+		}
+	}
+
+	.executable {
+		display: block;
+		font-size: 14px;
+		margin: 5px 0 0 0;
+		font-family: Monaco, monospace;
+		color: @scriptname;
+	}
+}
+
+@media only screen and (max-width: 700px) {
+	.system {
+		table, figure {
 			width: 100%;
-			overflow: hidden;
-		}
-
-		.name {
-			font-size: 18px;
-			margin: 2px 0 4px 0;
-			font-weight: bold;
-		}
-
-		.executable {
-			display: block;
-			font-size: 14px;
-			margin: 5px 0 0 0;
-			font-family: Monaco, monospace;
-			color: @scriptname;
-		}
-	}
-
-	.status {
-		i.icon-ok-circle {
-			color: @processonline
-		}
-
-		i.icon-ban-circle {
-			color: @processoffline
-		}
-
-		i.icon-exclamation-sign {
-			color: @processerror
-		}
-	}
-
-	.actions {
-		a {
-			color: @processactions;
-			cursor: pointer;
-			text-decoration: none;
-		}
-
-		a.icon-play:hover {
-			color: @restartaction;
-		}
-
-		a.icon-remove:hover {
-			color: @killaction;
-		}
-
-		a.icon-refresh:hover {
-			color: @restartaction;
+			float: none;
 		}
 	}
 }

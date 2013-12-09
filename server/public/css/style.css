@@ -47,8 +47,8 @@ article {
   padding: 10px 10px 10px 10px;
 }
 th,
-figcaption {
-  font-weight: bold;
+figcaption,
+.information h3 {
   color: rgba(0, 0, 0, 0.3);
   font-size: 13px;
   padding: 4px;
@@ -128,45 +128,111 @@ section h2 {
 .processes {
   margin-top: 10px;
 }
-.processes .script {
-  width: auto;
-}
-.processes .script p {
+.processes article {
   width: 100%;
-  overflow: hidden;
+  background: transparent;
+  padding: 0;
 }
-.processes .script .name {
-  font-size: 18px;
-  margin: 2px 0 4px 0;
-  font-weight: bold;
+.processes article:hover p {
+  background-color: #EEE;
 }
-.processes .script .executable {
+.processes article h3 {
+  display: none;
+}
+.processes article:first-of-type h3 {
+  display: block;
+  border-bottom: 1px solid #DDD;
+  padding-bottom: 9px;
+}
+.processes article:first-of-type li.actions p {
+  margin-top: 26px;
+  border-top: 1px solid #DDD;
+}
+.processes article:first-of-type .information {
+  border-top: none;
+  margin-top: 7px;
+}
+.processes .information {
+  border-top: 1px solid #DDD;
+  display: flex;
+}
+.processes .information li {
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.processes .information li p {
+  padding: 15px 4px;
+  margin: 0;
+}
+.processes .information .pid {
+  width: 80px;
+  flex-grow: 0;
+}
+.processes .information .script {
+  flex-grow: 1;
+}
+.processes .information .restarts,
+.processes .information .uptime,
+.processes .information .status,
+.processes .information .cpu,
+.processes .information .memory,
+.processes .information .actions {
+  width: 80px;
+  flex-grow: 0;
+}
+.processes .information .restarts p,
+.processes .information .uptime p,
+.processes .information .status p,
+.processes .information .cpu p,
+.processes .information .memory p,
+.processes .information .actions p,
+.processes .information .restarts h3,
+.processes .information .uptime h3,
+.processes .information .status h3,
+.processes .information .cpu h3,
+.processes .information .memory h3,
+.processes .information .actions h3 {
+  text-align: center;
+}
+.processes .information .status {
+  width: 50px;
+}
+.processes .information .status i.icon-ok-circle {
+  color: #33b763;
+}
+.processes .information .status i.icon-ban-circle {
+  color: #920e00;
+}
+.processes .information .status i.icon-exclamation-sign {
+  color: #ff1100;
+}
+.processes .information .actions a {
+  color: #888888;
+  cursor: pointer;
+  text-decoration: none;
+}
+.processes .information .actions a.icon-play:hover {
+  color: #33b763;
+}
+.processes .information .actions a.icon-remove:hover {
+  color: #ff1100;
+}
+.processes .information .actions a.icon-refresh:hover {
+  color: #33b763;
+}
+.processes .executable {
   display: block;
   font-size: 14px;
   margin: 5px 0 0 0;
   font-family: Monaco, monospace;
   color: #bbbbbb;
 }
-.processes .status i.icon-ok-circle {
-  color: #33b763;
-}
-.processes .status i.icon-ban-circle {
-  color: #920e00;
-}
-.processes .status i.icon-exclamation-sign {
-  color: #ff1100;
-}
-.processes .actions a {
-  color: #888888;
-  cursor: pointer;
-  text-decoration: none;
-}
-.processes .actions a.icon-play:hover {
-  color: #33b763;
-}
-.processes .actions a.icon-remove:hover {
-  color: #ff1100;
-}
-.processes .actions a.icon-refresh:hover {
-  color: #33b763;
+@media only screen and (max-width: 700px) {
+  .system table,
+  .system figure {
+    width: 100%;
+    float: none;
+  }
 }

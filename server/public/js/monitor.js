@@ -3380,6 +3380,8 @@ WebSocketResponder.prototype.restartProcess = function(host, pm_id) {
 	});
 };
 
+WebSocketResponder.READYSTATE = READYSTATE;
+
 module.exports = WebSocketResponder;
 },{"util":2,"wildemitter":4}],7:[function(require,module,exports){
 
@@ -3421,11 +3423,21 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 			$location.path("/");
 		});
 	});
-	webSocketResponder.on("error", function() {
+	webSocketResponder.on("error", function(event) {
+		var message = "";
+
+		if(0 == event.target.readyState) {
+			message = " - socket closed, attempting to reconnect";
+		} else if(2 == event.target.readyState) {
+			message = " - socket closing";
+		} else if(3 == event.target.readyState) {
+			message = " - socket closed";
+		}
+
 		$scope.$apply(function() {
 			$scope.alerts = [{
 				type: "error",
-				message: "Socket error"
+				message: "Socket error" + message
 			}];
 		});
 	});
@@ -3598,8 +3610,7 @@ module.exports = ["$routeProvider",
 	function($routeProvider) {
 		$routeProvider.
 			when("/hosts/:host", {
-				templateUrl: "/js/partials/host.html"/*,
-				 controller: "SystemController"*/
+				templateUrl: "/js/partials/host.html"
 			}).
 			otherwise({
 				templateUrl: "/js/partials/connecting.html",

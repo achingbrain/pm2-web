@@ -79,4 +79,6 @@ WebSocketResponder.prototype.restartProcess = function(host, pm_id) {
 	});
 };
 
+WebSocketResponder.READYSTATE = READYSTATE;
+
 module.exports = WebSocketResponder;

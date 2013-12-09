@@ -31,43 +31,51 @@
 </section>
 <section class="processes" ng-controller="ProcessListController">
 	<h2>Processes</h2>
-	<table class="table">
-		<thead>
-			<tr>
-				<th class="pid">PID</th>
-				<th class="script">Script</th>
-				<th class="uptime">Uptime</th>
-				<th class="restarts">Restarts</th>
-				<th class="status">Online</th>
-				<th class="cpu">CPU</th>
-				<th class="memory">Memory</th>
-				<th class="actions">Actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr ng-repeat="process in processes">
-				<td class="pid">{{process.pid}}</td>
-				<td class="script">
-					<p>
-						<span class="name">{{process.name}}</span>
-						<span class="executable" title="{{process.script}}">{{process.script}}</span>
-					</p>
-				</td>
-				<td class="uptime">{{process.uptime | humanise}}</td>
-				<td class="restarts">{{process.restarts}}</td>
-				<td class="status">
+	<article ng-repeat="process in processes">
+		<ul class="information">
+			<li class="pid">
+				<h3>PID</h3>
+				<p>{{process.pid}}</p>
+			</li>
+			<li class="script">
+				<h3>Name</h3>
+				<p>{{process.name}}</p>
+			</li>
+			<li class="restarts">
+				<h3>Restarts</h3>
+				<p>{{process.restarts}}</p>
+			</li>
+			<li class="uptime">
+				<h3>Uptime</h3>
+				<p>{{process.uptime | humanise}}</p>
+			</li>
+			<li class="status">
+				<h3>Status</h3>
+				<p>
 					<i title="Online" ng-show="process.status == 'online'" class="icon-ok-circle {{process.status}}"></i>
 					<i title="Stopped" ng-show="process.status == 'stopped'" class="icon-ban-circle {{process.status}}"></i>
 					<i title="Error!" ng-show="process.status == 'errored'" class="icon-exclamation-sign {{process.status}}"></i>
-				</td>
-				<td class="cpu">{{process.cpu | decimalPlaces:2}}%</td>
-				<td class="memory">{{process.memory | memory}}</td>
-				<td class="actions">
+				</p>
+			</li>
+			<li class="cpu">
+				<h3>CPU</h3>
+				<p>{{process.cpu | decimalPlaces:2}}%</p>
+			</li>
+			<li class="memory">
+				<h3>Memory</h3>
+				<p>{{process.memory | memory}}</p>
+			</li>
+			<li class="actions">
+				<p>
 					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id)"></a>
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id)"></a>
 					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id)"></a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+				</p>
+			</li>
+		</ul>
+		<!--<div class="details">
+			<h3>Executable</h3>
+			<p title="{{process.script}}">{{process.script}}</p>
+		</div>-->
+	</article>
 </section>
