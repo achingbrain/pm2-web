@@ -96,8 +96,14 @@ module.exports = {
 		var onCall = this._webSocketResponder.on.getCall(3);
 		onCall.args[0].should.equal("error");
 
+		var event = {
+			target: {
+				readyState: 2
+			}
+		}
+
 		// invoke error callback
-		onCall.args[1]();
+		onCall.args[1](event);
 
 		var applyCall = this._scope.$apply.getCall(0);
 
