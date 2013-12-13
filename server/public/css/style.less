@@ -22,6 +22,16 @@
 @processoffline: #920e00;
 @processerror: #F10;
 @scriptname: #BBB;
+@details: #FFF;
+@section: #F8F8F8;
+
+.rounded-corners (@radius: 5px) {
+	-webkit-border-radius: @radius;
+	-moz-border-radius: @radius;
+	-ms-border-radius: @radius;
+	-o-border-radius: @radius;
+	border-radius: @radius;
+}
 
 body {
 	background: url(../img/satinweave.png);
@@ -83,22 +93,19 @@ th, figcaption, .information h3 {
 
 section {
 	clear: both;
-	background-color: #F8F8F8;
+	background-color: @section;
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
 	border-radius: 6px;
 	padding: 10px;
 
-	h2 {
+	h2, .details h3 {
 		font-size: 14px;
 		font-family: 'Abel', sans-serif;
 		text-transform: uppercase;
 		letter-spacing: 2px;
 		margin: 0 0 0 5px;
 		padding: 5px 0;
-		-webkit-border-bottom-left-radius: 6px;
-		-moz-border-radius-bottomleft: 6px;
-		border-bottom-left-radius: 6px;
 		color: @blue;
 	}
 }
@@ -174,15 +181,11 @@ section {
 		padding: 0;
 	}
 
-	article:hover p {
-		background-color: #EEE;
-	}
-
-	article h3 {
+	article .information h3 {
 		display: none;
 	}
 
-	article:first-of-type h3 {
+	article:first-of-type .information h3 {
 		display: block;
 		border-bottom: 1px solid #DDD;
 		padding-bottom: 9px;
@@ -221,6 +224,10 @@ section {
 
 		.script {
 			flex-grow: 1;
+
+			p {
+				font-weight: bold;
+			}
 		}
 
 		.restarts, .uptime, .status, .cpu, .memory, .actions {
@@ -230,6 +237,10 @@ section {
 			p, h3 {
 				text-align: center;
 			}
+		}
+
+		.uptime {
+			width: 120px;
 		}
 
 		.status {
@@ -269,12 +280,27 @@ section {
 		}
 	}
 
-	.executable {
-		display: block;
-		font-size: 14px;
-		margin: 5px 0 0 0;
-		font-family: Monaco, monospace;
-		color: @scriptname;
+	.information:hover p {
+		background-color: darken(@section, 5%);
+		cursor: pointer;
+	}
+
+	.details {
+		.rounded-corners(6px);
+		background: @details;
+		padding: 10px;
+		margin-bottom: 10px;
+
+		h3 {
+			border-bottom: none;
+		}
+
+	  .executable {
+			font-size: 14px;
+			margin: 10px 0;
+			font-family: Monaco, monospace;
+			color: @scriptname;
+		}
 	}
 }
 

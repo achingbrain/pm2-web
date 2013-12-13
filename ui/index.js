@@ -1,5 +1,8 @@
 "use strict";
 
+var xChart = require("browserify-xcharts"),
+	d3 = require("d3");
+
 var WebSocketResponder = require("./components/WebSocketResponder"),
 	HostList = require("./components/HostList");
 
@@ -15,6 +18,15 @@ pm2Web.factory("hostList", function() {
 pm2Web.factory("webSocketResponder", ["$window", "hostList", function($window, hostList) {
 	return new WebSocketResponder($window.settings.ws, hostList);
 }]);
+pm2Web.factory("xChart", [function() {
+	return xChart;
+}]);
+pm2Web.factory("d3", [function() {
+	return d3;
+}]);
+
+// directives
+pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
 
 // filters
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));

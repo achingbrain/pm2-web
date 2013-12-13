@@ -1,5 +1,7 @@
 
 module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
+	$scope.showDetails = {};
+
 	var updateScope = function() {
 		var hostData = hostList.find($routeParams.host);
 
@@ -10,6 +12,10 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 		}
 
 		$scope.processes = hostData.processes;
+
+		$scope.toggleDetails = function(pm_id) {
+			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
+		};
 
 		$scope.start = function(pm_id) {
 			webSocketResponder.startProcess(hostData.name, pm_id);

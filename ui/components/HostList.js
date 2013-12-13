@@ -25,50 +25,88 @@ HostList.prototype.addOrUpdate = function(data) {
 		};
 	}
 
-	var systemData = this._mapSystem(data);
+	this._mapSystem(data, this._hosts[data.name].system);
 
-	for(var key in systemData) {
-		this._hosts[data.name].system[key] = systemData[key];
+	// remove any deleted processes
+	for(var i = 0; i < this._hosts[data.name].processes.length; i++) {
+		var existingProcess = this._hosts[data.name].processes[i];
+		var foundProcess = false;
+
+		data.processes.forEach(function(incomingProcess) {
+			if(existingProcess.id == incomingProcess.pm_id) {
+				foundProcess = true;
+			}
+		});
+
+		if(!foundProcess) {
+			this._hosts[data.name].processes.splice(i, 1);
+			i--;
+		}
 	}
 
-	this._hosts[data.name].processes.length = 0;
-
+	// update surviving processes
 	data.processes.forEach(function(process) {
-		this._hosts[data.name].processes.push(this._mapProcess(process));
+		var foundProcess = false;
+
+		this._hosts[data.name].processes.forEach(function(existingProcess) {
+			if(existingProcess.id == process.pm_id) {
+				foundProcess = existingProcess;
+			}
+		});
+
+		if(!foundProcess) {
+			foundProcess = {
+				usage: {
+					cpu: [],
+					memory: []
+				}
+			};
+
+			this._hosts[data.name].processes.push(foundProcess);
+		}
+
+		this._mapProcess(process, foundProcess, this._hosts[data.name].system);
 	}.bind(this));
 
 	this.emit(newHost ? "newHost" : "update", data.name);
 };
 
-HostList.prototype._mapSystem = function(hostData) {
-	var freeMemory = (hostData.system.memory.free / hostData.system.memory.total) * 100;
+HostList.prototype._mapSystem = function(source, target) {
+	var freeMemory = (source.system.memory.free / source.system.memory.total) * 100;
 
-	return {
-		hostname: hostData.system.hostname,
-		process_count: hostData.processes.length,
-		cpu_count: hostData.system.cpus.length,
-		load_avg: hostData.system.load,
-		uptime: hostData.system.uptime,
-		memory_free: hostData.system.memory.free,
-		memory_used: hostData.system.memory.total - hostData.system.memory.free,
-		memory_total: hostData.system.memory.total,
-		memory_free_percent: freeMemory,
-		memory_used_percent: 100 - freeMemory
-	}
+	target.hostname = source.system.hostname;
+	target.process_count = source.processes.length;
+	target.cpu_count = source.system.cpus.length;
+	target.load_avg = source.system.load;
+	target.uptime = source.system.uptime;
+	target.memory_free = source.system.memory.free;
+	target.memory_used = source.system.memory.total - source.system.memory.free;
+	target.memory_total = source.system.memory.total;
+	target.memory_free_percent = freeMemory;
+	target.memory_used_percent = 100 - freeMemory;
 };
 
-HostList.prototype._mapProcess = function(process) {
-	return {
-		id: process.pm_id,
-		pid: process.pid,
-		name: process.pm2_env.name,
-		script: process.pm2_env.pm_exec_path,
-		uptime: (process.pm2_env.pm_uptime - (new Date()).getTime())/1000,
-		restarts: process.pm2_env.restart_time,
-		status: process.pm2_env.status,
-		memory: process.monit.memory,
-		cpu: process.monit.cpu
-	};
+HostList.prototype._mapProcess = function(source, target, system) {
+	target.id = source.pm_id;
+	target.pid = source.pid;
+	target.name = source.pm2_env.name;
+	target.script = source.pm2_env.pm_exec_path;
+	target.uptime = (source.pm2_env.pm_uptime - (new Date()).getTime())/1000;
+	target.restarts = source.pm2_env.restart_time;
+	target.status = source.pm2_env.status;
+	target.memory = source.monit.memory;
+	target.cpu = source.monit.cpu;
+
+	var now = new Date();
+
+	target.usage.memory.push({
+		x: now,
+		y: (source.monit.memory / system.memory_total) * 100
+	});
+	target.usage.cpu.push({
+		x: now,
+		y: source.monit.cpu
+	});
 };
 
 HostList.prototype.find = function(host) {

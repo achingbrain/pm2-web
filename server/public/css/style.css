@@ -56,22 +56,20 @@ figcaption,
 }
 section {
   clear: both;
-  background-color: #F8F8F8;
+  background-color: #f8f8f8;
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   border-radius: 6px;
   padding: 10px;
 }
-section h2 {
+section h2,
+section .details h3 {
   font-size: 14px;
   font-family: 'Abel', sans-serif;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin: 0 0 0 5px;
   padding: 5px 0;
-  -webkit-border-bottom-left-radius: 6px;
-  -moz-border-radius-bottomleft: 6px;
-  border-bottom-left-radius: 6px;
   color: #9b9bad;
 }
 .system table {
@@ -133,13 +131,10 @@ section h2 {
   background: transparent;
   padding: 0;
 }
-.processes article:hover p {
-  background-color: #EEE;
-}
-.processes article h3 {
+.processes article .information h3 {
   display: none;
 }
-.processes article:first-of-type h3 {
+.processes article:first-of-type .information h3 {
   display: block;
   border-bottom: 1px solid #DDD;
   padding-bottom: 9px;
@@ -173,6 +168,9 @@ section h2 {
 .processes .information .script {
   flex-grow: 1;
 }
+.processes .information .script p {
+  font-weight: bold;
+}
 .processes .information .restarts,
 .processes .information .uptime,
 .processes .information .status,
@@ -195,6 +193,9 @@ section h2 {
 .processes .information .memory h3,
 .processes .information .actions h3 {
   text-align: center;
+}
+.processes .information .uptime {
+  width: 120px;
 }
 .processes .information .status {
   width: 50px;
@@ -222,10 +223,26 @@ section h2 {
 .processes .information .actions a.icon-refresh:hover {
   color: #33b763;
 }
-.processes .executable {
-  display: block;
+.processes .information:hover p {
+  background-color: #ebebeb;
+  cursor: pointer;
+}
+.processes .details {
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.processes .details h3 {
+  border-bottom: none;
+}
+.processes .details .executable {
   font-size: 14px;
-  margin: 5px 0 0 0;
+  margin: 10px 0;
   font-family: Monaco, monospace;
   color: #bbbbbb;
 }
