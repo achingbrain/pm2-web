@@ -48,7 +48,8 @@ article {
 }
 th,
 figcaption,
-.information h3 {
+.information h3,
+p.noprocesses {
   color: rgba(0, 0, 0, 0.3);
   font-size: 13px;
   padding: 4px;
@@ -146,6 +147,9 @@ section .details h3 {
 .processes article:first-of-type .information {
   border-top: none;
   margin-top: 7px;
+}
+.processes .noprocesses {
+  padding: 10px 5px;
 }
 .processes .information {
   border-top: 1px solid #DDD;
@@ -245,6 +249,32 @@ section .details h3 {
   margin: 10px 0;
   font-family: Monaco, monospace;
   color: #bbbbbb;
+}
+.processes .details dl {
+  float: right;
+  margin-top: -19px;
+  font-size: 14px;
+  font-family: 'Abel', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #9b9bad;
+}
+.processes .details dl dt,
+.processes .details dl dd {
+  display: inline-block;
+}
+.processes .details dl dt {
+  width: 10px;
+  height: 0;
+  overflow: hidden;
+  padding-top: 10px;
+  margin-left: 5px;
+}
+.processes .details dl dt.cpu {
+  background: #347fac;
+}
+.processes .details dl dt.memory {
+  background: #49aa3c;
 }
 @media only screen and (max-width: 700px) {
   .system table,

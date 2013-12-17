@@ -24,6 +24,8 @@
 @scriptname: #BBB;
 @details: #FFF;
 @section: #F8F8F8;
+@cpuusage: #347FAC;
+@memoryusage: #49AA3C;
 
 .rounded-corners (@radius: 5px) {
 	-webkit-border-radius: @radius;
@@ -84,7 +86,7 @@ article {
 	padding: 10px 10px 10px 10px;
 }
 
-th, figcaption, .information h3 {
+th, figcaption, .information h3, p.noprocesses {
 	color: rgba(0,0,0,0.3);
 	font-size: 13px;
 	padding: 4px;
@@ -201,6 +203,10 @@ section {
 		margin-top: 7px;
 	}
 
+	.noprocesses {
+		padding: 10px 5px;
+	}
+
 	.information {
 		border-top: 1px solid #DDD;
 		display: flex;
@@ -295,11 +301,41 @@ section {
 			border-bottom: none;
 		}
 
-	  .executable {
+		.executable {
 			font-size: 14px;
 			margin: 10px 0;
 			font-family: Monaco, monospace;
 			color: @scriptname;
+		}
+
+		dl {
+			float: right;
+			margin-top: -19px;
+			font-size: 14px;
+			font-family: 'Abel', sans-serif;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			color: @blue;
+
+			dt, dd {
+				display: inline-block;
+			}
+
+			dt {
+				width: 10px;
+				height: 0;
+				overflow: hidden;
+				padding-top: 10px;
+				margin-left: 5px;
+			}
+
+			dt.cpu {
+				background: @cpuusage;
+			}
+
+			dt.memory {
+				background: @memoryusage;
+			}
 		}
 	}
 }

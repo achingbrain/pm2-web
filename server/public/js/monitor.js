@@ -15617,12 +15617,22 @@ module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $
 
 			var opts = {
 				"tickFormatX": function (x) {
+					var now = new Date();
+
+					if(now.getDate() == x.getDate()) {
+
+					}
+
 					return d3.time.format("%X")(x);
+				},
+				"tickFormatY": function (y) {
+					return y + "%";
 				},
 				yMin: 0,
 				yMax: 100,
 				axisPaddingTop: 20,
-				interpolation: "linear"
+				interpolation: "linear",
+				timing: 100
 			};
 
 			var chart = new xChart("line-dotted", data, element[0], opts);
