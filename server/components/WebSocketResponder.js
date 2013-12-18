@@ -18,7 +18,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 			} catch(e) {
 				this._logger.warn("WebSocketResponder", "Error broadcasing to client", e.message);
 			}
-		});
+		}.bind(this));
 	};
 	this._webSocketServer.on("connection", function(client) {
 		client.on("message", function(message) {

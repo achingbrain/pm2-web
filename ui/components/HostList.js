@@ -68,7 +68,11 @@ HostList.prototype.addOrUpdate = function(data) {
 		this._mapProcess(process, foundProcess, this._hosts[data.name].system);
 	}.bind(this));
 
-	this.emit(newHost ? "newHost" : "update", data.name);
+	if(newHost) {
+		this.emit("newHost", data.name);
+	}
+
+	this.emit("update", data.name);
 };
 
 HostList.prototype._mapSystem = function(source, target) {
