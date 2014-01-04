@@ -4,7 +4,8 @@ var xChart = require("browserify-xcharts"),
 	d3 = require("d3");
 
 var WebSocketResponder = require("./components/WebSocketResponder"),
-	HostList = require("./components/HostList");
+	HostList = require("./components/UIHostList"),
+	Config = require("./components/Config");
 
 var pm2Web = angular.module("pm2-web", [
 	"ngRoute",
@@ -12,17 +13,20 @@ var pm2Web = angular.module("pm2-web", [
 ]);
 
 pm2Web.config(require("./routes"));
-pm2Web.factory("hostList", function() {
-	return new HostList();
-});
-pm2Web.factory("webSocketResponder", ["$window", "hostList", function($window, hostList) {
-	return new WebSocketResponder($window.settings.ws, hostList);
+pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, webSocketResponder) {
+	return new HostList(config, webSocketResponder);
+}]);
+pm2Web.factory("webSocketResponder", ["$window", function($window) {
+	return new WebSocketResponder($window.settings.ws);
 }]);
 pm2Web.factory("xChart", [function() {
 	return xChart;
 }]);
 pm2Web.factory("d3", [function() {
 	return d3;
+}]);
+pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
+	return new Config(webSocketResponder);
 }]);
 
 // directives

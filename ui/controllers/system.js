@@ -7,7 +7,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 			return $location.path("/");
 		}
 
-		$scope.system = hostData.system;
+		$scope.system = hostData;
 	};
 	updateScope();
 

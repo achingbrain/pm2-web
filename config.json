@@ -6,6 +6,18 @@
 	"ws": {
 		"port": 9001
 	},
-	"pm2": [],
-	"updateFrequency": 5000
+	"pm2": [{
+		"host": "localhost"
+	}],
+	"updateFrequency": 5000,
+	"hostPurge": {
+		"frequency": 10000,
+		"cutoff": 5000
+	},
+	"graph": {
+		"datapoints": 1000,
+		"distribution": [
+			40, 25, 10, 10, 5
+		]
+	}
 }

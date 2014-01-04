@@ -1,11 +1,11 @@
 
-module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $window, $document) {
+module.exports = ["xChart", "d3", function(xChart, d3) {
 	return {
 		restrict: "A",
 		scope: {
 			data: "="
 		},
-		link: function(scope, element, attrs) {
+		link: function(scope, element) {
 			var data = {
 				"xScale": "time",
 				"yScale": "linear",
@@ -21,7 +21,7 @@ module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $
 			};
 
 			var opts = {
-				"tickFormatX": function (x) {
+				tickFormatX: function (x) {
 					var now = new Date();
 
 					if(now.getDate() == x.getDate()) {
@@ -30,7 +30,7 @@ module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $
 
 					return d3.time.format("%X")(x);
 				},
-				"tickFormatY": function (y) {
+				tickFormatY: function (y) {
 					return y + "%";
 				},
 				yMin: 0,

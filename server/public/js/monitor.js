@@ -1,4 +1,239 @@
-;(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var ProcessData = require("./ProcessData");
+
+var HostData = function(name, config) {
+	this._config = config;
+	this.name = name;
+	this._processes = {};
+
+	Object.defineProperty(this, "processes", {
+		get: function() {
+			return this._processes
+		}.bind(this)
+	});
+	Object.defineProperty(this, "process_count", {
+		get: function() {
+			return Object.keys(this._processes).length;
+		}.bind(this)
+	});
+};
+
+HostData.prototype.getData = function() {
+	var output = {
+		name: this.name,
+		system: {},
+		processes: []
+	};
+
+	["name", "hostname", "cpu_count", "uptime", "load", "memory"].forEach(function(key) {
+		output.system[key] = this[key]
+	}.bind(this));
+
+	Object.keys(this._processes).forEach(function(key) {
+		output.processes.push(this._processes[key].getData());
+	}.bind(this));
+
+	return output;
+};
+
+HostData.prototype.update = function(data) {
+	["hostname", "cpu_count", "uptime"].forEach(function(key) {
+		this[key] = data.system[key]
+	}.bind(this));
+
+	this.load = [
+		data.system.load[0],
+		data.system.load[1],
+		data.system.load[2]
+	];
+	this.memory = {
+		free: data.system.memory.free,
+		total: data.system.memory.total,
+		used: data.system.memory.total - data.system.memory.free
+	};
+
+	this._removeMissingProcesses(data);
+
+	data.processes.forEach(function(process) {
+		if(!this._processes[process.name]) {
+			this._processes[process.name] = new ProcessData(this._config);
+		}
+
+		this._processes[process.name].update(process, data.system);
+	}.bind(this));
+};
+
+HostData.prototype._removeMissingProcesses = function(data) {
+	for(var i = 0; i < this._processes.length; i++) {
+		var found = false;
+
+		for(var k = 0; k < data.processes.length; k++) {
+			if(data.processes[k].pm2_env.name == this._processes[i].name) {
+				found = true;
+			}
+		}
+
+		if(!found) {
+			this._processes.splice(i, 1);
+			i--;
+		}
+	}
+};
+
+module.exports = HostData;
+},{"./ProcessData":2}],2:[function(require,module,exports){
+var Moment = require("moment");
+
+var ProcessData = function(config) {
+	this._config = config;
+
+	this._process = {};
+	this._memoryUsage = [];
+	this._cpuUsage = [];
+
+	Object.defineProperty(this, "usage", {
+		get: function() {
+			return {
+				cpu: this._cpuUsage,
+				memory: this._memoryUsage
+			}
+		}.bind(this)
+	});
+}
+
+ProcessData.prototype.getData = function() {
+	var output = {};
+
+	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "usage"].forEach(function(key) {
+		output[key] = this[key];
+	}.bind(this));
+
+	return output;
+}
+
+ProcessData.prototype.update = function(data, system) {
+	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu"].forEach(function(key) {
+		this[key] = data[key];
+	}.bind(this));
+
+	this._append((data.memory / system.memory.free) * 100, data.cpu);
+}
+
+ProcessData.prototype._append = function(memory, cpu) {
+	this._memoryUsage = this._compressResourceUsage(this._memoryUsage);
+	this._cpuUsage = this._compressResourceUsage(this._cpuUsage);
+
+	var now = new Date();
+
+	this._memoryUsage.push({
+		x: now,
+		y: memory
+	});
+
+	this._cpuUsage.push({
+		x: now,
+		y: cpu
+	});
+}
+
+ProcessData.prototype._compressResourceUsage = function(data) {
+	var datapoints = this._config.get("graph:datapoints");
+	datapoints -= 1;
+
+	var distribution = this._config.get("graph:distribution");
+	var maxAgeInDays = distribution.length;
+
+	if(data.length < datapoints) {
+		return data;
+	}
+
+	var now = new Date();
+	var cutoff = new Date(now);
+	cutoff.setDate(cutoff.getDate() - maxAgeInDays);
+	var usage = [];
+
+	var days = [];
+	var day = [];
+
+	data.forEach(function(datum) {
+		if(datum.date.getTime() < cutoff.getTime()) {
+			// ignore anything older than graph:maxAgeInDays
+			return;
+		}
+
+		if(day[day.length - 1] && day[day.length - 1].date.getDate() != datum.date.getDate()) {
+			days.push(day);
+			day = [];
+		} else {
+			day.push(datum);
+		}
+	});
+
+	days.forEach(function(day) {
+		var compressed = this._compressDay(day, now, datapoints, distribution);
+
+		usage = usage.concat(compressed);
+	}.bind(this));
+
+	return usage;
+}
+
+ProcessData.prototype._compressDay = function(day, now, datapoints, distribution) {
+	if(day.length == 0) {
+		return day;
+	}
+
+	var dayDifference = Math.floor((now.getTime() - day[day.length - 1].date.getTime()) / 86400000);
+
+	if(dayDifference > distribution.length) {
+		return [];
+	}
+
+	var percent = distribution[dayDifference];
+
+	return this._compress(day, (datapoints/100) * percent);
+}
+
+ProcessData.prototype._compress = function(dataSet, maxSamples) {
+	var sampleSize = Math.ceil(dataSet.length/maxSamples);
+
+	var output = [];
+	var offset = 0;
+	var data = 0;
+	var date = 0;
+
+	while(offset < dataSet.length) {
+		var processed = 0;
+
+		for(var i = 0; i < sampleSize; i++) {
+			if(offset + i == dataSet.length) {
+				break;
+			}
+
+			// might at some point overflow MAX_INT here. won't that be fun.
+			date += dataSet[offset + i].x.getTime();
+
+			data += dataSet[offset + i].y;
+
+			processed++;
+		}
+
+		offset += processed;
+
+		output.push({
+			x: new Date(date / processed),
+			y: data / processed
+		});
+
+		data = 0;
+		date = 0;
+	}
+
+	return output;
+}
+
+module.exports = ProcessData;
+},{"moment":21}],3:[function(require,module,exports){
 require('./xcharts.less');
 var _ = require('underscore');
 var d3 = require('d3');
@@ -671,7 +906,7 @@ _.defaults(xChart.prototype, {
   }
 });
 
-},{"./scales":2,"./vis/index":5,"./visutils":8,"./xcharts.less":9,"d3":14,"underscore":12}],2:[function(require,module,exports){
+},{"./scales":4,"./vis/index":7,"./visutils":10,"./xcharts.less":11,"d3":16,"underscore":14}],4:[function(require,module,exports){
 var _ = require('underscore');
 var d3 = require('d3');
 var xChart = require('./chart');
@@ -798,7 +1033,7 @@ _scales.xy = function (self, data, xType, yType) {
   return scales;
 };
 
-},{"./chart":1,"d3":14,"underscore":12}],3:[function(require,module,exports){
+},{"./chart":3,"d3":16,"underscore":14}],5:[function(require,module,exports){
 var _visutils = require('../visutils');
 var d3 = require('d3');
 var _ = require('underscore');
@@ -916,7 +1151,7 @@ module.exports = {
   exit: exit,
   destroy: destroy
 };
-},{"../visutils":8,"d3":14,"underscore":12}],4:[function(require,module,exports){
+},{"../visutils":10,"d3":16,"underscore":14}],6:[function(require,module,exports){
 var _visutils = require('../visutils');
 var d3 = require('d3');
 var _ = require('underscore');
@@ -981,7 +1216,7 @@ module.exports = {
   destroy: destroy
 };
 
-},{"../visutils":8,"./index":5,"./line":7,"d3":14,"underscore":12}],5:[function(require,module,exports){
+},{"../visutils":10,"./index":7,"./line":9,"d3":16,"underscore":14}],7:[function(require,module,exports){
 module.exports = {
   chart: require('../chart'),
   bar: require('./bar'),
@@ -990,7 +1225,7 @@ module.exports = {
   line: require('./line')
 };
 
-},{"../chart":1,"./bar":3,"./cumulative":4,"./line":7,"./line-dotted":6}],6:[function(require,module,exports){
+},{"../chart":3,"./bar":5,"./cumulative":6,"./line":9,"./line-dotted":8}],8:[function(require,module,exports){
 var _visutils = require('../visutils');
 var d3 = require('d3');
 var _ = require('underscore');
@@ -1053,7 +1288,7 @@ module.exports = {
   destroy: destroy
 };
 
-},{"../visutils":8,"./index":5,"d3":14,"underscore":12}],7:[function(require,module,exports){
+},{"../visutils":10,"./index":7,"d3":16,"underscore":14}],9:[function(require,module,exports){
 var _visutils = require('../visutils');
 var d3 = require('d3');
 var _ = require('underscore');
@@ -1166,7 +1401,7 @@ module.exports = {
   destroy: destroy
 };
 
-},{"../visutils":8,"./index":5,"d3":14,"underscore":12}],8:[function(require,module,exports){
+},{"../visutils":10,"./index":7,"d3":16,"underscore":14}],10:[function(require,module,exports){
 var _ = require('underscore');
 
 function getInsertionPoint(zIndex) {
@@ -1185,7 +1420,7 @@ module.exports = {
   colorClass: colorClass
 };
 
-},{"underscore":12}],9:[function(require,module,exports){
+},{"underscore":14}],11:[function(require,module,exports){
 var css = '.xchart .line {\
   stroke-width: 3px;\
   fill: none;\
@@ -1470,7 +1705,7 @@ var css = '.xchart .line {\
   fill: #2477ab;\
 }\
 ';(require('lessify'))(css); module.exports = css;
-},{"lessify":11}],10:[function(require,module,exports){
+},{"lessify":13}],12:[function(require,module,exports){
 module.exports = function (css) {
   var head = document.getElementsByTagName('head')[0],
       style = document.createElement('style');
@@ -1495,10 +1730,10 @@ module.exports.byUrl = function(url) {
   
   head.appendChild(link);
 };
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = require('cssify');
 
-},{"cssify":10}],12:[function(require,module,exports){
+},{"cssify":12}],14:[function(require,module,exports){
 //     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -2726,10 +2961,10 @@ module.exports = require('cssify');
 
 }).call(this);
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 d3 = function() {
   var d3 = {
-    version: "3.3.11"
+    version: "3.3.13"
   };
   if (!Date.now) Date.now = function() {
     return +new Date();
@@ -3336,7 +3571,7 @@ d3 = function() {
   d3_selectionPrototype.classed = function(name, value) {
     if (arguments.length < 2) {
       if (typeof name === "string") {
-        var node = this.node(), n = (name = name.trim().split(/^|\s+/g)).length, i = -1;
+        var node = this.node(), n = (name = d3_selection_classes(name)).length, i = -1;
         if (value = node.classList) {
           while (++i < n) if (!value.contains(name[i])) return false;
         } else {
@@ -3353,8 +3588,11 @@ d3 = function() {
   function d3_selection_classedRe(name) {
     return new RegExp("(?:^|\\s+)" + d3.requote(name) + "(?:\\s+|$)", "g");
   }
+  function d3_selection_classes(name) {
+    return name.trim().split(/^|\s+/);
+  }
   function d3_selection_classed(name, value) {
-    name = name.trim().split(/\s+/).map(d3_selection_classedName);
+    name = d3_selection_classes(name).map(d3_selection_classedName);
     var n = name.length;
     function classedConstant() {
       var i = -1;
@@ -6895,14 +7133,21 @@ d3 = function() {
     return d3_geo_projection(d3_geo_stereographic);
   }).raw = d3_geo_stereographic;
   function d3_geo_transverseMercator(λ, φ) {
-    var B = Math.cos(φ) * Math.sin(λ);
-    return [ Math.log((1 + B) / (1 - B)) / 2, Math.atan2(Math.tan(φ), Math.cos(λ)) ];
+    return [ Math.log(Math.tan(π / 4 + φ / 2)), -λ ];
   }
   d3_geo_transverseMercator.invert = function(x, y) {
-    return [ Math.atan2(d3_sinh(x), Math.cos(y)), d3_asin(Math.sin(y) / d3_cosh(x)) ];
+    return [ -y, 2 * Math.atan(Math.exp(x)) - halfπ ];
   };
   (d3.geo.transverseMercator = function() {
-    return d3_geo_mercatorProjection(d3_geo_transverseMercator);
+    var projection = d3_geo_mercatorProjection(d3_geo_transverseMercator), center = projection.center, rotate = projection.rotate;
+    projection.center = function(_) {
+      return _ ? center([ -_[1], _[0] ]) : (_ = center(), [ -_[1], _[0] ]);
+    };
+    projection.rotate = function(_) {
+      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(), 
+      [ _[0], _[1], _[2] - 90 ]);
+    };
+    return projection.rotate([ 0, 0 ]);
   }).raw = d3_geo_transverseMercator;
   d3.geom = {};
   function d3_geom_pointX(d) {
@@ -9576,10 +9821,16 @@ d3 = function() {
         return Math.exp(random());
       };
     },
+    bates: function(m) {
+      var random = d3.random.irwinHall(m);
+      return function() {
+        return random() / m;
+      };
+    },
     irwinHall: function(m) {
       return function() {
         for (var s = 0, j = 0; j < m; j++) s += Math.random();
-        return s / m;
+        return s;
       };
     }
   };
@@ -11955,7 +12206,9 @@ d3 = function() {
   var d3_time_scaleMilliseconds = {
     range: function(start, stop, step) {
       return d3.range(+start, +stop, step).map(d3_time_scaleDate);
-    }
+    },
+    floor: d3_identity,
+    ceil: d3_identity
   };
   var d3_time_scaleUTCMethods = d3_time_scaleLocalMethods.map(function(m) {
     return [ m[0].utc, m[1] ];
@@ -12002,231 +12255,101 @@ d3 = function() {
   });
   return d3;
 }();
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 require("./d3");
 module.exports = d3;
 (function () { delete this.d3; })(); // unset global
 
-},{"./d3":13}],15:[function(require,module,exports){
-
-
-//
-// The shims in this file are not fully implemented shims for the ES5
-// features, but do work for the particular usecases there is in
-// the other modules.
-//
-
-var toString = Object.prototype.toString;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-// Array.isArray is supported in IE9
-function isArray(xs) {
-  return toString.call(xs) === '[object Array]';
-}
-exports.isArray = typeof Array.isArray === 'function' ? Array.isArray : isArray;
-
-// Array.prototype.indexOf is supported in IE9
-exports.indexOf = function indexOf(xs, x) {
-  if (xs.indexOf) return xs.indexOf(x);
-  for (var i = 0; i < xs.length; i++) {
-    if (x === xs[i]) return i;
-  }
-  return -1;
-};
-
-// Array.prototype.filter is supported in IE9
-exports.filter = function filter(xs, fn) {
-  if (xs.filter) return xs.filter(fn);
-  var res = [];
-  for (var i = 0; i < xs.length; i++) {
-    if (fn(xs[i], i, xs)) res.push(xs[i]);
-  }
-  return res;
-};
-
-// Array.prototype.forEach is supported in IE9
-exports.forEach = function forEach(xs, fn, self) {
-  if (xs.forEach) return xs.forEach(fn, self);
-  for (var i = 0; i < xs.length; i++) {
-    fn.call(self, xs[i], i, xs);
-  }
-};
-
-// Array.prototype.map is supported in IE9
-exports.map = function map(xs, fn) {
-  if (xs.map) return xs.map(fn);
-  var out = new Array(xs.length);
-  for (var i = 0; i < xs.length; i++) {
-    out[i] = fn(xs[i], i, xs);
-  }
-  return out;
-};
-
-// Array.prototype.reduce is supported in IE9
-exports.reduce = function reduce(array, callback, opt_initialValue) {
-  if (array.reduce) return array.reduce(callback, opt_initialValue);
-  var value, isValueSet = false;
-
-  if (2 < arguments.length) {
-    value = opt_initialValue;
-    isValueSet = true;
-  }
-  for (var i = 0, l = array.length; l > i; ++i) {
-    if (array.hasOwnProperty(i)) {
-      if (isValueSet) {
-        value = callback(value, array[i], i, array);
+},{"./d3":15}],17:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
       }
-      else {
-        value = array[i];
-        isValueSet = true;
-      }
-    }
-  }
-
-  return value;
-};
-
-// String.prototype.substr - negative index don't work in IE8
-if ('ab'.substr(-1) !== 'b') {
-  exports.substr = function (str, start, length) {
-    // did we get a negative start, calculate how much it is from the beginning of the string
-    if (start < 0) start = str.length + start;
-
-    // call the original function
-    return str.substr(start, length);
+    });
   };
 } else {
-  exports.substr = function (str, start, length) {
-    return str.substr(start, length);
-  };
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
 }
 
-// String.prototype.trim is supported in IE9
-exports.trim = function (str) {
-  if (str.trim) return str.trim();
-  return str.replace(/^\s+|\s+$/g, '');
-};
+},{}],18:[function(require,module,exports){
+// shim for using process in browser
 
-// Function.prototype.bind is supported in IE9
-exports.bind = function () {
-  var args = Array.prototype.slice.call(arguments);
-  var fn = args.shift();
-  if (fn.bind) return fn.bind.apply(fn, args);
-  var self = args.shift();
-  return function () {
-    fn.apply(self, args.concat([Array.prototype.slice.call(arguments)]));
-  };
-};
+var process = module.exports = {};
 
-// Object.create is supported in IE9
-function create(prototype, properties) {
-  var object;
-  if (prototype === null) {
-    object = { '__proto__' : null };
-  }
-  else {
-    if (typeof prototype !== 'object') {
-      throw new TypeError(
-        'typeof prototype[' + (typeof prototype) + '] != \'object\''
-      );
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
     }
-    var Type = function () {};
-    Type.prototype = prototype;
-    object = new Type();
-    object.__proto__ = prototype;
-  }
-  if (typeof properties !== 'undefined' && Object.defineProperties) {
-    Object.defineProperties(object, properties);
-  }
-  return object;
-}
-exports.create = typeof Object.create === 'function' ? Object.create : create;
 
-// Object.keys and Object.getOwnPropertyNames is supported in IE9 however
-// they do show a description and number property on Error objects
-function notObject(object) {
-  return ((typeof object != "object" && typeof object != "function") || object === null);
-}
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
 
-function keysShim(object) {
-  if (notObject(object)) {
-    throw new TypeError("Object.keys called on a non-object");
-  }
-
-  var result = [];
-  for (var name in object) {
-    if (hasOwnProperty.call(object, name)) {
-      result.push(name);
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
     }
-  }
-  return result;
-}
 
-// getOwnPropertyNames is almost the same as Object.keys one key feature
-//  is that it returns hidden properties, since that can't be implemented,
-//  this feature gets reduced so it just shows the length property on arrays
-function propertyShim(object) {
-  if (notObject(object)) {
-    throw new TypeError("Object.getOwnPropertyNames called on a non-object");
-  }
-
-  var result = keysShim(object);
-  if (exports.isArray(object) && exports.indexOf(object, 'length') === -1) {
-    result.push('length');
-  }
-  return result;
-}
-
-var keys = typeof Object.keys === 'function' ? Object.keys : keysShim;
-var getOwnPropertyNames = typeof Object.getOwnPropertyNames === 'function' ?
-  Object.getOwnPropertyNames : propertyShim;
-
-if (new Error().hasOwnProperty('description')) {
-  var ERROR_PROPERTY_FILTER = function (obj, array) {
-    if (toString.call(obj) === '[object Error]') {
-      array = exports.filter(array, function (name) {
-        return name !== 'description' && name !== 'number' && name !== 'message';
-      });
-    }
-    return array;
-  };
-
-  exports.keys = function (object) {
-    return ERROR_PROPERTY_FILTER(object, keys(object));
-  };
-  exports.getOwnPropertyNames = function (object) {
-    return ERROR_PROPERTY_FILTER(object, getOwnPropertyNames(object));
-  };
-} else {
-  exports.keys = keys;
-  exports.getOwnPropertyNames = getOwnPropertyNames;
-}
-
-// Object.getOwnPropertyDescriptor - supported in IE8 but only on dom elements
-function valueObject(value, key) {
-  return { value: value[key] };
-}
-
-if (typeof Object.getOwnPropertyDescriptor === 'function') {
-  try {
-    Object.getOwnPropertyDescriptor({'a': 1}, 'a');
-    exports.getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-  } catch (e) {
-    // IE8 dom element issue - use a try catch and default to valueObject
-    exports.getOwnPropertyDescriptor = function (value, key) {
-      try {
-        return Object.getOwnPropertyDescriptor(value, key);
-      } catch (e) {
-        return valueObject(value, key);
-      }
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
     };
-  }
-} else {
-  exports.getOwnPropertyDescriptor = valueObject;
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
 }
 
-},{}],16:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],19:[function(require,module,exports){
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.binarySlice === 'function'
+    ;
+}
+
+},{}],20:[function(require,module,exports){
+var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -12246,8 +12369,6 @@ if (typeof Object.getOwnPropertyDescriptor === 'function') {
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var shims = require('_shims');
 
 var formatRegExp = /%[sdj%]/g;
 exports.format = function(f) {
@@ -12287,6 +12408,62 @@ exports.format = function(f) {
   }
   return str;
 };
+
+
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  // Allow for deprecating things in the process of starting up.
+  if (isUndefined(global.process)) {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
+    };
+  }
+
+  if (process.noDeprecation === true) {
+    return fn;
+  }
+
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
+      } else {
+        console.error(msg);
+      }
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
+
+  return deprecated;
+};
+
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
 
 /**
  * Echos the value of a value. Trys to print the value out
@@ -12374,7 +12551,7 @@ function stylizeNoColor(str, styleType) {
 function arrayToHash(array) {
   var hash = {};
 
-  shims.forEach(array, function(val, idx) {
+  array.forEach(function(val, idx) {
     hash[val] = true;
   });
 
@@ -12392,7 +12569,7 @@ function formatValue(ctx, value, recurseTimes) {
       value.inspect !== exports.inspect &&
       // Also filter out any prototype objects using the circular check.
       !(value.constructor && value.constructor.prototype === value)) {
-    var ret = value.inspect(recurseTimes);
+    var ret = value.inspect(recurseTimes, ctx);
     if (!isString(ret)) {
       ret = formatValue(ctx, ret, recurseTimes);
     }
@@ -12406,11 +12583,11 @@ function formatValue(ctx, value, recurseTimes) {
   }
 
   // Look up the keys of the object.
-  var keys = shims.keys(value);
+  var keys = Object.keys(value);
   var visibleKeys = arrayToHash(keys);
 
   if (ctx.showHidden) {
-    keys = shims.getOwnPropertyNames(value);
+    keys = Object.getOwnPropertyNames(value);
   }
 
   // Some type of object without properties can be shortcutted.
@@ -12522,8 +12699,7 @@ function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
       output.push('');
     }
   }
-
-  shims.forEach(keys, function(key) {
+  keys.forEach(function(key) {
     if (!key.match(/^\d+$/)) {
       output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
           key, true));
@@ -12535,7 +12711,7 @@ function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
 
 function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
   var name, str, desc;
-  desc = shims.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
   if (desc.get) {
     if (desc.set) {
       str = ctx.stylize('[Getter/Setter]', 'special');
@@ -12547,12 +12723,11 @@ function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
       str = ctx.stylize('[Setter]', 'special');
     }
   }
-
   if (!hasOwnProperty(visibleKeys, key)) {
     name = '[' + key + ']';
   }
   if (!str) {
-    if (shims.indexOf(ctx.seen, desc.value) < 0) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
       if (isNull(recurseTimes)) {
         str = formatValue(ctx, desc.value, null);
       } else {
@@ -12595,7 +12770,7 @@ function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
 
 function reduceToSingleString(output, base, braces) {
   var numLinesEst = 0;
-  var length = shims.reduce(output, function(prev, cur) {
+  var length = output.reduce(function(prev, cur) {
     numLinesEst++;
     if (cur.indexOf('\n') >= 0) numLinesEst++;
     return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
@@ -12617,7 +12792,7 @@ function reduceToSingleString(output, base, braces) {
 // NOTE: These type checking functions intentionally don't use `instanceof`
 // because it is fragile and can be easily faked with `Object.create()`.
 function isArray(ar) {
-  return shims.isArray(ar);
+  return Array.isArray(ar);
 }
 exports.isArray = isArray;
 
@@ -12662,7 +12837,7 @@ function isRegExp(re) {
 exports.isRegExp = isRegExp;
 
 function isObject(arg) {
-  return typeof arg === 'object' && arg;
+  return typeof arg === 'object' && arg !== null;
 }
 exports.isObject = isObject;
 
@@ -12672,7 +12847,8 @@ function isDate(d) {
 exports.isDate = isDate;
 
 function isError(e) {
-  return isObject(e) && objectToString(e) === '[object Error]';
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
 }
 exports.isError = isError;
 
@@ -12691,14 +12867,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.binarySlice === 'function'
-  ;
-}
-exports.isBuffer = isBuffer;
+exports.isBuffer = require('./support/isBuffer');
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -12742,23 +12911,13 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = function(ctor, superCtor) {
-  ctor.super_ = superCtor;
-  ctor.prototype = shims.create(superCtor.prototype, {
-    constructor: {
-      value: ctor,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-};
+exports.inherits = require('inherits');
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
   if (!add || !isObject(add)) return origin;
 
-  var keys = shims.keys(add);
+  var keys = Object.keys(add);
   var i = keys.length;
   while (i--) {
     origin[keys[i]] = add[keys[i]];
@@ -12770,7 +12929,7 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"_shims":15}],17:[function(require,module,exports){
+},{"./support/isBuffer":19,"__browserify_process":18,"inherits":17}],21:[function(require,module,exports){
 //! moment.js
 //! version : 2.4.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -15086,7 +15245,7 @@ function hasOwnProperty(obj, prop) {
     }
 }).call(this);
 
-},{}],18:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /*
 WildEmitter.js is a slim little event emitter by @henrikjoreteg largely based 
 on @visionmedia's Emitter from UI Kit.
@@ -15223,133 +15382,87 @@ WildEmitter.prototype.getWildcardCallbacks = function (eventName) {
     return result;
 };
 
-},{}],19:[function(require,module,exports){
-var EventEmitter = require("wildemitter"),
-	util = require("util");
+},{}],23:[function(require,module,exports){
 
-HostList = function() {
+var Config = function(webSocketResponder) {
+	webSocketResponder.once("config", function(data) {
+		this._config = data
+	}.bind(this));
+};
+
+Config.prototype.get = function(key) {
+	if(!this._config || !key) {
+		return null;
+	}
+
+	var value = this._config;
+
+	key.split(":").forEach(function(property) {
+		if(typeof(property) != "undefined") {
+			value = value[property];
+		} else {
+			value = null;
+		}
+	});
+
+	return value;
+}
+
+module.exports = Config;
+},{}],24:[function(require,module,exports){
+var EventEmitter = require("wildemitter"),
+	util = require("util"),
+	HostData = require("./../../common/HostData");
+
+UIHostList = function(config, webSocketResponder) {
 	EventEmitter.call(this);
 
-	this._hosts = {};
-};
-util.inherits(HostList, EventEmitter);
-
-HostList.prototype.empty = function() {
-	this._hosts = {};
-};
-
-HostList.prototype.addOrUpdate = function(data) {
-	var newHost = false;
-
-	if(!this._hosts[data.name]) {
-		newHost = true;
-
-		this._hosts[data.name] = {
-			name: data.name,
-			system: {},
-			processes: []
-		};
-	}
-
-	this._mapSystem(data, this._hosts[data.name].system);
-
-	// remove any deleted processes
-	for(var i = 0; i < this._hosts[data.name].processes.length; i++) {
-		var existingProcess = this._hosts[data.name].processes[i];
-		var foundProcess = false;
-
-		data.processes.forEach(function(incomingProcess) {
-			if(existingProcess.id == incomingProcess.pm_id) {
-				foundProcess = true;
-			}
-		});
-
-		if(!foundProcess) {
-			this._hosts[data.name].processes.splice(i, 1);
-			i--;
-		}
-	}
-
-	// update surviving processes
-	data.processes.forEach(function(process) {
-		var foundProcess = false;
-
-		this._hosts[data.name].processes.forEach(function(existingProcess) {
-			if(existingProcess.id == process.pm_id) {
-				foundProcess = existingProcess;
-			}
-		});
-
-		if(!foundProcess) {
-			foundProcess = {
-				usage: {
-					cpu: [],
-					memory: []
-				}
-			};
-
-			this._hosts[data.name].processes.push(foundProcess);
-		}
-
-		this._mapProcess(process, foundProcess, this._hosts[data.name].system);
+	// populate host data when it's available
+	webSocketResponder.once("hosts", function(list) {
+		list.forEach(function(data) {
+			this.add(data);
+		}.bind(this));
 	}.bind(this));
 
-	if(newHost) {
-		this.emit("newHost", data.name);
-	}
+	// update host data occasionally
+	webSocketResponder.on("systemData", function(data) {
+		this.update(data);
+	}.bind(this));
+
+	this._config = config;
+	this._hosts = {};
+};
+util.inherits(UIHostList, EventEmitter);
+
+UIHostList.prototype.empty = function() {
+	this._hosts = {};
+};
+
+UIHostList.prototype.add = function(data) {
+	this._hosts[data.name] = new HostData(data.name, this._config);
+
+	this.update(data);
+
+	this.emit("newHost", data.name);
+};
+
+UIHostList.prototype.update = function(data) {
+	this._hosts[data.name].update(data);
 
 	this.emit("update", data.name);
 };
 
-HostList.prototype._mapSystem = function(source, target) {
-	var freeMemory = (source.system.memory.free / source.system.memory.total) * 100;
-
-	target.hostname = source.system.hostname;
-	target.process_count = source.processes.length;
-	target.cpu_count = source.system.cpus.length;
-	target.load_avg = source.system.load;
-	target.uptime = source.system.uptime;
-	target.memory_free = source.system.memory.free;
-	target.memory_used = source.system.memory.total - source.system.memory.free;
-	target.memory_total = source.system.memory.total;
-	target.memory_free_percent = freeMemory;
-	target.memory_used_percent = 100 - freeMemory;
-};
-
-HostList.prototype._mapProcess = function(source, target, system) {
-	target.id = source.pm_id;
-	target.pid = source.pid;
-	target.name = source.pm2_env.name;
-	target.script = source.pm2_env.pm_exec_path;
-	target.uptime = (source.pm2_env.pm_uptime - (new Date()).getTime())/1000;
-	target.restarts = source.pm2_env.restart_time;
-	target.status = source.pm2_env.status;
-	target.memory = source.monit.memory;
-	target.cpu = source.monit.cpu;
-
-	var now = new Date();
-
-	target.usage.memory.push({
-		x: now,
-		y: (source.monit.memory / system.memory_total) * 100
-	});
-	target.usage.cpu.push({
-		x: now,
-		y: source.monit.cpu
-	});
-};
-
-HostList.prototype.find = function(host) {
+UIHostList.prototype.find = function(host) {
 	return this._hosts[host];
 };
 
-HostList.prototype.hosts = function() {
+UIHostList.prototype.hosts = function() {
 	return Object.keys(this._hosts);
 };
 
-module.exports = HostList;
+module.exports = UIHostList;
 
-},{"util":16,"wildemitter":18}],20:[function(require,module,exports){
+},{"./../../common/HostData":1,"util":20,"wildemitter":22}],25:[function(require,module,exports){
 var EventEmitter = require("wildemitter"),
 	util = require("util");
 
@@ -15360,10 +15473,8 @@ var READYSTATE = {
 	CLOSED: 3
 };
 
-WebSocketResponder = function(socketUrl, hostList) {
+WebSocketResponder = function(socketUrl) {
 	EventEmitter.apply(this);
-
-	this._hostList = hostList;
 
 	console.info("WebSocketResponder", "Connecting to", socketUrl);
 
@@ -15378,7 +15489,7 @@ WebSocketResponder = function(socketUrl, hostList) {
 		var event = JSON.parse(message.data);
 
 		if(event && event.method && this[event.method]) {
-			this[event.method](event.data);
+			this[event.method].apply(this, event.args);
 		}
 	}.bind(this);
 	this._ws.onclose = function() {
@@ -15402,8 +15513,16 @@ WebSocketResponder.prototype.isOpen = function() {
 	return this._ws.readyState == READYSTATE.OPEN;
 };
 
-WebSocketResponder.prototype.systemData = function(data) {
-	this._hostList.addOrUpdate(data);
+WebSocketResponder.prototype.onSystemData = function(data) {
+	this.emit("systemData", data);
+};
+
+WebSocketResponder.prototype.onHosts = function(hosts) {
+	this.emit("hosts", hosts);
+}
+
+WebSocketResponder.prototype.onConfig = function(config) {
+	this.emit("config", config);
 };
 
 WebSocketResponder.prototype._send = function(message) {
@@ -15434,7 +15553,7 @@ WebSocketResponder.prototype.restartProcess = function(host, pm_id) {
 WebSocketResponder.READYSTATE = READYSTATE;
 
 module.exports = WebSocketResponder;
-},{"util":16,"wildemitter":18}],21:[function(require,module,exports){
+},{"util":20,"wildemitter":22}],26:[function(require,module,exports){
 
 module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostList", function($window, $scope, $location, webSocketResponder, hostList) {
 	if(!$window["WebSocket"]) {
@@ -15492,6 +15611,7 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 			}];
 		});
 	});
+
 	hostList.once("update", function(host) {
 		$scope.$apply(function() {
 			$location.path("/hosts/" + host);
@@ -15499,7 +15619,7 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 	});
 }];
 
-},{}],22:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 
 module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
 	$scope.tabs = [];
@@ -15534,7 +15654,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 	});
 }];
 
-},{}],23:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 
 module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
 	$scope.showDetails = {};
@@ -15561,6 +15681,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 			webSocketResponder.stopProcess(hostData.name, pm_id);
 		};
 		$scope.restart = function(pm_id) {
+			console.info(hostData);
 			webSocketResponder.restartProcess(hostData.name, pm_id);
 		};
 	};
@@ -15574,7 +15695,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 	});
 }];
 
-},{}],24:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 
 module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
 	var updateScope = function() {
@@ -15584,7 +15705,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 			return $location.path("/");
 		}
 
-		$scope.system = hostData.system;
+		$scope.system = hostData;
 	};
 	updateScope();
 
@@ -15596,15 +15717,15 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 	});
 }];
 
-},{}],25:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 
-module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $window, $document) {
+module.exports = ["xChart", "d3", function(xChart, d3) {
 	return {
 		restrict: "A",
 		scope: {
 			data: "="
 		},
-		link: function(scope, element, attrs) {
+		link: function(scope, element) {
 			var data = {
 				"xScale": "time",
 				"yScale": "linear",
@@ -15620,7 +15741,7 @@ module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $
 			};
 
 			var opts = {
-				"tickFormatX": function (x) {
+				tickFormatX: function (x) {
 					var now = new Date();
 
 					if(now.getDate() == x.getDate()) {
@@ -15629,7 +15750,7 @@ module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $
 
 					return d3.time.format("%X")(x);
 				},
-				"tickFormatY": function (y) {
+				tickFormatY: function (y) {
 					return y + "%";
 				},
 				yMin: 0,
@@ -15648,7 +15769,7 @@ module.exports = ["xChart", "d3", "$window", "$document", function(xChart, d3, $
 	};
 }];
 
-},{}],26:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
@@ -15656,7 +15777,7 @@ module.exports = function() {
 	}
 };
 
-},{}],27:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var Moment = require("moment");
 
 module.exports = function() {
@@ -15665,7 +15786,7 @@ module.exports = function() {
 	}
 };
 
-},{"moment":17}],28:[function(require,module,exports){
+},{"moment":21}],33:[function(require,module,exports){
 
 module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
@@ -15683,14 +15804,15 @@ module.exports = function() {
 	}
 };
 
-},{}],29:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 
 var xChart = require("browserify-xcharts"),
 	d3 = require("d3");
 
 var WebSocketResponder = require("./components/WebSocketResponder"),
-	HostList = require("./components/HostList");
+	HostList = require("./components/UIHostList"),
+	Config = require("./components/Config");
 
 var pm2Web = angular.module("pm2-web", [
 	"ngRoute",
@@ -15698,17 +15820,20 @@ var pm2Web = angular.module("pm2-web", [
 ]);
 
 pm2Web.config(require("./routes"));
-pm2Web.factory("hostList", function() {
-	return new HostList();
-});
-pm2Web.factory("webSocketResponder", ["$window", "hostList", function($window, hostList) {
-	return new WebSocketResponder($window.settings.ws, hostList);
+pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, webSocketResponder) {
+	return new HostList(config, webSocketResponder);
+}]);
+pm2Web.factory("webSocketResponder", ["$window", function($window) {
+	return new WebSocketResponder($window.settings.ws);
 }]);
 pm2Web.factory("xChart", [function() {
 	return xChart;
 }]);
 pm2Web.factory("d3", [function() {
 	return d3;
+}]);
+pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
+	return new Config(webSocketResponder);
 }]);
 
 // directives
@@ -15725,7 +15850,7 @@ pm2Web.controller("SystemController", require("./controllers/system"));
 pm2Web.controller("ProcessListController", require("./controllers/processList"));
 pm2Web.controller("HostListController", require("./controllers/hostList"));
 
-},{"./components/HostList":19,"./components/WebSocketResponder":20,"./controllers/connection":21,"./controllers/hostList":22,"./controllers/processList":23,"./controllers/system":24,"./directives/resourceUsage":25,"./filters/decimalPlaces":26,"./filters/humanise":27,"./filters/memory":28,"./routes":30,"browserify-xcharts":1,"d3":14}],30:[function(require,module,exports){
+},{"./components/Config":23,"./components/UIHostList":24,"./components/WebSocketResponder":25,"./controllers/connection":26,"./controllers/hostList":27,"./controllers/processList":28,"./controllers/system":29,"./directives/resourceUsage":30,"./filters/decimalPlaces":31,"./filters/humanise":32,"./filters/memory":33,"./routes":35,"browserify-xcharts":3,"d3":16}],35:[function(require,module,exports){
 
 module.exports = ["$routeProvider",
 	function($routeProvider) {
@@ -15740,5 +15865,4 @@ module.exports = ["$routeProvider",
 	}
 ];
 
-},{}]},{},[29])
-;
+},{}]},{},[34])

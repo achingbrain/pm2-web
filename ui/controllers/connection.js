@@ -55,6 +55,7 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 			}];
 		});
 	});
+
 	hostList.once("update", function(host) {
 		$scope.$apply(function() {
 			$location.path("/hosts/" + host);

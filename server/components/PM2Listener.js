@@ -47,19 +47,13 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 		return;
 	}
 
-	this._logger.debug("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
+	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
 
 	// listen for all events
 	pm2Interface.bus.on("*", function(event, data) {
-		if(event == "process:exception") {
-			this._logger.warn("PM2Listener", pm2Interface.bind_host, event, data.name);
-
-			this.emit(event, data.name);
-		} else {
-			this._logger.info("PM2Listener", pm2Interface.bind_host, event, data.pm2_env.name);
-
-			this.emit(event, data.pm2_env.name);
-		}
+		data.name = pm2Interface.bind_host;
+		this._logger.info("PM2Listener", event, JSON.stringify(data));
+		this.emit(event, data);
 	}.bind(this));
 
 	var getSystemData = function() {
@@ -67,9 +61,10 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 			if(error) {
 				this._logger.warn("PM2Listener", "Error retrieving system data", error.message);
 			} else {
-				data.name = pm2Interface.bind_host;
+				// only expose fields we are interested in
+				var systemData = this._mapSystemData(pm2Interface, data);
 
-				this.emit("systemData", data);
+				this.emit("systemData", systemData);
 			}
 
 			setTimeout(getSystemData, this._config.get("updateFrequency"));
@@ -78,6 +73,43 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 	getSystemData();
 
 	this._pm2List[pm2Interface.bind_host] = pm2Interface;
+}
+
+PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
+	var systemData = {
+		name: pm2Interface.bind_host,
+		system: {
+			hostname: data.system.hostname,
+			cpu_count: data.system.cpus.length,
+			load: [
+				data.system.load[0],
+				data.system.load[1],
+				data.system.load[2]
+			],
+			uptime: data.system.uptime,
+			memory: {
+				free: data.system.memory.free,
+				total: data.system.memory.total
+			}
+		},
+		processes: []
+	};
+
+	data.processes.forEach(function(process) {
+		systemData.processes.push({
+			id: process.pm_id,
+			pid: process.pid,
+			name: process.pm2_env.name,
+			script: process.pm2_env.pm_exec_path,
+			uptime: (Date.now() - process.pm2_env.pm_uptime) / 1000,
+			restarts: process.pm2_env.restart_time,
+			status: process.pm2_env.status,
+			memory: process.monit.memory,
+			cpu: process.monit.cpu
+		});
+	}.bind(this));
+
+	return systemData;
 }
 
 PM2Listener.prototype._pm2RPCSocketClosed = function(pm2Interface) {

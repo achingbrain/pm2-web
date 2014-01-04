@@ -8,10 +8,8 @@ var READYSTATE = {
 	CLOSED: 3
 };
 
-WebSocketResponder = function(socketUrl, hostList) {
+WebSocketResponder = function(socketUrl) {
 	EventEmitter.apply(this);
-
-	this._hostList = hostList;
 
 	console.info("WebSocketResponder", "Connecting to", socketUrl);
 
@@ -26,7 +24,7 @@ WebSocketResponder = function(socketUrl, hostList) {
 		var event = JSON.parse(message.data);
 
 		if(event && event.method && this[event.method]) {
-			this[event.method](event.data);
+			this[event.method].apply(this, event.args);
 		}
 	}.bind(this);
 	this._ws.onclose = function() {
@@ -50,8 +48,16 @@ WebSocketResponder.prototype.isOpen = function() {
 	return this._ws.readyState == READYSTATE.OPEN;
 };
 
-WebSocketResponder.prototype.systemData = function(data) {
-	this._hostList.addOrUpdate(data);
+WebSocketResponder.prototype.onSystemData = function(data) {
+	this.emit("systemData", data);
+};
+
+WebSocketResponder.prototype.onHosts = function(hosts) {
+	this.emit("hosts", hosts);
+}
+
+WebSocketResponder.prototype.onConfig = function(config) {
+	this.emit("config", config);
 };
 
 WebSocketResponder.prototype._send = function(message) {

@@ -41,6 +41,9 @@ PM2Web = function(options) {
 		port: config.get("ws:port")
 	});
 
+	// holds host data
+	this._container.createAndRegister("hostList", require(__dirname + "/components/ServerHostList"));
+
 	this._express = Express();
 
 	// all environments

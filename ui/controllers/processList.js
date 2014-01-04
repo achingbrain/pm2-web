@@ -24,6 +24,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 			webSocketResponder.stopProcess(hostData.name, pm_id);
 		};
 		$scope.restart = function(pm_id) {
+			console.info(hostData);
 			webSocketResponder.restartProcess(hostData.name, pm_id);
 		};
 	};

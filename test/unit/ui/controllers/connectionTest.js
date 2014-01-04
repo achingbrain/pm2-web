@@ -125,7 +125,7 @@ module.exports = {
 		this._controller(this._window, this._scope, this._location, this._webSocketResponder, this._hostList);
 
 		var onceCall = this._hostList.once.getCall(0);
-		onceCall.args[0].should.equal("newHost");
+		onceCall.args[0].should.equal("update");
 
 		var host = "bar";
 

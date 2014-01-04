@@ -20,6 +20,7 @@ module.exports = function(grunt) {
 			scripts: {
 				files: [
 					"./ui/**/*.js",
+					"./common/**/*.js",
 					"./server/public/css/*.less"
 				],
 				tasks: ["browserify", "less"],
