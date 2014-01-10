@@ -10,6 +10,8 @@ var WebSocketResponder = function() {
 }
 
 WebSocketResponder.prototype.afterPropertiesSet = function() {
+	var logger = this._logger;
+
 	this._webSocketServer.broadcast = function(data) {
 		var message = JSON.stringify(data);
 
@@ -17,7 +19,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 			try {
 				client.send(message);
 			} catch(e) {
-				this._logger.warn("WebSocketResponder", "Error broadcasing to client", e.message);
+				logger.warn("WebSocketResponder", "Error broadcasing to client", e.message);
 			}
 		}.bind(this));
 	};
@@ -47,7 +49,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		client.send(JSON.stringify({
 			method: "onHosts",
 			args: [
-				this._hostList.getData()
+				this._hostList.getHosts()
 			]
 		}));
 	}.bind(this));

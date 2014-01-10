@@ -1,53 +1,44 @@
 var Moment = require("moment");
 
-var ProcessData = function(config) {
-	this._config = config;
+var MILLISECONDS_IN_A_DAY = 86400000;
 
-	this._process = {};
-	this._memoryUsage = [];
-	this._cpuUsage = [];
-
-	Object.defineProperty(this, "usage", {
-		get: function() {
-			return {
-				cpu: this._cpuUsage,
-				memory: this._memoryUsage
-			}
-		}.bind(this)
+var ProcessData = function(config, data) {
+	Object.defineProperty(this, "_config", {
+		enumerable: false,
+		value: config
 	});
-}
 
-ProcessData.prototype.getData = function() {
-	var output = {};
+	this.usage = {
+		cpu: data.usage ? data.usage.cpu : [],
+		memory: data.usage ? data.usage.memory : []
+	};
 
-	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "usage"].forEach(function(key) {
-		output[key] = this[key];
-	}.bind(this));
-
-	return output;
+	this._map(data);
 }
 
 ProcessData.prototype.update = function(data, system) {
-	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu"].forEach(function(key) {
-		this[key] = data[key];
-	}.bind(this));
+	this._map(data);
 
 	this._append((data.memory / system.memory.free) * 100, data.cpu);
 }
 
+ProcessData.prototype._map = function(data) {
+	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu"].forEach(function(key) {
+		this[key] = data[key];
+	}.bind(this));
+}
+
 ProcessData.prototype._append = function(memory, cpu) {
-	this._memoryUsage = this._compressResourceUsage(this._memoryUsage);
-	this._cpuUsage = this._compressResourceUsage(this._cpuUsage);
+	this.usage.memory = this._compressResourceUsage(this.usage.memory);
+	this.usage.cpu = this._compressResourceUsage(this.usage.cpu);
 
-	var now = new Date();
-
-	this._memoryUsage.push({
-		x: now,
+	this.usage.memory.push({
+		x: Date.now(),
 		y: memory
 	});
 
-	this._cpuUsage.push({
-		x: now,
+	this.usage.cpu.push({
+		x: Date.now(),
 		y: cpu
 	});
 }
@@ -57,25 +48,28 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 	datapoints -= 1;
 
 	var distribution = this._config.get("graph:distribution");
-	var maxAgeInDays = distribution.length;
+	var maxAgeInDays = distribution.length * MILLISECONDS_IN_A_DAY;
 
 	if(data.length < datapoints) {
 		return data;
 	}
 
-	var now = new Date();
-	var cutoff = new Date(now);
-	cutoff.setDate(cutoff.getDate() - maxAgeInDays);
+	var now = Date.now();
+	var cutoff = Date.now() - maxAgeInDays;
 	var usage = [];
 
 	var days = [];
 	var day = [];
 
+	// group all data by day
 	data.forEach(function(datum) {
-		if(datum.date.getTime() < cutoff.getTime()) {
+		if(datum.x < cutoff) {
 			// ignore anything older than graph:maxAgeInDays
 			return;
 		}
+
+		// record date so we can easily compare days
+		datum.date = new Date(datum.x);
 
 		if(day[day.length - 1] && day[day.length - 1].date.getDate() != datum.date.getDate()) {
 			days.push(day);
@@ -85,6 +79,7 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 		}
 	});
 
+	// compress each days worth of data
 	days.forEach(function(day) {
 		var compressed = this._compressDay(day, now, datapoints, distribution);
 
@@ -99,7 +94,7 @@ ProcessData.prototype._compressDay = function(day, now, datapoints, distribution
 		return day;
 	}
 
-	var dayDifference = Math.floor((now.getTime() - day[day.length - 1].date.getTime()) / 86400000);
+	var dayDifference = Math.floor((now - day[day.length - 1].x) / MILLISECONDS_IN_A_DAY);
 
 	if(dayDifference > distribution.length) {
 		return [];
@@ -127,7 +122,7 @@ ProcessData.prototype._compress = function(dataSet, maxSamples) {
 			}
 
 			// might at some point overflow MAX_INT here. won't that be fun.
-			date += dataSet[offset + i].x.getTime();
+			date += dataSet[offset + i].x;
 
 			data += dataSet[offset + i].y;
 
@@ -137,7 +132,7 @@ ProcessData.prototype._compress = function(dataSet, maxSamples) {
 		offset += processed;
 
 		output.push({
-			x: new Date(date / processed),
+			x: date / processed,
 			y: data / processed
 		});
 

@@ -10,11 +10,11 @@ module.exports = {
 
 		};
 
-		this._hostList = {
-			addOrUpdate: sinon.spy()
+		this._rootScope = {
+			$apply: sinon.spy()
 		};
 
-		this._webSocketResponder = new WebSocketResponder(socketUrl, this._hostList);
+		this._webSocketResponder = new WebSocketResponder(socketUrl, this._rootScope);
 
 		done();
 	},
@@ -76,19 +76,17 @@ module.exports = {
 	},
 
 	"Should update system data": function(test) {
-		this._hostList.addOrUpdate.callCount.should.equal(0);
+		this._webSocketResponder.on("systemData", function() {
+			test.done();
+		});
 
-		this._webSocketResponder.systemData({});
-
-		this._hostList.addOrUpdate.callCount.should.equal(1);
-
-		test.done();
+		this._webSocketResponder.onSystemData({});
 	},
 
 	"Should parse message": function(test) {
 		var message = {
 			method: "test",
-			data: {}
+			args: []
 		};
 
 		this._webSocketResponder.test = function() {
@@ -96,6 +94,10 @@ module.exports = {
 		};
 
 		this._webSocketResponder._ws.onmessage({data: JSON.stringify(message)});
+		this._rootScope.$apply.callCount.should.equal(1);
+
+		var callback = this._rootScope.$apply.getCall(0).args[0];
+		callback();
 	},
 
 	"Should send message": function(test) {

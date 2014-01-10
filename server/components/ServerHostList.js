@@ -24,7 +24,6 @@ ServerHostList.prototype._onSystemData = function(data) {
 		this._hostData[data.name] = new HostData(data.name, this._config);
 	}
 
-	this._hostData[data.name].lastUpdated = new Date();
 	this._hostData[data.name].update(data);
 };
 
@@ -32,18 +31,18 @@ ServerHostList.prototype._hostPurge = function() {
 	var now = new Date();
 
 	Object.keys(this._hostData).forEach(function(key) {
-		if(now.getTime() - this._hostData[key].lastUpdated.getTime() > this._config.get("hostPurge:cutoff")) {
+		if(now.getTime() - this._hostData[key].lastUpdated > this._config.get("hostPurge:cutoff")) {
 			this._logger.info("HostList", key, "has gone away");
 			delete this._hostData[key];
 		}
 	}.bind(this));
 };
 
-ServerHostList.prototype.getData = function() {
+ServerHostList.prototype.getHosts = function() {
 	var output = [];
 
 	Object.keys(this._hostData).forEach(function(key) {
-		output.push(this._hostData[key].getData());
+		output.push(this._hostData[key]);
 	}.bind(this));
 
 	return output;

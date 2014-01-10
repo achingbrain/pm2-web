@@ -5,7 +5,7 @@
 	</li>
 </ul>
 <section class="system" ng-controller="SystemController">
-	<h2>{{system.hostname}}</h2>
+	<h2>{{hostData.system.hostname}}</h2>
 	<table class="table">
 		<thead>
 			<tr>
@@ -17,16 +17,16 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td>{{system.process_count}}</td>
-				<td>{{system.cpu_count}}</td>
-				<td><span ng-repeat="load in system.load track by $index">{{load | decimalPlaces:2}}</span></td>
-				<td>{{system.uptime | humanise}}</td>
+				<td>{{hostData.processes.length}}</td>
+				<td>{{hostData.system.cpu_count}}</td>
+				<td><span ng-repeat="load in hostData.system.load track by $index">{{load | decimalPlaces:2}}</span></td>
+				<td>{{hostData.system.uptime | humanise}}</td>
 			</tr>
 		</tbody>
 	</table>
 	<figure id="memory">
-		<figcaption>Memory ({{system.memory.total | memory}} total)</figcaption>
-		<div style="width: {{system.memory_free_percent}}%">{{system.memory.free | memory}} Free</div><div style="width: {{system.memory_used_percent}}%">{{system.memory.used | memory}} Used</div>
+		<figcaption>Memory ({{hostData.system.memory.total | memory}} total)</figcaption>
+		<div style="width: {{system.memory_free_percent}}%">{{hostData.system.memory.free | memory}} Free</div><div style="width: {{system.memory_used_percent}}%">{{hostData.system.memory.used | memory}} Used</div>
 	</figure>
 </section>
 <section class="processes" ng-controller="ProcessListController">

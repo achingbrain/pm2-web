@@ -8,7 +8,7 @@ var READYSTATE = {
 	CLOSED: 3
 };
 
-WebSocketResponder = function(socketUrl) {
+WebSocketResponder = function(socketUrl, $rootScope) {
 	EventEmitter.apply(this);
 
 	console.info("WebSocketResponder", "Connecting to", socketUrl);
@@ -24,7 +24,9 @@ WebSocketResponder = function(socketUrl) {
 		var event = JSON.parse(message.data);
 
 		if(event && event.method && this[event.method]) {
-			this[event.method].apply(this, event.args);
+			$rootScope.$apply(function() {
+				this[event.method].apply(this, event.args);
+			}.bind(this));
 		}
 	}.bind(this);
 	this._ws.onclose = function() {

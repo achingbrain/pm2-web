@@ -27,7 +27,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 	updateScope();
 
 	// redraw tabs when new host is found
-	hostList.once("newHost", function() {
-		$scope.$apply(updateScope);
+	hostList.on("newHost", function() {
+		updateScope();
 	});
 }];

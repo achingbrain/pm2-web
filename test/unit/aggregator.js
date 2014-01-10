@@ -1,10 +1,12 @@
 
 module.exports = {
+	"common": {
+		"ProcessData": require(__dirname + "/common/ProcessDataTest.js")
+	},
 	"server": {
 		"components": {
 			"PM2ArgumentParser": require(__dirname + "/server/components/PM2ArgumentParserTest.js"),
 			"PM2Listener": require(__dirname + "/server/components/PM2ListenerTest.js"),
-			"ProcessData": require(__dirname + "/server/components/ProcessDataTest.js"),
 			"WebSocketResponder": require(__dirname + "/server/components/WebSocketResponderTest.js")
 		}
 	},

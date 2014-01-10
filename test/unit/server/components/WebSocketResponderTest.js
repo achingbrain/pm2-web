@@ -24,6 +24,9 @@ module.exports = {
 			stopProcess: sinon.stub(),
 			restartProcess: sinon.stub()
 		};
+		this._responder._hostList = {
+			getHosts: sinon.stub()
+		};
 
 		done();
 	},
@@ -32,7 +35,8 @@ module.exports = {
 		this._responder.afterPropertiesSet();
 
 		var client = {
-			on: sinon.stub()
+			on: sinon.stub(),
+			send: sinon.stub()
 		};
 
 		this._responder._webSocketServer.on.getCall(0).args[0].should.equal("connection");
@@ -49,7 +53,7 @@ module.exports = {
 			args: [1]
 		};
 
-		this._responder[invocation.method] = function(num) {
+		this._responder[invocation.method] = function(client, num) {
 			num.should.equal(invocation.args[0]);
 
 			test.done();
@@ -78,17 +82,18 @@ module.exports = {
 		var message = this._responder._webSocketServer.clients[0].send.getCall(0).args[0];
 
 		var invocation = JSON.parse(message);
-		invocation.method.should.equal(event);
-		invocation.data.bar.should.equal(data.bar);
+		invocation.method.should.equal("onFoo");
+		invocation.args[0].bar.should.equal(data.bar);
 
 		test.done();
 	},
 
 	"Should start a process": function(test) {
+		var client = "localhost";
 		var host = "foo";
 		var pid = 10;
 
-		this._responder.startProcess(host, pid);
+		this._responder.startProcess(client, host, pid);
 
 		this._responder._pm2Listener.startProcess.callCount.should.equal(1);
 		this._responder._pm2Listener.startProcess.getCall(0).args[0].should.equal(host);
@@ -98,10 +103,11 @@ module.exports = {
 	},
 
 	"Should stop a process": function(test) {
+		var client = "localhost";
 		var host = "foo";
 		var pid = 10;
 
-		this._responder.stopProcess(host, pid);
+		this._responder.stopProcess(client, host, pid);
 
 		this._responder._pm2Listener.stopProcess.callCount.should.equal(1);
 		this._responder._pm2Listener.stopProcess.getCall(0).args[0].should.equal(host);
@@ -111,10 +117,11 @@ module.exports = {
 	},
 
 	"Should restart a process": function(test) {
+		var client = "localhost";
 		var host = "foo";
 		var pid = 10;
 
-		this._responder.restartProcess(host, pid);
+		this._responder.restartProcess(client, host, pid);
 
 		this._responder._pm2Listener.restartProcess.callCount.should.equal(1);
 		this._responder._pm2Listener.restartProcess.getCall(0).args[0].should.equal(host);

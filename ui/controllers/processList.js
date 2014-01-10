@@ -33,7 +33,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 	hostList.on("update", function(hostName) {
 		// only update scope if the update was for our host
 		if(hostName == $routeParams.host) {
-			$scope.$apply(updateScope);
+			updateScope();
 		}
 	});
 }];

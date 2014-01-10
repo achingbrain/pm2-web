@@ -13,7 +13,8 @@ module.exports = {
 		};
 		this._hostList = {
 			hosts: sinon.stub(),
-			once: sinon.stub()
+			once: sinon.stub(),
+			on: sinon.stub()
 		}
 
 		this._controller = hostList[hostList.length - 1];
@@ -65,15 +66,18 @@ module.exports = {
 	"Should update host list when new host is discovered": function(test) {
 		this._hostList.hosts.returns([]);
 
+		this._hostList.hosts.callCount.should.equal(0);
+
 		this._controller(this._scope, this._routeParams, this._location, this._hostList);
 
-		this._hostList.once.getCall(0).args[0].should.equal("newHost");
+		this._hostList.hosts.callCount.should.equal(1);
 
-		this._scope.$apply.callCount.should.equal(0);
+		this._hostList.on.getCall(0).args[0].should.equal("newHost");
 
-		this._hostList.once.getCall(0).args[1]();
+		this._hostList.on.getCall(0).args[1]();
 
-		this._scope.$apply.callCount.should.equal(1);
+		// should have retrieved host list again
+		this._hostList.hosts.callCount.should.equal(2);
 
 		test.done();
 	}

@@ -16,8 +16,8 @@ pm2Web.config(require("./routes"));
 pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, webSocketResponder) {
 	return new HostList(config, webSocketResponder);
 }]);
-pm2Web.factory("webSocketResponder", ["$window", function($window) {
-	return new WebSocketResponder($window.settings.ws);
+pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
+	return new WebSocketResponder($window.settings.ws, $rootScope);
 }]);
 pm2Web.factory("xChart", [function() {
 	return xChart;

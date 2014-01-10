@@ -132,11 +132,6 @@ module.exports = {
 		// invoke newHost callback
 		onceCall.args[1](host);
 
-		var applyCall = this._scope.$apply.getCall(0);
-
-		// invoke apply callback
-		applyCall.args[0]();
-
 		this._location.path.callCount.should.equal(1);
 
 		this._location.path.getCall(0).args[0].should.equal("/hosts/" + host);

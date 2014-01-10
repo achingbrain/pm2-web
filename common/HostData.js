@@ -1,82 +1,68 @@
 var ProcessData = require("./ProcessData");
 
 var HostData = function(name, config) {
-	this._config = config;
+	Object.defineProperty(this, "_config", {
+		enumerable: false,
+		value: config
+	});
+
 	this.name = name;
-	this._processes = {};
-
-	Object.defineProperty(this, "processes", {
-		get: function() {
-			return this._processes
-		}.bind(this)
-	});
-	Object.defineProperty(this, "process_count", {
-		get: function() {
-			return Object.keys(this._processes).length;
-		}.bind(this)
-	});
-};
-
-HostData.prototype.getData = function() {
-	var output = {
-		name: this.name,
-		system: {},
-		processes: []
-	};
-
-	["name", "hostname", "cpu_count", "uptime", "load", "memory"].forEach(function(key) {
-		output.system[key] = this[key]
-	}.bind(this));
-
-	Object.keys(this._processes).forEach(function(key) {
-		output.processes.push(this._processes[key].getData());
-	}.bind(this));
-
-	return output;
+	this.system = {};
+	this.processes = [];
 };
 
 HostData.prototype.update = function(data) {
+	this.lastUpdated = Date.now();
+
 	["hostname", "cpu_count", "uptime"].forEach(function(key) {
-		this[key] = data.system[key]
+		this.system[key] = data.system[key]
 	}.bind(this));
 
-	this.load = [
+	this.system.load = [
 		data.system.load[0],
 		data.system.load[1],
 		data.system.load[2]
 	];
-	this.memory = {
+	this.system.memory = {
 		free: data.system.memory.free,
 		total: data.system.memory.total,
 		used: data.system.memory.total - data.system.memory.free
 	};
 
-	this._removeMissingProcesses(data);
+	this._removeMissingProcesses(data.processes);
 
-	data.processes.forEach(function(process) {
-		if(!this._processes[process.name]) {
-			this._processes[process.name] = new ProcessData(this._config);
+	data.processes.forEach(function(reportedProcess) {
+		var existingProcess = this.findProcess(reportedProcess.name);
+
+		if(!existingProcess) {
+			existingProcess = new ProcessData(this._config, reportedProcess);
+			this.processes.push(existingProcess);
 		}
 
-		this._processes[process.name].update(process, data.system);
+		existingProcess.update(reportedProcess, data.system);
 	}.bind(this));
 };
 
-HostData.prototype._removeMissingProcesses = function(data) {
-	for(var i = 0; i < this._processes.length; i++) {
-		var found = false;
-
-		for(var k = 0; k < data.processes.length; k++) {
-			if(data.processes[k].pm2_env.name == this._processes[i].name) {
-				found = true;
+HostData.prototype._removeMissingProcesses = function(reportedProcesses) {
+	this.processes = this.processes.filter(function(existingProcess) {
+		for(var i = 0; i < reportedProcesses.length; i++) {
+			if(reportedProcesses[i].name == existingProcess.name) {
+				return true;
 			}
 		}
 
-		if(!found) {
-			this._processes.splice(i, 1);
-			i--;
+		return false;
+	});
+};
+
+HostData.prototype.findProcess = function(name) {
+	for(var i = 0; i < this.processes.length; i++) {
+		if(this.processes[i].name == name) {
+			return this.processes[i];
 		}
 	}
-};
+
+	return null;
+}
 
 module.exports = HostData;

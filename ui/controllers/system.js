@@ -7,14 +7,14 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 			return $location.path("/");
 		}
 
-		$scope.system = hostData;
+		$scope.hostData = hostData;
 	};
 	updateScope();
 
 	hostList.on("update", function(hostName) {
 		// only update scope if the update was for our host
 		if(hostName == $routeParams.host) {
-			$scope.$apply(updateScope);
+			updateScope();
 		}
 	});
 }];

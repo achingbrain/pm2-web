@@ -107,11 +107,22 @@ module.exports = {
 
 		this._listener._pm2RPCSocketReady(remote);
 
-		var systemData = {};
+		var systemData = {
+			system: {
+				hostname: "foo",
+				cpus: [0],
+				load: [0, 0, 0],
+				memory: {
+					free: 0,
+					total: 0
+				}
+			},
+			processes: []
+		};
 
 		this._listener.once("systemData", function(data) {
 			remote.bind_host.should.equal(data.name);
-			systemData.should.equal(data);
+			systemData.system.hostname.should.equal(data.system.hostname);
 
 			test.done();
 		});
@@ -140,7 +151,7 @@ module.exports = {
 		};
 
 		this._listener.once(event, function(host) {
-			data.pm2_env.name.should.equal(host);
+			data.pm2_env.name.should.equal(host.pm2_env.name);
 
 			test.done();
 		});
@@ -167,7 +178,7 @@ module.exports = {
 		};
 
 		this._listener.once(event, function(host) {
-			data.name.should.equal(host);
+			data.name.should.equal(host.name);
 
 			test.done();
 		});

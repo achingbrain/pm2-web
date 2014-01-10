@@ -30,7 +30,7 @@ module.exports = {
 
 		this._controller(this._scope, this._routeParams, this._location, this._hostList);
 
-		this._scope.system.should.equal(hostData.system);
+		this._scope.hostData.system.should.equal(hostData.system);
 
 		test.done();
 	},
@@ -52,15 +52,17 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
+		this._hostList.find.callCount.should.equal(0);
+
 		this._controller(this._scope, this._routeParams, this._location, this._hostList);
 
-		this._scope.$apply.callCount.should.equal(0);
+		this._hostList.find.callCount.should.equal(1);
 
 		this._hostList.on.callCount.should.equal(1);
 		this._hostList.on.getCall(0).args[0].should.equal("update");
 		this._hostList.on.getCall(0).args[1](hostData.name);
 
-		this._scope.$apply.callCount.should.equal(1);
+		this._hostList.find.callCount.should.equal(2);
 
 		test.done();
 	},
@@ -73,13 +75,17 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
+		this._hostList.find.callCount.should.equal(0);
+
 		this._controller(this._scope, this._routeParams, this._location, this._hostList);
+
+		this._hostList.find.callCount.should.equal(1);
 
 		this._hostList.on.callCount.should.equal(1);
 		this._hostList.on.getCall(0).args[0].should.equal("update");
 		this._hostList.on.getCall(0).args[1]("bar");
 
-		this._scope.$apply.callCount.should.equal(0);
+		this._hostList.find.callCount.should.equal(1);
 
 		test.done();
 	}

@@ -2,136 +2,113 @@
 var ProcessData = require("./ProcessData");
 
 var HostData = function(name, config) {
-	this._config = config;
+	Object.defineProperty(this, "_config", {
+		enumerable: false,
+		value: config
+	});
+
 	this.name = name;
-	this._processes = {};
-
-	Object.defineProperty(this, "processes", {
-		get: function() {
-			return this._processes
-		}.bind(this)
-	});
-	Object.defineProperty(this, "process_count", {
-		get: function() {
-			return Object.keys(this._processes).length;
-		}.bind(this)
-	});
-};
-
-HostData.prototype.getData = function() {
-	var output = {
-		name: this.name,
-		system: {},
-		processes: []
-	};
-
-	["name", "hostname", "cpu_count", "uptime", "load", "memory"].forEach(function(key) {
-		output.system[key] = this[key]
-	}.bind(this));
-
-	Object.keys(this._processes).forEach(function(key) {
-		output.processes.push(this._processes[key].getData());
-	}.bind(this));
-
-	return output;
+	this.system = {};
+	this.processes = [];
 };
 
 HostData.prototype.update = function(data) {
+	this.lastUpdated = Date.now();
+
 	["hostname", "cpu_count", "uptime"].forEach(function(key) {
-		this[key] = data.system[key]
+		this.system[key] = data.system[key]
 	}.bind(this));
 
-	this.load = [
+	this.system.load = [
 		data.system.load[0],
 		data.system.load[1],
 		data.system.load[2]
 	];
-	this.memory = {
+	this.system.memory = {
 		free: data.system.memory.free,
 		total: data.system.memory.total,
 		used: data.system.memory.total - data.system.memory.free
 	};
 
-	this._removeMissingProcesses(data);
+	this._removeMissingProcesses(data.processes);
 
-	data.processes.forEach(function(process) {
-		if(!this._processes[process.name]) {
-			this._processes[process.name] = new ProcessData(this._config);
+	data.processes.forEach(function(reportedProcess) {
+		var existingProcess = this.findProcess(reportedProcess.name);
+
+		if(!existingProcess) {
+			existingProcess = new ProcessData(this._config, reportedProcess);
+			this.processes.push(existingProcess);
 		}
 
-		this._processes[process.name].update(process, data.system);
+		existingProcess.update(reportedProcess, data.system);
 	}.bind(this));
 };
 
-HostData.prototype._removeMissingProcesses = function(data) {
-	for(var i = 0; i < this._processes.length; i++) {
-		var found = false;
-
-		for(var k = 0; k < data.processes.length; k++) {
-			if(data.processes[k].pm2_env.name == this._processes[i].name) {
-				found = true;
+HostData.prototype._removeMissingProcesses = function(reportedProcesses) {
+	this.processes = this.processes.filter(function(existingProcess) {
+		for(var i = 0; i < reportedProcesses.length; i++) {
+			if(reportedProcesses[i].name == existingProcess.name) {
+				return true;
 			}
 		}
 
-		if(!found) {
-			this._processes.splice(i, 1);
-			i--;
+		return false;
+	});
+};
+
+HostData.prototype.findProcess = function(name) {
+	for(var i = 0; i < this.processes.length; i++) {
+		if(this.processes[i].name == name) {
+			return this.processes[i];
 		}
 	}
-};
+
+	return null;
+}
 
 module.exports = HostData;
 },{"./ProcessData":2}],2:[function(require,module,exports){
 var Moment = require("moment");
 
-var ProcessData = function(config) {
-	this._config = config;
+var MILLISECONDS_IN_A_DAY = 86400000;
 
-	this._process = {};
-	this._memoryUsage = [];
-	this._cpuUsage = [];
-
-	Object.defineProperty(this, "usage", {
-		get: function() {
-			return {
-				cpu: this._cpuUsage,
-				memory: this._memoryUsage
-			}
-		}.bind(this)
+var ProcessData = function(config, data) {
+	Object.defineProperty(this, "_config", {
+		enumerable: false,
+		value: config
 	});
-}
 
-ProcessData.prototype.getData = function() {
-	var output = {};
+	this.usage = {
+		cpu: data.usage ? data.usage.cpu : [],
+		memory: data.usage ? data.usage.memory : []
+	};
 
-	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "usage"].forEach(function(key) {
-		output[key] = this[key];
-	}.bind(this));
-
-	return output;
+	this._map(data);
 }
 
 ProcessData.prototype.update = function(data, system) {
-	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu"].forEach(function(key) {
-		this[key] = data[key];
-	}.bind(this));
+	this._map(data);
 
 	this._append((data.memory / system.memory.free) * 100, data.cpu);
 }
 
+ProcessData.prototype._map = function(data) {
+	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu"].forEach(function(key) {
+		this[key] = data[key];
+	}.bind(this));
+}
+
 ProcessData.prototype._append = function(memory, cpu) {
-	this._memoryUsage = this._compressResourceUsage(this._memoryUsage);
-	this._cpuUsage = this._compressResourceUsage(this._cpuUsage);
+	this.usage.memory = this._compressResourceUsage(this.usage.memory);
+	this.usage.cpu = this._compressResourceUsage(this.usage.cpu);
 
-	var now = new Date();
-
-	this._memoryUsage.push({
-		x: now,
+	this.usage.memory.push({
+		x: Date.now(),
 		y: memory
 	});
 
-	this._cpuUsage.push({
-		x: now,
+	this.usage.cpu.push({
+		x: Date.now(),
 		y: cpu
 	});
 }
@@ -141,25 +118,28 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 	datapoints -= 1;
 
 	var distribution = this._config.get("graph:distribution");
-	var maxAgeInDays = distribution.length;
+	var maxAgeInDays = distribution.length * MILLISECONDS_IN_A_DAY;
 
 	if(data.length < datapoints) {
 		return data;
 	}
 
-	var now = new Date();
-	var cutoff = new Date(now);
-	cutoff.setDate(cutoff.getDate() - maxAgeInDays);
+	var now = Date.now();
+	var cutoff = Date.now() - maxAgeInDays;
 	var usage = [];
 
 	var days = [];
 	var day = [];
 
+	// group all data by day
 	data.forEach(function(datum) {
-		if(datum.date.getTime() < cutoff.getTime()) {
+		if(datum.x < cutoff) {
 			// ignore anything older than graph:maxAgeInDays
 			return;
 		}
+
+		// record date so we can easily compare days
+		datum.date = new Date(datum.x);
 
 		if(day[day.length - 1] && day[day.length - 1].date.getDate() != datum.date.getDate()) {
 			days.push(day);
@@ -169,6 +149,7 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 		}
 	});
 
+	// compress each days worth of data
 	days.forEach(function(day) {
 		var compressed = this._compressDay(day, now, datapoints, distribution);
 
@@ -183,7 +164,7 @@ ProcessData.prototype._compressDay = function(day, now, datapoints, distribution
 		return day;
 	}
 
-	var dayDifference = Math.floor((now.getTime() - day[day.length - 1].date.getTime()) / 86400000);
+	var dayDifference = Math.floor((now - day[day.length - 1].x) / MILLISECONDS_IN_A_DAY);
 
 	if(dayDifference > distribution.length) {
 		return [];
@@ -211,7 +192,7 @@ ProcessData.prototype._compress = function(dataSet, maxSamples) {
 			}
 
 			// might at some point overflow MAX_INT here. won't that be fun.
-			date += dataSet[offset + i].x.getTime();
+			date += dataSet[offset + i].x;
 
 			data += dataSet[offset + i].y;
 
@@ -221,7 +202,7 @@ ProcessData.prototype._compress = function(dataSet, maxSamples) {
 		offset += processed;
 
 		output.push({
-			x: new Date(date / processed),
+			x: date / processed,
 			y: data / processed
 		});
 
@@ -15473,7 +15454,7 @@ var READYSTATE = {
 	CLOSED: 3
 };
 
-WebSocketResponder = function(socketUrl) {
+WebSocketResponder = function(socketUrl, $rootScope) {
 	EventEmitter.apply(this);
 
 	console.info("WebSocketResponder", "Connecting to", socketUrl);
@@ -15489,7 +15470,9 @@ WebSocketResponder = function(socketUrl) {
 		var event = JSON.parse(message.data);
 
 		if(event && event.method && this[event.method]) {
-			this[event.method].apply(this, event.args);
+			$rootScope.$apply(function() {
+				this[event.method].apply(this, event.args);
+			}.bind(this));
 		}
 	}.bind(this);
 	this._ws.onclose = function() {
@@ -15613,9 +15596,7 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 	});
 
 	hostList.once("update", function(host) {
-		$scope.$apply(function() {
-			$location.path("/hosts/" + host);
-		});
+		$location.path("/hosts/" + host);
 	});
 }];
 
@@ -15649,8 +15630,8 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 	updateScope();
 
 	// redraw tabs when new host is found
-	hostList.once("newHost", function() {
-		$scope.$apply(updateScope);
+	hostList.on("newHost", function() {
+		updateScope();
 	});
 }];
 
@@ -15690,7 +15671,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 	hostList.on("update", function(hostName) {
 		// only update scope if the update was for our host
 		if(hostName == $routeParams.host) {
-			$scope.$apply(updateScope);
+			updateScope();
 		}
 	});
 }];
@@ -15705,14 +15686,14 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 			return $location.path("/");
 		}
 
-		$scope.system = hostData;
+		$scope.hostData = hostData;
 	};
 	updateScope();
 
 	hostList.on("update", function(hostName) {
 		// only update scope if the update was for our host
 		if(hostName == $routeParams.host) {
-			$scope.$apply(updateScope);
+			updateScope();
 		}
 	});
 }];
@@ -15823,8 +15804,8 @@ pm2Web.config(require("./routes"));
 pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, webSocketResponder) {
 	return new HostList(config, webSocketResponder);
 }]);
-pm2Web.factory("webSocketResponder", ["$window", function($window) {
-	return new WebSocketResponder($window.settings.ws);
+pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
+	return new WebSocketResponder($window.settings.ws, $rootScope);
 }]);
 pm2Web.factory("xChart", [function() {
 	return xChart;
