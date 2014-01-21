@@ -1,17 +1,20 @@
 
 module.exports = {
 	"common": {
-		"ProcessData": require(__dirname + "/common/ProcessDataTest.js")
+		"ProcessData": require(__dirname + "/common/ProcessDataTest.js"),
+		"HostData": require(__dirname + "/common/HostDataTest.js")
 	},
 	"server": {
 		"components": {
 			"PM2ArgumentParser": require(__dirname + "/server/components/PM2ArgumentParserTest.js"),
 			"PM2Listener": require(__dirname + "/server/components/PM2ListenerTest.js"),
+			"ServerHostList": require(__dirname + "/server/components/ServerHostListTest.js"),
 			"WebSocketResponder": require(__dirname + "/server/components/WebSocketResponderTest.js")
 		}
 	},
 	"ui": {
 		"components": {
+			"Config": require(__dirname + "/ui/components/ConfigTest.js"),
 			"HostList": require(__dirname + "/ui/components/HostListTest.js"),
 			"WebSocketResponder": require(__dirname + "/ui/components/WebSocketResponderTest.js")
 		},

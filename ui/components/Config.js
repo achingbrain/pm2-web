@@ -13,7 +13,7 @@ Config.prototype.get = function(key) {
 	var value = this._config;
 
 	key.split(":").forEach(function(property) {
-		if(typeof(property) != "undefined") {
+		if(typeof(value[property]) != "undefined") {
 			value = value[property];
 		} else {
 			value = null;

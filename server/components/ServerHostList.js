@@ -28,10 +28,10 @@ ServerHostList.prototype._onSystemData = function(data) {
 };
 
 ServerHostList.prototype._hostPurge = function() {
-	var now = new Date();
+	var now = Date.now();
 
 	Object.keys(this._hostData).forEach(function(key) {
-		if(now.getTime() - this._hostData[key].lastUpdated > this._config.get("hostPurge:cutoff")) {
+		if(now - this._hostData[key].lastUpdated > this._config.get("hostPurge:cutoff")) {
 			this._logger.info("HostList", key, "has gone away");
 			delete this._hostData[key];
 		}

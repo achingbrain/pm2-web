@@ -15379,7 +15379,7 @@ Config.prototype.get = function(key) {
 	var value = this._config;
 
 	key.split(":").forEach(function(property) {
-		if(typeof(property) != "undefined") {
+		if(typeof(value[property]) != "undefined") {
 			value = value[property];
 		} else {
 			value = null;
@@ -15390,6 +15390,7 @@ Config.prototype.get = function(key) {
 }
 
 module.exports = Config;
+
 },{}],24:[function(require,module,exports){
 var EventEmitter = require("wildemitter"),
 	util = require("util"),
