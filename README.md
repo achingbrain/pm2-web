@@ -55,6 +55,28 @@ And with multiple hosts like so:
 $ pm2-web --pm2.host localhost --pm2.rpc 6666 --pm2.events 6667 --pm2.host another.host --pm2.rpc 6666 --pm2.events 6667
 ```
 
+### Resource usage graphs
+
+You can tweak the resource usage graph to be more or less specific.  The thinking here is that lots of processes with lots of process usage data will make your browser a bit crashey.
+
+By default it will retain 1000 resource usage measurements of a process (CPU and memory) over a maximum of five days with 40% of the measurements taken in the last 24 hours, 25% from the day before, 10% each from the two days before that and 5% from the day before that.
+
+The update frequency of the graph is controlled by `--updateFrequency` as detailed above.
+
+```
+--graph.datapoints 1000
+```
+
+The number of data points that will be plotted on the graph in total.  If you've got a lot of processes, you may wish to set this to a lowish number to minimise memory consumption in your browser and the pm2-web process itself.
+
+```
+--graph.distribution 40 --graph.distribution 25 --graph.distribution 10 --graph.distribution 10 --graph.distribution 5
+```
+
+The number of `--graph.distribution` arguments is the number of days worth of data to graph (default 5) and the value is what percentage of `--graph.datapoints` should be plotted on a given day (the first `--graph.distribution` argument is today, the second is yesterday, etc).
+
+What this means is that any recent resource usage data will have a more accurate representation in the graph at the cost of consuming more memory and older data will be less accurate but also less likely to crash your browser.
+
 ## Credits
 
 Code by [achingbrain](http://github.com/achingbrain), originally based on work done by [dunxrion](https://github.com/dunxrion).
