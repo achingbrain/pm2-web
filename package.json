@@ -15,35 +15,35 @@
 	},
 	"dependencies": {
 		"express": "~3.4",
-		"jade": "~0.35",
+		"jade": "~1.1",
 		"winston": "~0.7",
 		"underscore.string": "~2.3",
 		"nconf": "~0.6",
 		"wantsit": "1.0",
-		"pm2-interface": "~0.0",
+		"pm2-interface": "~0.1",
 		"ws": "~0.4",
 		"defaults": "~1.0",
-		"wildemitter": "~0.0",
+		"wildemitter": "~1.0",
 
 		"zepto-browserify": "~1.0",
 		"browserify-xcharts": "~0.3",
-		"moment": "~2.4",
+		"moment": "~2.5",
 		"mustache": "~0.8",
-		"d3": "~3.3"
+		"d3": "~3.4"
 	},
 	"optionalDependencies": {
 		"mdns2": "~2.1.0"
 	},
 	"devDependencies": {
-		"grunt-browserify": "~1.2",
+		"grunt-browserify": "~1.3",
 		"grunt-contrib-watch": "~0.5",
-		"grunt-contrib-less": "~0.8",
+		"grunt-contrib-less": "~0.9",
 		"nodeunit": "~0.8",
-		"should": "~2.1",
+		"should": "~3.0",
 		"sinon": "~1.7",
-		"istanbul": "~0.1",
+		"istanbul": "~0.2",
 		"coveralls": "~2.6",
-		"protractor": "~0.14"
+		"protractor": "~0.16"
 	},
 	"preferGlobal": "true",
 	"bin": {

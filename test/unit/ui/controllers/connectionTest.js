@@ -31,7 +31,7 @@ module.exports = {
 
 		this._scope.alerts.length.should.equal(1);
 		this._scope.alerts[0].type.should.equal("error");
-		this._scope.alerts[0].message.should.contain("sockets");
+		this._scope.alerts[0].message.should.containEql("sockets");
 
 		test.done();
 	},
@@ -56,7 +56,7 @@ module.exports = {
 
 		this._scope.alerts.length.should.equal(1);
 		this._scope.alerts[0].type.should.equal("info");
-		this._scope.alerts[0].message.should.contain(this._window.settings.ws);
+		this._scope.alerts[0].message.should.containEql(this._window.settings.ws);
 
 		test.done();
 	},
@@ -81,7 +81,7 @@ module.exports = {
 
 		this._scope.alerts.length.should.equal(1);
 		this._scope.alerts[0].type.should.equal("success");
-		this._scope.alerts[0].message.should.contain("Waiting");
+		this._scope.alerts[0].message.should.containEql("Waiting");
 
 		test.done();
 	},
@@ -112,7 +112,7 @@ module.exports = {
 
 		this._scope.alerts.length.should.equal(1);
 		this._scope.alerts[0].type.should.equal("error");
-		this._scope.alerts[0].message.should.contain("error");
+		this._scope.alerts[0].message.should.containEql("error");
 
 		test.done();
 	},

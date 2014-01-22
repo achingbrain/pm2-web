@@ -41,11 +41,15 @@ UIHostList.prototype.update = function(data) {
 };
 
 UIHostList.prototype.find = function(host) {
-	return this._hosts[host];
+	var result = this._hosts[host];
+
+	return result ? result : null;
 };
 
 UIHostList.prototype.hosts = function() {
-	return Object.keys(this._hosts);
+	var result = Object.keys(this._hosts);
+
+	return result ? result : null;
 };
 
 module.exports = UIHostList;
