@@ -66,6 +66,16 @@ HostData.prototype.findProcess = function(name) {
 	return null;
 }
 
+HostData.prototype.findProcessById = function(id) {
+	for(var i = 0; i < this.processes.length; i++) {
+		if(this.processes[i].id == id) {
+			return this.processes[i];
+		}
+	}
+
+	return null;
+}
+
 module.exports = HostData;
 },{"./ProcessData":2}],2:[function(require,module,exports){
 var Moment = require("moment");
@@ -83,6 +93,8 @@ var ProcessData = function(config, data) {
 		memory: data.usage ? data.usage.memory : []
 	};
 
+	this.logs = [];
+
 	this._map(data);
 }
 
@@ -90,6 +102,14 @@ ProcessData.prototype.update = function(data, system) {
 	this._map(data);
 
 	this._append((data.memory / system.memory.free) * 100, data.cpu);
+}
+
+ProcessData.prototype.log = function(type, date, data) {
+	this.logs.push({
+		type: type,
+		date: date,
+		data: data
+	});
 }
 
 ProcessData.prototype._map = function(data) {
@@ -21560,7 +21580,8 @@ process.nextTick = (function () {
     if (canPost) {
         var queue = [];
         window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
                 ev.stopPropagation();
                 if (queue.length > 0) {
                     var fn = queue.shift();
@@ -22192,7 +22213,7 @@ function hasOwnProperty(obj, prop) {
 
 },{"./support/isBuffer":20,"__browserify_process":19,"inherits":18}],22:[function(require,module,exports){
 //! moment.js
-//! version : 2.5.0
+//! version : 2.5.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -22204,7 +22225,7 @@ function hasOwnProperty(obj, prop) {
     ************************************/
 
     var moment,
-        VERSION = "2.5.0",
+        VERSION = "2.5.1",
         global = this,
         round = Math.round,
         i,
@@ -22219,6 +22240,19 @@ function hasOwnProperty(obj, prop) {
 
         // internal storage for language config files
         languages = {},
+
+        // moment internal properties
+        momentProperties = {
+            _isAMomentObject: null,
+            _i : null,
+            _f : null,
+            _l : null,
+            _strict : null,
+            _isUTC : null,
+            _offset : null,  // optional. Combine with _isUTC
+            _pf : null,
+            _lang : null  // optional
+        },
 
         // check for nodeJS
         hasModule = (typeof module !== 'undefined' && module.exports && typeof require !== 'undefined'),
@@ -22251,19 +22285,21 @@ function hasOwnProperty(obj, prop) {
         parseTokenTwoDigits = /\d\d/, // 00 - 99
         parseTokenThreeDigits = /\d{3}/, // 000 - 999
         parseTokenFourDigits = /\d{4}/, // 0000 - 9999
-        parseTokenSixDigits = /[+\-]?\d{6}/, // -999,999 - 999,999
+        parseTokenSixDigits = /[+-]?\d{6}/, // -999,999 - 999,999
+        parseTokenSignedNumber = /[+-]?\d+/, // -inf - inf
 
         // iso 8601 regex
         // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
-        isoRegex = /^\s*\d{4}-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
+        isoRegex = /^\s*(?:[+-]\d{6}|\d{4})-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
 
         isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
 
         isoDates = [
-            'YYYY-MM-DD',
-            'GGGG-[W]WW',
-            'GGGG-[W]WW-E',
-            'YYYY-DDD'
+            ['YYYYYY-MM-DD', /[+-]\d{6}-\d{2}-\d{2}/],
+            ['YYYY-MM-DD', /\d{4}-\d{2}-\d{2}/],
+            ['GGGG-[W]WW-E', /\d{4}-W\d{2}-\d/],
+            ['GGGG-[W]WW', /\d{4}-W\d{2}/],
+            ['YYYY-DDD', /\d{4}-\d{3}/]
         ],
 
         // iso time formats and regexes
@@ -22373,7 +22409,7 @@ function hasOwnProperty(obj, prop) {
                 return leftZeroFill(this.weekYear() % 100, 2);
             },
             gggg : function () {
-                return this.weekYear();
+                return leftZeroFill(this.weekYear(), 4);
             },
             ggggg : function () {
                 return leftZeroFill(this.weekYear(), 5);
@@ -22382,7 +22418,7 @@ function hasOwnProperty(obj, prop) {
                 return leftZeroFill(this.isoWeekYear() % 100, 2);
             },
             GGGG : function () {
-                return this.isoWeekYear();
+                return leftZeroFill(this.isoWeekYear(), 4);
             },
             GGGGG : function () {
                 return leftZeroFill(this.isoWeekYear(), 5);
@@ -22456,6 +22492,23 @@ function hasOwnProperty(obj, prop) {
         },
 
         lists = ['months', 'monthsShort', 'weekdays', 'weekdaysShort', 'weekdaysMin'];
+
+    function defaultParsingFlags() {
+        // We need to deep clone this object, and es5 standard is not very
+        // helpful.
+        return {
+            empty : false,
+            unusedTokens : [],
+            unusedInput : [],
+            overflow : -2,
+            charsLeftOver : 0,
+            nullInput : false,
+            invalidMonth : null,
+            invalidFormat : false,
+            userInvalidated : false,
+            iso: false
+        };
+    }
 
     function padToken(func, count) {
         return function (a) {
@@ -22548,6 +22601,17 @@ function hasOwnProperty(obj, prop) {
         return a;
     }
 
+    function cloneMoment(m) {
+        var result = {}, i;
+        for (i in m) {
+            if (m.hasOwnProperty(i) && momentProperties.hasOwnProperty(i)) {
+                result[i] = m[i];
+            }
+        }
+
+        return result;
+    }
+
     function absRound(number) {
         if (number < 0) {
             return Math.ceil(number);
@@ -22559,7 +22623,7 @@ function hasOwnProperty(obj, prop) {
     // left zero fill a number
     // see http://jsperf.com/left-zero-filling for performance comparison
     function leftZeroFill(number, targetLength, forceSign) {
-        var output = Math.abs(number) + '',
+        var output = '' + Math.abs(number),
             sign = number >= 0;
 
         while (output.length < targetLength) {
@@ -22737,21 +22801,6 @@ function hasOwnProperty(obj, prop) {
 
             m._pf.overflow = overflow;
         }
-    }
-
-    function initializeParsingFlags(config) {
-        config._pf = {
-            empty : false,
-            unusedTokens : [],
-            unusedInput : [],
-            overflow : -2,
-            charsLeftOver : 0,
-            nullInput : false,
-            invalidMonth : null,
-            invalidFormat : false,
-            userInvalidated : false,
-            iso: false
-        };
     }
 
     function isValid(m) {
@@ -23122,6 +23171,10 @@ function hasOwnProperty(obj, prop) {
         case 'GGGG':
         case 'gggg':
             return strict ? parseTokenFourDigits : parseTokenOneToFourDigits;
+        case 'Y':
+        case 'G':
+        case 'g':
+            return parseTokenSignedNumber;
         case 'YYYYYY':
         case 'YYYYY':
         case 'GGGGG':
@@ -23134,8 +23187,10 @@ function hasOwnProperty(obj, prop) {
             if (strict) { return parseTokenTwoDigits; }
             /* falls through */
         case 'SSS':
+            if (strict) { return parseTokenThreeDigits; }
+            /* falls through */
         case 'DDD':
-            return strict ? parseTokenThreeDigits : parseTokenOneToThreeDigits;
+            return parseTokenOneToThreeDigits;
         case 'MMM':
         case 'MMMM':
         case 'dd':
@@ -23177,7 +23232,7 @@ function hasOwnProperty(obj, prop) {
         case 'W':
         case 'e':
         case 'E':
-            return strict ? parseTokenOneDigit : parseTokenOneOrTwoDigits;
+            return parseTokenOneOrTwoDigits;
         default :
             a = new RegExp(regexpEscape(unescapeFormat(token.replace('\\', '')), "i"));
             return a;
@@ -23508,7 +23563,7 @@ function hasOwnProperty(obj, prop) {
         for (i = 0; i < config._f.length; i++) {
             currentScore = 0;
             tempConfig = extend({}, config);
-            initializeParsingFlags(tempConfig);
+            tempConfig._pf = defaultParsingFlags();
             tempConfig._f = config._f[i];
             makeDateFromStringAndFormat(tempConfig);
 
@@ -23535,20 +23590,20 @@ function hasOwnProperty(obj, prop) {
 
     // date from iso format
     function makeDateFromString(config) {
-        var i,
+        var i, l,
             string = config._i,
             match = isoRegex.exec(string);
 
         if (match) {
             config._pf.iso = true;
-            for (i = 4; i > 0; i--) {
-                if (match[i]) {
+            for (i = 0, l = isoDates.length; i < l; i++) {
+                if (isoDates[i][1].exec(string)) {
                     // match[5] should be "T" or undefined
-                    config._f = isoDates[i - 1] + (match[6] || " ");
+                    config._f = isoDates[i][0] + (match[6] || " ");
                     break;
                 }
             }
-            for (i = 0; i < 4; i++) {
+            for (i = 0, l = isoTimes.length; i < l; i++) {
                 if (isoTimes[i][1].exec(string)) {
                     config._f += isoTimes[i][0];
                     break;
@@ -23689,14 +23744,10 @@ function hasOwnProperty(obj, prop) {
 
     //http://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
     function dayOfYearFromWeeks(year, week, weekday, firstDayOfWeekOfYear, firstDayOfWeek) {
-        // The only solid way to create an iso date from year is to use
-        // a string format (Date.UTC handles only years > 1900). Don't ask why
-        // it doesn't need Z at the end.
-        var d = new Date(leftZeroFill(year, 6, true) + '-01-01').getUTCDay(),
-            daysToAdd, dayOfYear;
+        var d = makeUTCDate(year, 0, 1).getUTCDay(), daysToAdd, dayOfYear;
 
         weekday = weekday != null ? weekday : firstDayOfWeek;
-        daysToAdd = firstDayOfWeek - d + (d > firstDayOfWeekOfYear ? 7 : 0);
+        daysToAdd = firstDayOfWeek - d + (d > firstDayOfWeekOfYear ? 7 : 0) - (d < firstDayOfWeek ? 7 : 0);
         dayOfYear = 7 * (week - 1) + (weekday - firstDayOfWeek) + daysToAdd + 1;
 
         return {
@@ -23713,10 +23764,6 @@ function hasOwnProperty(obj, prop) {
         var input = config._i,
             format = config._f;
 
-        if (typeof config._pf === 'undefined') {
-            initializeParsingFlags(config);
-        }
-
         if (input === null) {
             return moment.invalid({nullInput: true});
         }
@@ -23726,7 +23773,7 @@ function hasOwnProperty(obj, prop) {
         }
 
         if (moment.isMoment(input)) {
-            config = extend({}, input);
+            config = cloneMoment(input);
 
             config._d = new Date(+input._d);
         } else if (format) {
@@ -23743,37 +23790,47 @@ function hasOwnProperty(obj, prop) {
     }
 
     moment = function (input, format, lang, strict) {
+        var c;
+
         if (typeof(lang) === "boolean") {
             strict = lang;
             lang = undefined;
         }
-        return makeMoment({
-            _i : input,
-            _f : format,
-            _l : lang,
-            _strict : strict,
-            _isUTC : false
-        });
+        // object construction must be done this way.
+        // https://github.com/moment/moment/issues/1423
+        c = {};
+        c._isAMomentObject = true;
+        c._i = input;
+        c._f = format;
+        c._l = lang;
+        c._strict = strict;
+        c._isUTC = false;
+        c._pf = defaultParsingFlags();
+
+        return makeMoment(c);
     };
 
     // creating with utc
     moment.utc = function (input, format, lang, strict) {
-        var m;
+        var c;
 
         if (typeof(lang) === "boolean") {
             strict = lang;
             lang = undefined;
         }
-        m = makeMoment({
-            _useUTC : true,
-            _isUTC : true,
-            _l : lang,
-            _i : input,
-            _f : format,
-            _strict : strict
-        }).utc();
+        // object construction must be done this way.
+        // https://github.com/moment/moment/issues/1423
+        c = {};
+        c._isAMomentObject = true;
+        c._useUTC = true;
+        c._isUTC = true;
+        c._l = lang;
+        c._i = input;
+        c._f = format;
+        c._strict = strict;
+        c._pf = defaultParsingFlags();
 
-        return m;
+        return makeMoment(c).utc();
     };
 
     // creating with unix timestamp (in seconds)
@@ -23883,7 +23940,8 @@ function hasOwnProperty(obj, prop) {
 
     // compare moment object
     moment.isMoment = function (obj) {
-        return obj instanceof Moment;
+        return obj instanceof Moment ||
+            (obj != null &&  obj.hasOwnProperty('_isAMomentObject'));
     };
 
     // for typechecking Duration objects
@@ -24744,6 +24802,39 @@ UIHostList = function(config, webSocketResponder) {
 		this.update(data);
 	}.bind(this));
 
+	// update host data occasionally
+	webSocketResponder.on("log:info", function(host, pm_id, date, data) {
+		var host = this.find(host);
+
+		if(!host) {
+			return;
+		}
+
+		var process = host.findProcessById(pm_id);
+
+		if(!process) {
+			return;
+		}
+
+		process.log("info", date, data);
+	}.bind(this));
+
+	webSocketResponder.on("log:error", function(host, pm_id, date, data) {
+		var host = this.find(host);
+
+		if(!host) {
+			return;
+		}
+
+		var process = host.findProcessById(pm_id);
+
+		if(!process) {
+			return;
+		}
+
+		process.log("error", date, data);
+	}.bind(this));
+
 	this._config = config;
 	this._hosts = {};
 };
@@ -24844,6 +24935,14 @@ WebSocketResponder.prototype.onHosts = function(hosts) {
 
 WebSocketResponder.prototype.onConfig = function(config) {
 	this.emit("config", config);
+};
+
+WebSocketResponder.prototype.onInfoLog = function(host, pm_id, date, log) {
+	this.emit("log:info", host, pm_id, date, log);
+};
+
+WebSocketResponder.prototype.onErrorLog = function(host, pm_id, date, log) {
+	this.emit("log:error", host, pm_id, date, log);
 };
 
 WebSocketResponder.prototype._send = function(message) {
@@ -25094,6 +25193,47 @@ module.exports = ["xChart", "d3", function(xChart, d3) {
 }];
 
 },{}],32:[function(require,module,exports){
+function fakeNgModel(initValue){
+	return {
+		$setViewValue: function(value){
+			this.$viewValue = value;
+		},
+		$viewValue: initValue
+	};
+};
+
+module.exports = [function() {
+	return {
+		priority: 1,
+		require: ['?ngModel'],
+		restrict: 'A',
+		link: function(scope, $el, attrs, ctrls){
+			var el = $el[0],
+				ngModel = ctrls[0] || fakeNgModel(true);
+
+			function scrollToBottom(){
+				el.scrollTop = el.scrollHeight;
+			}
+
+			function shouldActivateAutoScroll(){
+				// + 1 catches off by one errors in chrome
+				return el.scrollTop + el.clientHeight + 1 >= el.scrollHeight;
+			}
+
+			scope.$watch(function(){
+				if(ngModel.$viewValue){
+					scrollToBottom();
+				}
+			});
+
+			$el.bind('scroll', function(){
+				scope.$apply(ngModel.$setViewValue.bind(ngModel, shouldActivateAutoScroll()));
+			});
+		}
+	};
+}];
+
+},{}],33:[function(require,module,exports){
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
@@ -25101,7 +25241,7 @@ module.exports = function() {
 	}
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var Moment = require("moment");
 
 module.exports = function() {
@@ -25110,7 +25250,7 @@ module.exports = function() {
 	}
 };
 
-},{"moment":22}],34:[function(require,module,exports){
+},{"moment":22}],35:[function(require,module,exports){
 
 module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
@@ -25128,7 +25268,16 @@ module.exports = function() {
 	}
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
+var Moment = require("moment");
+
+module.exports = function() {
+	return function(date) {
+		return Moment(date).toISOString();
+	}
+};
+
+},{"moment":22}],37:[function(require,module,exports){
 "use strict";
 
 var xChart = require("browserify-xcharts"),
@@ -25162,10 +25311,12 @@ pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 
 // directives
 pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
+pm2Web.directive("scrollglue", require("./directives/scrollGlue"));
 
 // filters
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));
 pm2Web.filter("humanise", require("./filters/humanise"));
+pm2Web.filter("timestamp", require("./filters/timestamp"));
 pm2Web.filter("memory", require("./filters/memory"));
 
 // controllers
@@ -25174,7 +25325,7 @@ pm2Web.controller("SystemController", require("./controllers/system"));
 pm2Web.controller("ProcessListController", require("./controllers/processList"));
 pm2Web.controller("HostListController", require("./controllers/hostList"));
 
-},{"./components/Config":24,"./components/UIHostList":25,"./components/WebSocketResponder":26,"./controllers/connection":27,"./controllers/hostList":28,"./controllers/processList":29,"./controllers/system":30,"./directives/resourceUsage":31,"./filters/decimalPlaces":32,"./filters/humanise":33,"./filters/memory":34,"./routes":36,"browserify-xcharts":3,"d3":17}],36:[function(require,module,exports){
+},{"./components/Config":24,"./components/UIHostList":25,"./components/WebSocketResponder":26,"./controllers/connection":27,"./controllers/hostList":28,"./controllers/processList":29,"./controllers/system":30,"./directives/resourceUsage":31,"./directives/scrollGlue":32,"./filters/decimalPlaces":33,"./filters/humanise":34,"./filters/memory":35,"./filters/timestamp":36,"./routes":38,"browserify-xcharts":3,"d3":17}],38:[function(require,module,exports){
 
 module.exports = ["$routeProvider",
 	function($routeProvider) {
@@ -25189,4 +25340,4 @@ module.exports = ["$routeProvider",
 	}
 ];
 
-},{}]},{},[35])
+},{}]},{},[37])

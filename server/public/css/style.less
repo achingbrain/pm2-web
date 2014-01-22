@@ -101,7 +101,7 @@ section {
 	border-radius: 6px;
 	padding: 10px;
 
-	h2, .details h3 {
+	h2, .details h3, .logs h3 {
 		font-size: 14px;
 		font-family: 'Abel', sans-serif;
 		text-transform: uppercase;
@@ -291,7 +291,7 @@ section {
 		cursor: pointer;
 	}
 
-	.details {
+	.details, .logs {
 		.rounded-corners(6px);
 		background: @details;
 		padding: 10px;
@@ -300,7 +300,9 @@ section {
 		h3 {
 			border-bottom: none;
 		}
+	}
 
+	.details {
 		.executable {
 			font-size: 14px;
 			margin: 10px 0;
@@ -338,6 +340,66 @@ section {
 			}
 		}
 	}
+
+	.logs {
+		ul {
+			.rounded-corners(6px);
+			background: #333;
+			color: #FFF;
+			font-family: 'Lucida Console', Monaco, monospace;
+			height: 400px;
+			margin-top: 10px;
+			overflow: auto;
+			padding: 10px;
+
+			li {
+				white-space: nowrap;
+				font-size: 12px;
+				margin-bottom: 4px;
+			}
+
+			li.error span {
+				color: #F10;
+			}
+		}
+
+		ul:after {
+			content: "\2588";
+
+			-webkit-animation-name: blinker;
+			-webkit-animation-duration: 1s;
+			-webkit-animation-timing-function: linear;
+			-webkit-animation-iteration-count: infinite;
+
+			-moz-animation-name: blinker;
+			-moz-animation-duration: 1s;
+			-moz-animation-timing-function: linear;
+			-moz-animation-iteration-count: infinite;
+
+			animation-name: blinker;
+			animation-duration: 1s;
+			animation-timing-function: linear;
+			animation-iteration-count: infinite;
+		}
+	}
+}
+
+@-moz-keyframes blinker {
+	0% { opacity: 1.0; }
+	50% { opacity: 0.0; }
+	100% { opacity: 1.0; }
+}
+
+@-webkit-keyframes blinker {
+	0% { opacity: 1.0; }
+	50% { opacity: 0.0; }
+	100% { opacity: 1.0; }
+}
+
+@keyframes blinker {
+	0% { opacity: 1.0; }
+	50% { opacity: 0.0; }
+	100% { opacity: 1.0; }
 }
 
 @media only screen and (max-width: 700px) {

@@ -17,6 +17,39 @@ UIHostList = function(config, webSocketResponder) {
 		this.update(data);
 	}.bind(this));
 
+	// update host data occasionally
+	webSocketResponder.on("log:info", function(host, pm_id, date, data) {
+		var host = this.find(host);
+
+		if(!host) {
+			return;
+		}
+
+		var process = host.findProcessById(pm_id);
+
+		if(!process) {
+			return;
+		}
+
+		process.log("info", date, data);
+	}.bind(this));
+
+	webSocketResponder.on("log:error", function(host, pm_id, date, data) {
+		var host = this.find(host);
+
+		if(!host) {
+			return;
+		}
+
+		var process = host.findProcessById(pm_id);
+
+		if(!process) {
+			return;
+		}
+
+		process.log("error", date, data);
+	}.bind(this));
+
 	this._config = config;
 	this._hosts = {};
 };

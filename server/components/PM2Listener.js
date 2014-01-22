@@ -52,7 +52,6 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 	// listen for all events
 	pm2Interface.bus.on("*", function(event, data) {
 		data.name = pm2Interface.bind_host;
-		this._logger.info("PM2Listener", event, JSON.stringify(data));
 		this.emit(event, data);
 	}.bind(this));
 

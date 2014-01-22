@@ -13,6 +13,8 @@ var ProcessData = function(config, data) {
 		memory: data.usage ? data.usage.memory : []
 	};
 
+	this.logs = [];
+
 	this._map(data);
 }
 
@@ -20,6 +22,14 @@ ProcessData.prototype.update = function(data, system) {
 	this._map(data);
 
 	this._append((data.memory / system.memory.free) * 100, data.cpu);
+}
+
+ProcessData.prototype.log = function(type, date, data) {
+	this.logs.push({
+		type: type,
+		date: date,
+		data: data
+	});
 }
 
 ProcessData.prototype._map = function(data) {

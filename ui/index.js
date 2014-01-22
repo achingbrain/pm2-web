@@ -31,10 +31,12 @@ pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 
 // directives
 pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
+pm2Web.directive("scrollglue", require("./directives/scrollGlue"));
 
 // filters
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));
 pm2Web.filter("humanise", require("./filters/humanise"));
+pm2Web.filter("timestamp", require("./filters/timestamp"));
 pm2Web.filter("memory", require("./filters/memory"));
 
 // controllers

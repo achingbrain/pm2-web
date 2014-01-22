@@ -62,6 +62,14 @@ WebSocketResponder.prototype.onConfig = function(config) {
 	this.emit("config", config);
 };
 
+WebSocketResponder.prototype.onInfoLog = function(host, pm_id, date, log) {
+	this.emit("log:info", host, pm_id, date, log);
+};
+
+WebSocketResponder.prototype.onErrorLog = function(host, pm_id, date, log) {
+	this.emit("log:error", host, pm_id, date, log);
+};
+
 WebSocketResponder.prototype._send = function(message) {
 	this._ws.send(JSON.stringify(message));
 };

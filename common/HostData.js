@@ -65,4 +65,14 @@ HostData.prototype.findProcess = function(name) {
 	return null;
 }
 
+HostData.prototype.findProcessById = function(id) {
+	for(var i = 0; i < this.processes.length; i++) {
+		if(this.processes[i].id == id) {
+			return this.processes[i];
+		}
+	}
+
+	return null;
+}
+
 module.exports = HostData;

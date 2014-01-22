@@ -64,7 +64,8 @@ section {
   padding: 10px;
 }
 section h2,
-section .details h3 {
+section .details h3,
+section .logs h3 {
   font-size: 14px;
   font-family: 'Abel', sans-serif;
   text-transform: uppercase;
@@ -231,7 +232,8 @@ section .details h3 {
   background-color: #ebebeb;
   cursor: pointer;
 }
-.processes .details {
+.processes .details,
+.processes .logs {
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   -ms-border-radius: 6px;
@@ -241,7 +243,8 @@ section .details h3 {
   padding: 10px;
   margin-bottom: 10px;
 }
-.processes .details h3 {
+.processes .details h3,
+.processes .logs h3 {
   border-bottom: none;
 }
 .processes .details .executable {
@@ -275,6 +278,76 @@ section .details h3 {
 }
 .processes .details dl dt.memory {
   background: #49aa3c;
+}
+.processes .logs ul {
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+  border-radius: 6px;
+  background: #333;
+  color: #FFF;
+  font-family: 'Lucida Console', Monaco, monospace;
+  height: 400px;
+  margin-top: 10px;
+  overflow: auto;
+  padding: 10px;
+}
+.processes .logs ul li {
+  white-space: nowrap;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.processes .logs ul li.error span {
+  color: #F10;
+}
+.processes .logs ul:after {
+  content: "\2588";
+  -webkit-animation-name: blinker;
+  -webkit-animation-duration: 1s;
+  -webkit-animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-name: blinker;
+  -moz-animation-duration: 1s;
+  -moz-animation-timing-function: linear;
+  -moz-animation-iteration-count: infinite;
+  animation-name: blinker;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@-moz-keyframes blinker {
+  0% {
+    opacity: 1.0;
+  }
+  50% {
+    opacity: 0.0;
+  }
+  100% {
+    opacity: 1.0;
+  }
+}
+@-webkit-keyframes blinker {
+  0% {
+    opacity: 1.0;
+  }
+  50% {
+    opacity: 0.0;
+  }
+  100% {
+    opacity: 1.0;
+  }
+}
+@keyframes blinker {
+  0% {
+    opacity: 1.0;
+  }
+  50% {
+    opacity: 0.0;
+  }
+  100% {
+    opacity: 1.0;
+  }
 }
 @media only screen and (max-width: 700px) {
   .system table,

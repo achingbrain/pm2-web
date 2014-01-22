@@ -83,4 +83,4 @@ Code by [achingbrain](http://github.com/achingbrain), originally based on work d
 
 Uses [pm2](https://github.com/unitech/pm2) and [pm2-interface](https://github.com/unitech/pm2-interface) by [unitech](https://github.com/unitech).
 
-Special thanks to [joewalnes](https://github.com/joewalnes) for [reconnecting-websocket](https://github.com/joewalnes/reconnecting-websocket).
+Special thanks to [joewalnes](https://github.com/joewalnes) for [reconnecting-websocket](https://github.com/joewalnes/reconnecting-websocket) and [Luegg](https://github.com/Luegg) for [angularjs-scroll-glue](https://github.com/Luegg/angularjs-scroll-glue).

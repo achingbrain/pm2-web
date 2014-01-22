@@ -62,32 +62,6 @@ module.exports = {
 		onMessage(JSON.stringify(invocation));
 	},
 
-	"Should broadcast events": function(test) {
-		var event = "foo";
-		var data = {bar: "baz"};
-
-		this._responder.afterPropertiesSet();
-
-		this._responder._webSocketServer.clients = [{
-			send: sinon.stub()
-		}];
-
-		this._responder._webSocketServer.clients[0].send.callCount.should.equal(0);
-
-		this._responder._pm2Listener.on.callCount.should.equal(1);
-		this._responder._pm2Listener.on.getCall(0).args[0].should.equal("*");
-		this._responder._pm2Listener.on.getCall(0).args[1](event, data);
-
-		this._responder._webSocketServer.clients[0].send.callCount.should.equal(1);
-		var message = this._responder._webSocketServer.clients[0].send.getCall(0).args[0];
-
-		var invocation = JSON.parse(message);
-		invocation.method.should.equal("onFoo");
-		invocation.args[0].bar.should.equal(data.bar);
-
-		test.done();
-	},
-
 	"Should start a process": function(test) {
 		var client = "localhost";
 		var host = "foo";

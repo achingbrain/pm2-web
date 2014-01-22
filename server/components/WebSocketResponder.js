@@ -1,4 +1,5 @@
-var Autowire = require("wantsit").Autowire;
+var Autowire = require("wantsit").Autowire,
+	_s = require("underscore.string");
 
 var WebSocketResponder = function() {
 	this._config = Autowire;
@@ -54,12 +55,24 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		}));
 	}.bind(this));
 
-	// broadcast all pm2 events
-	this._pm2Listener.on("*", function(event, data) {
+	// broadcast error logging
+	this._pm2Listener.on("log:err", function(event) {
 		this._webSocketServer.broadcast({
-			method: "on" + event.substring(0, 1).toUpperCase() + event.substring(1),
+			method: "onErrorLog",
 			args: [
-				data
+				// n.b. this is wrong - time should come from the event, not this server as it might not be the same one the process is running on
+				event.name, event.process.pm2_env.pm_id, Date.now(), event.data
+			]
+		});
+	}.bind(this));
+
+	// broadcast info logging
+	this._pm2Listener.on("log:out", function(event) {
+		this._webSocketServer.broadcast({
+			method: "onInfoLog",
+			args: [
+				// n.b. this is wrong - time should come from the event, not this server as it might not be the same one the process is running on
+				event.name, event.process.pm2_env.pm_id, Date.now(), event.data
 			]
 		});
 	}.bind(this));
