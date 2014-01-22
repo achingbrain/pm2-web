@@ -26,7 +26,7 @@
 	</table>
 	<figure id="memory">
 		<figcaption>Memory ({{hostData.system.memory.total | memory}} total)</figcaption>
-		<div style="width: {{system.memory_free_percent}}%">{{hostData.system.memory.free | memory}} Free</div><div style="width: {{system.memory_used_percent}}%">{{hostData.system.memory.used | memory}} Used</div>
+		<div style="width: {{(hostData.system.memory.free / hostData.system.memory.total) * 100}}%">{{hostData.system.memory.free | memory}} Free</div><div style="width: {{100 - ((hostData.system.memory.free / hostData.system.memory.total) * 100)}}%">{{hostData.system.memory.used | memory}} Used</div>
 	</figure>
 </section>
 <section class="processes" ng-controller="ProcessListController">
