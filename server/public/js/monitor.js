@@ -24993,15 +24993,20 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
 		};
 
-		$scope.start = function(pm_id) {
+		$scope.start = function(pm_id, $event) {
 			webSocketResponder.startProcess(hostData.name, pm_id);
+
+			$event.stopPropagation();
 		};
-		$scope.stop = function(pm_id) {
+		$scope.stop = function(pm_id, $event) {
 			webSocketResponder.stopProcess(hostData.name, pm_id);
+
+			$event.stopPropagation();
 		};
-		$scope.restart = function(pm_id) {
-			console.info(hostData);
+		$scope.restart = function(pm_id, $event) {
 			webSocketResponder.restartProcess(hostData.name, pm_id);
+
+			$event.stopPropagation();
 		};
 	};
 	updateScope();

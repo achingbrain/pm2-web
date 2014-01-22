@@ -69,9 +69,9 @@
 			</li>
 			<li class="actions">
 				<p ng-click="toggleDetails(process.id)">
-					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id)"></a>
-					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id)"></a>
-					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id)"></a>
+					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id, $event)"></a>
+					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>
+					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id, $event)"></a>
 				</p>
 			</li>
 		</ul>
