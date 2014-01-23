@@ -9,8 +9,8 @@ module.exports = {
 			get: sinon.stub()
 		};
 		this._responder._webSocketServer = {
-			on: sinon.stub()
-
+			on: sinon.stub(),
+			broadcast: sinon.stub()
 		}
 		this._responder._logger = {
 			info: sinon.stub(),
@@ -25,7 +25,8 @@ module.exports = {
 			restartProcess: sinon.stub()
 		};
 		this._responder._hostList = {
-			getHosts: sinon.stub()
+			getHosts: sinon.stub(),
+			addLog: sinon.stub()
 		};
 
 		done();
@@ -100,6 +101,89 @@ module.exports = {
 		this._responder._pm2Listener.restartProcess.callCount.should.equal(1);
 		this._responder._pm2Listener.restartProcess.getCall(0).args[0].should.equal(host);
 		this._responder._pm2Listener.restartProcess.getCall(0).args[1].should.equal(pid);
+
+		test.done();
+	},
+
+	"Should broadcast system data": function(test) {
+		this._responder.afterPropertiesSet();
+
+		this._responder._webSocketServer.broadcast = sinon.stub();
+
+		// find the callback
+		this._responder._pm2Listener.on.getCall(2).args[0].should.equal("systemData");
+		var callback = this._responder._pm2Listener.on.getCall(2).args[1];
+
+		// the system data we are sending
+		var data = {};
+
+		// invoke the callback
+		callback(data);
+
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].method.should.equal("onSystemData");
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[0].should.equal(data);
+
+		test.done();
+	},
+
+	"Should broadcast error logs": function(test) {
+		this._responder.afterPropertiesSet();
+
+		this._responder._webSocketServer.broadcast = sinon.stub();
+
+		// find the callback
+		this._responder._pm2Listener.on.getCall(0).args[0].should.equal("log:err");
+		var callback = this._responder._pm2Listener.on.getCall(0).args[1];
+
+		// the log data we are sending
+		var data = {
+			name: "foo",
+			process: {
+				pm2_env: {
+					pm_id: 1
+				}
+			},
+			data: "bar"
+		};
+
+		// invoke the callback
+		callback(data);
+
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].method.should.equal("onErrorLog");
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[0].should.equal("foo");
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[1].should.equal(1);
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[2].should.equal("bar");
+
+		test.done();
+	},
+
+	"Should broadcast info logs": function(test) {
+		this._responder.afterPropertiesSet();
+
+		this._responder._webSocketServer.broadcast = sinon.stub();
+
+		// find the callback
+		this._responder._pm2Listener.on.getCall(1).args[0].should.equal("log:out");
+		var callback = this._responder._pm2Listener.on.getCall(1).args[1];
+
+		// the log data we are sending
+		var data = {
+			name: "foo",
+			process: {
+				pm2_env: {
+					pm_id: 1
+				}
+			},
+			data: "bar"
+		};
+
+		// invoke the callback
+		callback(data);
+
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].method.should.equal("onInfoLog");
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[0].should.equal("foo");
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[1].should.equal(1);
+		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[2].should.equal("bar");
 
 		test.done();
 	}

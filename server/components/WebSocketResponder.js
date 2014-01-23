@@ -79,6 +79,16 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 			]
 		});
 	}.bind(this));
+
+	// broadcast system data updates
+	this._pm2Listener.on("systemData", function(data) {
+		this._webSocketServer.broadcast({
+			method: "onSystemData",
+			args: [
+				data
+			]
+		});
+	}.bind(this));
 };
 
 WebSocketResponder.prototype.startProcess = function(client, host, pm_id) {
