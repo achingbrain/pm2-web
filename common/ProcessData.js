@@ -15,6 +15,12 @@ var ProcessData = function(config, data) {
 
 	this.logs = [];
 
+	if(Array.isArray(data.logs)) {
+		data.logs.forEach(function(log) {
+			this.log(log.type, log.data);
+		}.bind(this));
+	}
+
 	this._map(data);
 }
 
@@ -25,6 +31,11 @@ ProcessData.prototype.update = function(data, system) {
 }
 
 ProcessData.prototype.log = function(type, data) {
+	// rotate logs if necessary
+	if(this.logs.length > this._config.get("logs:max")) {
+		this.logs.splice(0, this.logs.length - this._config.get("logs:max"));
+	}
+
 	this.logs.push({
 		type: type,
 		data: data

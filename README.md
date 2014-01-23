@@ -77,6 +77,16 @@ The number of `--graph.distribution` arguments is the number of days worth of da
 
 What this means is that any recent resource usage data will have a more accurate representation in the graph at the cost of consuming more memory and older data will be less accurate but also less likely to crash your browser.
 
+### Logs
+
+pm2-web will display log lines emitted by monitored processes after pm2-web itself was started.  In order to keep resource usage reasonable by default it will show 1000 log lines.
+
+You can alter this behaviour by specifying `--logs:max`, so for example to lower this to 500 lines:
+
+```
+--logs:max 500
+```
+
 ## Credits
 
 Code by [achingbrain](http://github.com/achingbrain), originally based on work done by [dunxrion](https://github.com/dunxrion).

@@ -41,7 +41,8 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		client.send(JSON.stringify({
 			method: "onConfig",
 			args: [{
-					graph: this._config.get("graph")
+					graph: this._config.get("graph"),
+					logs: this._config.get("logs")
 				}
 			]
 		}));
@@ -57,6 +58,8 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 
 	// broadcast error logging
 	this._pm2Listener.on("log:err", function(event) {
+		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "error", event.data);
+
 		this._webSocketServer.broadcast({
 			method: "onErrorLog",
 			args: [
@@ -67,6 +70,8 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 
 	// broadcast info logging
 	this._pm2Listener.on("log:out", function(event) {
+		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "info", event.data);
+
 		this._webSocketServer.broadcast({
 			method: "onInfoLog",
 			args: [

@@ -48,4 +48,20 @@ ServerHostList.prototype.getHosts = function() {
 	return output;
 };
 
+ServerHostList.prototype.addLog = function(host, pm2_id, type, data) {
+	var host = this._hostData[host];
+
+	if(!host) {
+		return;
+	}
+
+	var process = host.findProcessById(pm2_id);
+
+	if(!process) {
+		return;
+	}
+
+	process.log(type, data);
+}
+
 module.exports = ServerHostList;
