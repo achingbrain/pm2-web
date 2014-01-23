@@ -279,7 +279,7 @@ section .logs h3 {
 .processes .details dl dt.memory {
   background: #49aa3c;
 }
-.processes .logs ul {
+.processes .details ul {
   -webkit-border-radius: 6px;
   -moz-border-radius: 6px;
   -ms-border-radius: 6px;
@@ -293,18 +293,18 @@ section .logs h3 {
   overflow: auto;
   padding: 10px;
 }
-.processes .logs ul li {
+.processes .details ul li {
   font-size: 12px;
 }
-.processes .logs ul li pre {
+.processes .details ul li pre {
   background-color: transparent;
   color: #FFF;
   line-height: 1.4;
 }
-.processes .logs ul li.error pre {
+.processes .details ul li.error pre {
   color: #F10;
 }
-.processes .logs ul:after {
+.processes .details ul:after {
   content: "\2588";
   -webkit-animation-name: blinker;
   -webkit-animation-duration: 1s;
