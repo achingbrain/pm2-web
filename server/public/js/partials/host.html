@@ -91,8 +91,7 @@
 			<h3>Logs</h3>
 			<ul scrollglue>
 				<li ng-repeat="log in process.logs" class="{{log.type}}">
-					<time>{{log.date | timestamp}}</time>
-					<span>{{log.data}}</span>
+					<pre>{{log.data}}</pre>
 				</li>
 			</ul>
 		</div>

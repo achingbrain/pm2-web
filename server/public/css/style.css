@@ -294,11 +294,14 @@ section .logs h3 {
   padding: 10px;
 }
 .processes .logs ul li {
-  white-space: nowrap;
   font-size: 12px;
-  margin-bottom: 4px;
 }
-.processes .logs ul li.error span {
+.processes .logs ul li pre {
+  background-color: transparent;
+  color: #FFF;
+  line-height: 1.4;
+}
+.processes .logs ul li.error pre {
   color: #F10;
 }
 .processes .logs ul:after {

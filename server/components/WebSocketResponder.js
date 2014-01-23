@@ -60,8 +60,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		this._webSocketServer.broadcast({
 			method: "onErrorLog",
 			args: [
-				// n.b. this is wrong - time should come from the event, not this server as it might not be the same one the process is running on
-				event.name, event.process.pm2_env.pm_id, Date.now(), event.data
+				event.name, event.process.pm2_env.pm_id, event.data
 			]
 		});
 	}.bind(this));
@@ -71,8 +70,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		this._webSocketServer.broadcast({
 			method: "onInfoLog",
 			args: [
-				// n.b. this is wrong - time should come from the event, not this server as it might not be the same one the process is running on
-				event.name, event.process.pm2_env.pm_id, Date.now(), event.data
+				event.name, event.process.pm2_env.pm_id, event.data
 			]
 		});
 	}.bind(this));

@@ -24,10 +24,9 @@ ProcessData.prototype.update = function(data, system) {
 	this._append((data.memory / system.memory.free) * 100, data.cpu);
 }
 
-ProcessData.prototype.log = function(type, date, data) {
+ProcessData.prototype.log = function(type, data) {
 	this.logs.push({
 		type: type,
-		date: date,
 		data: data
 	});
 }

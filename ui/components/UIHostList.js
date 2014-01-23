@@ -18,7 +18,7 @@ UIHostList = function(config, webSocketResponder) {
 	}.bind(this));
 
 	// update host data occasionally
-	webSocketResponder.on("log:info", function(host, pm_id, date, data) {
+	webSocketResponder.on("log:info", function(host, pm_id, data) {
 		var host = this.find(host);
 
 		if(!host) {
@@ -31,10 +31,10 @@ UIHostList = function(config, webSocketResponder) {
 			return;
 		}
 
-		process.log("info", date, data);
+		process.log("info", data);
 	}.bind(this));
 
-	webSocketResponder.on("log:error", function(host, pm_id, date, data) {
+	webSocketResponder.on("log:error", function(host, pm_id, data) {
 		var host = this.find(host);
 
 		if(!host) {
@@ -47,7 +47,7 @@ UIHostList = function(config, webSocketResponder) {
 			return;
 		}
 
-		process.log("error", date, data);
+		process.log("error", data);
 	}.bind(this));
 
 	this._config = config;
