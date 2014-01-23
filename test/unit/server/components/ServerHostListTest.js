@@ -146,5 +146,24 @@ module.exports = {
 		hosts[1].name.should.equal(hostName2);
 
 		test.done();
+	},
+
+	"Should add log line to process": function(test) {
+		var process = {
+			log: sinon.stub()
+		};
+		var host = {
+			findProcessById: sinon.stub()
+		};
+		host.findProcessById.withArgs("bar").returns(process);
+
+		this._serverHostList._hostData["foo"] = host;
+
+		this._serverHostList.addLog("foo", "bar", "baz", "qux");
+
+		process.log.getCall(0).args[0].should.equal("baz");
+		process.log.getCall(0).args[1].should.equal("qux");
+
+		test.done();
 	}
 };

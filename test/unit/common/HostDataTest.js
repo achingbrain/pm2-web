@@ -46,5 +46,35 @@ module.exports = {
 		returned.name.should.equal("bar");
 
 		test.done();
+	},
+
+	"Should find process by id": function(test) {
+		this._data.processes.push({
+			id: "foo"
+		});
+		this._data.processes.push({
+			id: "bar"
+		});
+
+		var returned = this._data.findProcessById("bar");
+
+		returned.id.should.equal("bar");
+
+		test.done();
+	},
+
+	"Should fail to find process by id": function(test) {
+		this._data.processes.push({
+			id: "foo"
+		});
+		this._data.processes.push({
+			id: "bar"
+		});
+
+		var returned = this._data.findProcessById("baz");
+
+		test.ok(!returned);
+
+		test.done();
 	}
 };

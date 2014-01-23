@@ -111,15 +111,15 @@ ProcessData.prototype.update = function(data, system) {
 }
 
 ProcessData.prototype.log = function(type, data) {
-	// rotate logs if necessary
-	if(this.logs.length > this._config.get("logs:max")) {
-		this.logs.splice(0, this.logs.length - this._config.get("logs:max"));
-	}
-
 	this.logs.push({
 		type: type,
 		data: data
 	});
+
+	// rotate logs if necessary
+	if(this.logs.length > this._config.get("logs:max")) {
+		this.logs.splice(0, this.logs.length - this._config.get("logs:max"));
+	}
 }
 
 ProcessData.prototype._map = function(data) {

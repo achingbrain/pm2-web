@@ -61,5 +61,41 @@ module.exports = {
 		result.length.should.equal(expectedLength);
 
 		test.done();
+	},
+
+	"Should accept existing log data": function(test) {
+		this._data.logs.length.should.equal(0);
+
+		this._data = new ProcessData(this._config, {
+			"id": 0, "pid": 0, "name": "", "script": "", "uptime": 0, "restarts": 0, "status": "", "memory": 0, "cpu": 0,
+			"logs": [{
+				type: "foo",
+				data: "bar"
+			}]
+		});
+
+		this._data.logs.length.should.equal(1);
+		this._data.logs[0].type.should.equal("foo");
+		this._data.logs[0].data.should.equal("bar");
+
+		test.done();
+	},
+
+	"Should not overflow log limit": function(test) {
+		this._data.logs.length = 100;
+		this._data.logs.length.should.equal(100);
+
+		this._config.get.withArgs("logs:max").returns(100);
+
+		this._data.log("foo", "bar");
+
+		// should not have increased overall length
+		this._data.logs.length.should.equal(100);
+
+		// should have appended log
+		this._data.logs[99].type.should.equal("foo");
+		this._data.logs[99].data.should.equal("bar");
+
+		test.done();
 	}
 };
