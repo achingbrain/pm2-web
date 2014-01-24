@@ -87,6 +87,28 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 --logs:max 500
 ```
 
+## Release notes
+
+### 1.3.x
+
+ - Display logs from processes emitted after pm2-web was started
+ - Caches logging output between browser refreshes
+ - Respects ANSI colour in logging output
+
+### 1.2.x
+
+ - Must have been something interesting here
+
+### 1.1.x
+
+ - Displays graphs of memory and cpu output
+
+### 1.0.x
+
+ - Initial release
+ - Process listing
+ - Restarting, stopping & starting processes
+
 ## Credits
 
 Code by [achingbrain](http://github.com/achingbrain), originally based on work done by [dunxrion](https://github.com/dunxrion).
