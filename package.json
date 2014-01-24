@@ -29,7 +29,9 @@
 		"browserify-xcharts": "~0.3",
 		"moment": "~2.5",
 		"mustache": "~0.8",
-		"d3": "~3.4"
+		"d3": "~3.4",
+		"ansi-to-html": "~0.1",
+		"html-entities": "~1.0"
 	},
 	"optionalDependencies": {
 		"mdns2": "~2.1.0"

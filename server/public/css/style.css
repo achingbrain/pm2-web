@@ -295,13 +295,12 @@ section .logs h3 {
 }
 .processes .details ul li {
   font-size: 12px;
-}
-.processes .details ul li pre {
   background-color: transparent;
   color: #FFF;
   line-height: 1.4;
+  white-space: pre;
 }
-.processes .details ul li.error pre {
+.processes .details ul li.error {
   color: #F10;
 }
 .processes .details ul:after {

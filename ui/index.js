@@ -9,6 +9,7 @@ var WebSocketResponder = require("./components/WebSocketResponder"),
 
 var pm2Web = angular.module("pm2-web", [
 	"ngRoute",
+	"ngSanitize",
 	"ui.bootstrap"
 ]);
 
@@ -37,6 +38,7 @@ pm2Web.directive("scrollglue", require("./directives/scrollGlue"));
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));
 pm2Web.filter("humanise", require("./filters/humanise"));
 pm2Web.filter("memory", require("./filters/memory"));
+pm2Web.filter("ansiToHtml", require("./filters/ansiToHtml"));
 
 // controllers
 pm2Web.controller("ConnectionController", require("./controllers/connection"));

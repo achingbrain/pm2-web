@@ -89,7 +89,8 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 			memory: {
 				free: data.system.memory.free,
 				total: data.system.memory.total
-			}
+			},
+			time: data.system.time
 		},
 		processes: []
 	};
