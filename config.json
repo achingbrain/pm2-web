@@ -12,7 +12,7 @@
 	"updateFrequency": 5000,
 	"hostPurge": {
 		"frequency": 10000,
-		"cutoff": 5000
+		"cutoff": 60000
 	},
 	"graph": {
 		"datapoints": 1000,
