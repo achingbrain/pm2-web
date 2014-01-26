@@ -1,5 +1,5 @@
 
-module.exports = ["xChart", "d3", function(xChart, d3) {
+module.exports = ["xCharts", "d3", function(xCharts, d3) {
 	return {
 		restrict: "A",
 		scope: {
@@ -37,10 +37,11 @@ module.exports = ["xChart", "d3", function(xChart, d3) {
 				yMax: 100,
 				axisPaddingTop: 20,
 				interpolation: "linear",
-				timing: 100
+				timing: 10
 			};
 
-			var chart = new xChart("line-dotted", data, element[0], opts);
+			console.info("creating xChart");
+			var chart = new xCharts("line-dotted", data, element[0], opts);
 
 			scope.$watchCollection("data.memory", function() {
 				chart.setData(data);

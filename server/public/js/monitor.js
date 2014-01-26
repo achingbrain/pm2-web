@@ -25593,6 +25593,11 @@ WebSocketResponder.prototype.onErrorLog = function(host, pm_id, log) {
 	this.emit("log:error", host, pm_id, log);
 };
 
+WebSocketResponder.prototype.onProcessException = function(host, pm_id, message, stack) {
+	this.emit("log:error", host, pm_id, stack);
+	this.emit("process:exception", host, pm_id, message, stack);
+};
+
 WebSocketResponder.prototype._send = function(message) {
 	this._ws.send(JSON.stringify(message));
 };
@@ -25790,7 +25795,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 
 },{}],36:[function(require,module,exports){
 
-module.exports = ["xChart", "d3", function(xChart, d3) {
+module.exports = ["xCharts", "d3", function(xCharts, d3) {
 	return {
 		restrict: "A",
 		scope: {
@@ -25828,10 +25833,11 @@ module.exports = ["xChart", "d3", function(xChart, d3) {
 				yMax: 100,
 				axisPaddingTop: 20,
 				interpolation: "linear",
-				timing: 100
+				timing: 10
 			};
 
-			var chart = new xChart("line-dotted", data, element[0], opts);
+			console.info("creating xChart");
+			var chart = new xCharts("line-dotted", data, element[0], opts);
 
 			scope.$watchCollection("data.memory", function() {
 				chart.setData(data);
@@ -25934,7 +25940,7 @@ module.exports = function() {
 },{}],42:[function(require,module,exports){
 "use strict";
 
-var xChart = require("browserify-xcharts"),
+var xCharts = require("browserify-xcharts"),
 	d3 = require("d3");
 
 var WebSocketResponder = require("./components/WebSocketResponder"),
@@ -25954,8 +25960,8 @@ pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, web
 pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
 	return new WebSocketResponder($window.settings.ws, $rootScope);
 }]);
-pm2Web.factory("xChart", [function() {
-	return xChart;
+pm2Web.factory("xCharts", [function() {
+	return xCharts;
 }]);
 pm2Web.factory("d3", [function() {
 	return d3;

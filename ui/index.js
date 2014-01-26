@@ -1,6 +1,6 @@
 "use strict";
 
-var xChart = require("browserify-xcharts"),
+var xCharts = require("browserify-xcharts"),
 	d3 = require("d3");
 
 var WebSocketResponder = require("./components/WebSocketResponder"),
@@ -20,8 +20,8 @@ pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, web
 pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
 	return new WebSocketResponder($window.settings.ws, $rootScope);
 }]);
-pm2Web.factory("xChart", [function() {
-	return xChart;
+pm2Web.factory("xCharts", [function() {
+	return xCharts;
 }]);
 pm2Web.factory("d3", [function() {
 	return d3;

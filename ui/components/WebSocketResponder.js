@@ -70,6 +70,11 @@ WebSocketResponder.prototype.onErrorLog = function(host, pm_id, log) {
 	this.emit("log:error", host, pm_id, log);
 };
 
+WebSocketResponder.prototype.onProcessException = function(host, pm_id, message, stack) {
+	this.emit("log:error", host, pm_id, stack);
+	this.emit("process:exception", host, pm_id, message, stack);
+};
+
 WebSocketResponder.prototype._send = function(message) {
 	this._ws.send(JSON.stringify(message));
 };

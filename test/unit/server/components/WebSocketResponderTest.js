@@ -111,8 +111,8 @@ module.exports = {
 		this._responder._webSocketServer.broadcast = sinon.stub();
 
 		// find the callback
-		this._responder._pm2Listener.on.getCall(2).args[0].should.equal("systemData");
-		var callback = this._responder._pm2Listener.on.getCall(2).args[1];
+		this._responder._pm2Listener.on.getCall(3).args[0].should.equal("systemData");
+		var callback = this._responder._pm2Listener.on.getCall(3).args[1];
 
 		// the system data we are sending
 		var data = {};

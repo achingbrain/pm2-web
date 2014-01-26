@@ -80,6 +80,18 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		});
 	}.bind(this));
 
+	// broadcast exceptions
+	this._pm2Listener.on("process:exception", function(event) {
+		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "error", event.data);
+
+		this._webSocketServer.broadcast({
+			method: "onProcessException",
+			args: [
+				event.name, event.process.pm2_env.pm_id, event.err.message, event.err.stack
+			]
+		});
+	}.bind(this));
+
 	// broadcast system data updates
 	this._pm2Listener.on("systemData", function(data) {
 		this._webSocketServer.broadcast({
