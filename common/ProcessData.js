@@ -54,12 +54,12 @@ ProcessData.prototype._append = function(memory, cpu) {
 
 	this.usage.memory.push({
 		x: Date.now(),
-		y: memory
+		y: ~~memory
 	});
 
 	this.usage.cpu.push({
 		x: Date.now(),
-		y: cpu
+		y: ~~cpu
 	});
 }
 

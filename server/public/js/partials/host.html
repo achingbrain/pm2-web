@@ -85,7 +85,8 @@
 				<dt class="memory">Memory</dt>
 				<dd>Memory</dd>
 			</dl>
-			<figure resourceusage id="resources-{{process.pid}}" data="process.usage" style="width: 100%; height: 300px;"></figure>
+			<highchart id="chart1" config="chartConfig[$index]" style="width: 100%; height: 300px;"></highchart>
+			<!--<figure resourceusage id="resources-{{process.pid}}" data="process.usage" style="width: 100%; height: 300px;"></figure>-->
 			<h3>Logs</h3>
 			<ul scrollglue>
 				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml" />

@@ -134,12 +134,12 @@ ProcessData.prototype._append = function(memory, cpu) {
 
 	this.usage.memory.push({
 		x: Date.now(),
-		y: memory
+		y: ~~memory
 	});
 
 	this.usage.cpu.push({
 		x: Date.now(),
-		y: cpu
+		y: ~~cpu
 	});
 }
 
@@ -25741,6 +25741,67 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 
 		$scope.processes = hostData.processes;
 
+		$scope.chartConfig = [];
+
+		hostData.processes.forEach(function(process) {
+			$scope.chartConfig.push({
+				options: {
+					chart: {
+						type: "spline"
+					},
+					title: {
+						text: null
+					},
+					legend: {
+						enabled: false
+					},
+					credits: {
+						enabled: false
+					},
+					exporting: {
+						enabled: false
+					},
+					plotOptions: {
+						spline: {
+							lineWidth: 4,
+							states: {
+								hover: {
+									lineWidth: 5
+								}
+							},
+							marker: {
+								enabled: false
+							},
+							pointInterval: 3600000, // one hour
+							pointStart: Date.UTC(2009, 9, 6, 0, 0, 0)
+						}
+					}
+				},
+				series: [{
+					data: process.usage.cpu,
+					color: "#347FAC",
+					name: "CPU"
+				}, {
+					data: process.usage.memory,
+					color: "#49AA3C",
+					name: "Memory"
+				}],
+				xAxis: {
+					type: "datetime",
+					labels: {
+						overflow: "justify"
+					}
+				},
+				yAxis: {
+					min: 0,
+					max: 100,
+					title: {
+						text: null
+					}
+				}
+			});
+		});
+
 		$scope.toggleDetails = function(pm_id) {
 			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
 		};
@@ -25794,59 +25855,6 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 }];
 
 },{}],36:[function(require,module,exports){
-
-module.exports = ["xCharts", "d3", function(xCharts, d3) {
-	return {
-		restrict: "A",
-		scope: {
-			data: "="
-		},
-		link: function(scope, element) {
-			var data = {
-				"xScale": "time",
-				"yScale": "linear",
-				"type": "line",
-				"main": [{
-						"className": ".cpu",
-						"data": scope.data.cpu
-					}, {
-						"className": ".memory",
-						"data": scope.data.memory
-					}
-				]
-			};
-
-			var opts = {
-				tickFormatX: function (x) {
-					var now = new Date();
-
-					if(now.getDate() == x.getDate()) {
-
-					}
-
-					return d3.time.format("%X")(x);
-				},
-				tickFormatY: function (y) {
-					return y + "%";
-				},
-				yMin: 0,
-				yMax: 100,
-				axisPaddingTop: 20,
-				interpolation: "linear",
-				timing: 10
-			};
-
-			console.info("creating xChart");
-			var chart = new xCharts("line-dotted", data, element[0], opts);
-
-			scope.$watchCollection("data.memory", function() {
-				chart.setData(data);
-			});
-		}
-	};
-}];
-
-},{}],37:[function(require,module,exports){
 function fakeNgModel(initValue){
 	return {
 		$setViewValue: function(value){
@@ -25887,7 +25895,7 @@ module.exports = [function() {
 	};
 }];
 
-},{}],38:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var Convert = require('ansi-to-html'),
 	Entities = require('html-entities').XmlEntities;
 
@@ -25902,7 +25910,7 @@ module.exports = ["$sce", function($sce) {
 	}
 }];
 
-},{"ansi-to-html":3,"html-entities":23}],39:[function(require,module,exports){
+},{"ansi-to-html":3,"html-entities":23}],38:[function(require,module,exports){
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
@@ -25910,7 +25918,7 @@ module.exports = function() {
 	}
 };
 
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var Moment = require("moment");
 
 module.exports = function() {
@@ -25919,7 +25927,7 @@ module.exports = function() {
 	}
 };
 
-},{"moment":27}],41:[function(require,module,exports){
+},{"moment":27}],40:[function(require,module,exports){
 
 module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
@@ -25937,7 +25945,7 @@ module.exports = function() {
 	}
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 
 var xCharts = require("browserify-xcharts"),
@@ -25950,7 +25958,8 @@ var WebSocketResponder = require("./components/WebSocketResponder"),
 var pm2Web = angular.module("pm2-web", [
 	"ngRoute",
 	"ngSanitize",
-	"ui.bootstrap"
+	"ui.bootstrap",
+	"highcharts-ng"
 ]);
 
 pm2Web.config(require("./routes"));
@@ -25971,8 +25980,9 @@ pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 }]);
 
 // directives
-pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
+//pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
 pm2Web.directive("scrollglue", require("./directives/scrollGlue"));
+//pm2Web.directive("highchart", require("./directives/highchartsNg"));
 
 // filters
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));
@@ -25986,7 +25996,7 @@ pm2Web.controller("SystemController", require("./controllers/system"));
 pm2Web.controller("ProcessListController", require("./controllers/processList"));
 pm2Web.controller("HostListController", require("./controllers/hostList"));
 
-},{"./components/Config":29,"./components/UIHostList":30,"./components/WebSocketResponder":31,"./controllers/connection":32,"./controllers/hostList":33,"./controllers/processList":34,"./controllers/system":35,"./directives/resourceUsage":36,"./directives/scrollGlue":37,"./filters/ansiToHtml":38,"./filters/decimalPlaces":39,"./filters/humanise":40,"./filters/memory":41,"./routes":43,"browserify-xcharts":4,"d3":18}],43:[function(require,module,exports){
+},{"./components/Config":29,"./components/UIHostList":30,"./components/WebSocketResponder":31,"./controllers/connection":32,"./controllers/hostList":33,"./controllers/processList":34,"./controllers/system":35,"./directives/scrollGlue":36,"./filters/ansiToHtml":37,"./filters/decimalPlaces":38,"./filters/humanise":39,"./filters/memory":40,"./routes":42,"browserify-xcharts":4,"d3":18}],42:[function(require,module,exports){
 
 module.exports = ["$routeProvider",
 	function($routeProvider) {
@@ -26001,4 +26011,4 @@ module.exports = ["$routeProvider",
 	}
 ];
 
-},{}]},{},[42])
+},{}]},{},[41])

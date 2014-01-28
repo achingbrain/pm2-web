@@ -10,7 +10,8 @@ var WebSocketResponder = require("./components/WebSocketResponder"),
 var pm2Web = angular.module("pm2-web", [
 	"ngRoute",
 	"ngSanitize",
-	"ui.bootstrap"
+	"ui.bootstrap",
+	"highcharts-ng"
 ]);
 
 pm2Web.config(require("./routes"));
@@ -31,8 +32,9 @@ pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 }]);
 
 // directives
-pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
+//pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
 pm2Web.directive("scrollglue", require("./directives/scrollGlue"));
+//pm2Web.directive("highchart", require("./directives/highchartsNg"));
 
 // filters
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));
