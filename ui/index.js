@@ -1,8 +1,5 @@
 "use strict";
 
-var xCharts = require("browserify-xcharts"),
-	d3 = require("d3");
-
 var WebSocketResponder = require("./components/WebSocketResponder"),
 	HostList = require("./components/UIHostList"),
 	Config = require("./components/Config");
@@ -21,20 +18,13 @@ pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, web
 pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
 	return new WebSocketResponder($window.settings.ws, $rootScope);
 }]);
-pm2Web.factory("xCharts", [function() {
-	return xCharts;
-}]);
-pm2Web.factory("d3", [function() {
-	return d3;
-}]);
 pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 	return new Config(webSocketResponder);
 }]);
 
 // directives
-//pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
+pm2Web.directive("resourceusage", require("./directives/resourceUsage"));
 pm2Web.directive("scrollglue", require("./directives/scrollGlue"));
-//pm2Web.directive("highchart", require("./directives/highchartsNg"));
 
 // filters
 pm2Web.filter("decimalPlaces", require("./filters/decimalPlaces"));

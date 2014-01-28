@@ -1,50 +1,95 @@
 
-module.exports = ["xCharts", "d3", function(xCharts, d3) {
+module.exports = [function() {
 	return {
 		restrict: "A",
 		scope: {
 			data: "="
 		},
-		link: function(scope, element) {
+		link: function($scope, $element, $attributes) {
 			var data = {
 				"xScale": "time",
 				"yScale": "linear",
 				"type": "line",
 				"main": [{
 						"className": ".cpu",
-						"data": scope.data.cpu
+						"data": $scope.data.cpu
 					}, {
 						"className": ".memory",
-						"data": scope.data.memory
+						"data": $scope.data.memory
 					}
 				]
 			};
 
-			var opts = {
-				tickFormatX: function (x) {
-					var now = new Date();
-
-					if(now.getDate() == x.getDate()) {
-
+			var chart = new Highcharts.Chart({
+				chart: {
+					type: "areaspline",
+					renderTo: $element[0]
+				},
+				title: {
+					text: null
+				},
+				legend: {
+					enabled: false
+				},
+				credits: {
+					enabled: false
+				},
+				exporting: {
+					enabled: false
+				},
+				xAxis: {
+					type: "datetime",
+					labels: {
+						overflow: "justify",
+						y: 25
+					},
+					gridLineColor: "#EEEEEE",
+					gridLineWidth: 1
+				},
+				yAxis: {
+					title: {
+						text: null
+					},
+					labels: {
+						format: "{value}%"
+					},
+					min: 0,
+					max: 100,
+					gridLineColor: "#EEEEEE"
+				},
+				tooltip: {
+					valueSuffix: " %"
+				},
+				plotOptions: {
+					areaspline: {
+						lineWidth: 4,
+						states: {
+							hover: {
+								lineWidth: 5
+							}
+						},
+						marker: {
+							enabled: false
+						},
+						//pointInterval: 3600000, // one hour
+						//pointStart: Date.UTC(2009, 9, 6, 0, 0, 0),
+						fillOpacity: 0.1
 					}
-
-					return d3.time.format("%X")(x);
 				},
-				tickFormatY: function (y) {
-					return y + "%";
-				},
-				yMin: 0,
-				yMax: 100,
-				axisPaddingTop: 20,
-				interpolation: "linear",
-				timing: 10
-			};
+				series: [{
+					name: "CPU",
+					color: "#347FAC",
+					data: $scope.data.cpu
+				}, {
+					name: "Memory",
+					color: "#49AA3C",
+					data: $scope.data.memory
+				}]
+			});
 
-			console.info("creating xChart");
-			var chart = new xCharts("line-dotted", data, element[0], opts);
-
-			scope.$watchCollection("data.memory", function() {
-				chart.setData(data);
+			$scope.$watchCollection("data.memory", function() {
+				chart.series[0].setData($scope.data.cpu);
+				chart.series[1].setData($scope.data.memory, true);
 			});
 		}
 	};
