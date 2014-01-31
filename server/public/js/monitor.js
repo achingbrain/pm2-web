@@ -107,7 +107,7 @@ var ProcessData = function(config, data) {
 ProcessData.prototype.update = function(data, system) {
 	this._map(data);
 
-	this._append((data.memory / system.memory.free) * 100, data.cpu, system.time);
+	this._append((data.memory / system.memory.total) * 100, data.cpu, system.time);
 }
 
 ProcessData.prototype.log = function(type, data) {
