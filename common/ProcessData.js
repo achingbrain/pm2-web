@@ -27,7 +27,7 @@ var ProcessData = function(config, data) {
 ProcessData.prototype.update = function(data, system) {
 	this._map(data);
 
-	this._append((data.memory / system.memory.free) * 100, data.cpu);
+	this._append((data.memory / system.memory.free) * 100, data.cpu, system.time);
 }
 
 ProcessData.prototype.log = function(type, data) {
@@ -48,22 +48,22 @@ ProcessData.prototype._map = function(data) {
 	}.bind(this));
 }
 
-ProcessData.prototype._append = function(memory, cpu) {
-	this.usage.memory = this._compressResourceUsage(this.usage.memory);
-	this.usage.cpu = this._compressResourceUsage(this.usage.cpu);
+ProcessData.prototype._append = function(memory, cpu, time) {
+	this.usage.memory = this._compressResourceUsage(this.usage.memory, time);
+	this.usage.cpu = this._compressResourceUsage(this.usage.cpu, time);
 
 	this.usage.memory.push({
-		x: Date.now(),
+		x: time,
 		y: ~~memory
 	});
 
 	this.usage.cpu.push({
-		x: Date.now(),
+		x: time,
 		y: ~~cpu
 	});
 }
 
-ProcessData.prototype._compressResourceUsage = function(data) {
+ProcessData.prototype._compressResourceUsage = function(data, time) {
 	var datapoints = this._config.get("graph:datapoints");
 	datapoints -= 1;
 
@@ -74,8 +74,8 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 		return data;
 	}
 
-	var now = Date.now();
-	var cutoff = Date.now() - maxAgeInDays;
+	var now = time;
+	var cutoff = now - maxAgeInDays;
 	var usage = [];
 
 	var days = [];

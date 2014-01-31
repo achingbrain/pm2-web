@@ -101,7 +101,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 			pid: process.pid,
 			name: process.pm2_env.name,
 			script: process.pm2_env.pm_exec_path,
-			uptime: (Date.now() - process.pm2_env.pm_uptime) / 1000,
+			uptime: (data.system.time - process.pm2_env.pm_uptime) / 1000,
 			restarts: process.pm2_env.restart_time,
 			status: process.pm2_env.status,
 			memory: process.monit.memory,
