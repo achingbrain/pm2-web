@@ -89,6 +89,10 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 
 ## Release notes
 
+### 1.4.x
+
+ - Swapped d3/xCharts for HighCharts due to a memory leak
+
 ### 1.3.x
 
  - Display logs from processes emitted after pm2-web was started
