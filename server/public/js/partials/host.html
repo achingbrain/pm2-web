@@ -85,7 +85,7 @@
 				<dt class="memory">Memory</dt>
 				<dd>Memory</dd>
 			</dl>
-			<figure resourceusage id="resources-{{process.pid}}" data="process.usage" style="display: block; width: 100%; height: 300px; margin: 10px 0"></figure>
+			<figure resourceusage data="process.usage" style="display: block; width: 100%; height: 300px; margin: 10px 0"></figure>
 			<h3>Logs</h3>
 			<ul scrollglue>
 				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml" />
