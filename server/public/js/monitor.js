@@ -132,14 +132,25 @@ ProcessData.prototype._append = function(memory, cpu, time) {
 	this.usage.memory = this._compressResourceUsage(this.usage.memory, time);
 	this.usage.cpu = this._compressResourceUsage(this.usage.cpu, time);
 
-	this.usage.memory.push({
-		x: time,
-		y: ~~memory
-	});
+	this._appendIfDifferent(this.usage.memory, memory, time);
+	this._appendIfDifferent(this.usage.cpu, cpu, time);
+}
 
-	this.usage.cpu.push({
+ProcessData.prototype._appendIfDifferent = function(array, value, time) {
+	var rounded = ~~value;
+
+	// if the last two datapoints have the same value as the one we're about to add,
+	// don't add a third, just change the date of the last one to be now
+	// x-----x becomes x-----------x instead of x-----x-----x
+	if(array.length > 1 && array[array.length - 1].y == rounded && array[array.length - 2].y == rounded) {
+		array[array.length - 1].x = time;
+
+		return;
+	}
+
+	array.push({
 		x: time,
-		y: ~~cpu
+		y: rounded
 	});
 }
 
@@ -4692,6 +4703,10 @@ module.exports = ["$sce", function($sce) {
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
+		if(!number) {
+			return 0;
+		}
+
 		return number.toFixed(decimalPlaces);
 	}
 };
@@ -4711,6 +4726,10 @@ module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
 
 	return function(bytes) {
+		if(!bytes) {
+			return "0B";
+		}
+
 		for(var i = sizes.length; i > 0; i--) {
 			var step = Math.pow(1024, i);
 

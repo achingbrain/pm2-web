@@ -4,6 +4,7 @@
 		"title": "PM2 Process Monitor"
 	},
 	"ws": {
+		"host": "localhost",
 		"port": 9001
 	},
 	"pm2": [{
