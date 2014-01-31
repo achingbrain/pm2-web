@@ -37,6 +37,7 @@ module.exports = {
 
 		this._data._append(5, 5);
 
+		this._data.usage.memory.length.should.be.above(0);
 		this._data.usage.memory.length.should.not.be.above(1000);
 
 		test.done();

@@ -51,6 +51,46 @@ module.exports = {
 		this._webSocketResponder._ws.onerror();
 	},
 
+	"Should emit hosts": function(test) {
+		this._webSocketResponder.on("hosts", function() {
+			test.done();
+		});
+
+		this._webSocketResponder.onHosts();
+	},
+
+	"Should emit config": function(test) {
+		this._webSocketResponder.on("config", function() {
+			test.done();
+		});
+
+		this._webSocketResponder.onConfig();
+	},
+
+	"Should emit log:info": function(test) {
+		this._webSocketResponder.on("log:info", function() {
+			test.done();
+		});
+
+		this._webSocketResponder.onInfoLog();
+	},
+
+	"Should emit log:error": function(test) {
+		this._webSocketResponder.on("log:error", function() {
+			test.done();
+		});
+
+		this._webSocketResponder.onErrorLog();
+	},
+
+	"Should emit process:exception": function(test) {
+		this._webSocketResponder.on("process:exception", function() {
+			test.done();
+		});
+
+		this._webSocketResponder.onProcessException();
+	},
+
 	"Should report socket closed": function(test) {
 		this._webSocketResponder._ws.readyState = 3;
 

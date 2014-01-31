@@ -164,5 +164,134 @@ module.exports = {
 			},
 			processes: []
 		});
+	},
+
+	"Should populate host data": function(test) {
+		Object.keys(this._hostList._hosts).length.should.equal(0);
+
+		this._webSocketResponder.once.getCall(0).args[0].should.equal("hosts");
+
+		var callback = this._webSocketResponder.once.getCall(0).args[1];
+
+		callback([{
+			"name":"localhost",
+			"system": {
+				"hostname":"Alexs-MacBook-Pro.local",
+				"cpu_count":4,
+				"uptime":289806,
+				"load": [
+					2.47412109375,
+					2.4853515625,
+					2.4150390625
+				],
+				"memory": {
+					"free": 10717712384,
+					"total": 17179869184,
+					"used":6462156800
+				}
+			},"processes":[],
+			"lastUpdated":1391154303000
+		}]);
+
+		Object.keys(this._hostList._hosts).length.should.equal(1);
+
+		test.done();
+	},
+
+	"Should update host data": function(test) {
+		var hostData = {
+			"name":"localhost",
+			"system": {
+				"hostname":"Alexs-MacBook-Pro.local",
+				"cpu_count":4,
+				"uptime":289806,
+				"load": [
+					2.47412109375,
+					2.4853515625,
+					2.4150390625
+				],
+				"memory": {
+					"free": 10717712384,
+					"total": 17179869184,
+					"used":6462156800
+				}
+			},"processes":[],
+			"lastUpdated":1391154303000
+		};
+
+		this._webSocketResponder.once.getCall(0).args[0].should.equal("hosts");
+
+		var onHostsCallback = this._webSocketResponder.once.getCall(0).args[1];
+
+		// populate host data
+		onHostsCallback([hostData]);
+
+		this._webSocketResponder.on.getCall(0).args[0].should.equal("systemData");
+
+		// should emit "update" event
+		this._hostList.on("update", function() {
+			test.done();
+		});
+
+		var updateHostCallback = this._webSocketResponder.on.getCall(0).args[1];
+
+		// upate host data
+		updateHostCallback(hostData);
+	},
+
+	"Should log info message": function(test) {
+		var message = "message";
+		var hostName = "foo";
+		var processId = 5;
+
+		var host = {
+			findProcessById: sinon.stub()
+		};
+
+		var process = {
+			log: sinon.stub()
+		};
+
+		host.findProcessById.withArgs(processId).returns(process);
+
+		this._hostList._hosts[hostName] = host;
+
+		this._webSocketResponder.on.getCall(1).args[0].should.equal("log:info");
+		var callback = this._webSocketResponder.on.getCall(1).args[1];
+
+		callback(hostName, processId, message);
+
+		process.log.getCall(0).args[0].should.equal("info");
+		process.log.getCall(0).args[1].should.equal(message);
+
+		test.done();
+	},
+
+	"Should log error message": function(test) {
+		var message = "message";
+		var hostName = "foo";
+		var processId = 5;
+
+		var host = {
+			findProcessById: sinon.stub()
+		};
+
+		var process = {
+			log: sinon.stub()
+		};
+
+		host.findProcessById.withArgs(processId).returns(process);
+
+		this._hostList._hosts[hostName] = host;
+
+		this._webSocketResponder.on.getCall(2).args[0].should.equal("log:error");
+		var callback = this._webSocketResponder.on.getCall(2).args[1];
+
+		callback(hostName, processId, message);
+
+		process.log.getCall(0).args[0].should.equal("error");
+		process.log.getCall(0).args[1].should.equal(message);
+
+		test.done();
 	}
 };

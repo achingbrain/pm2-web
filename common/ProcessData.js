@@ -99,6 +99,11 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 		}
 	});
 
+	// all datapoints were in one day..
+	if(days.length == 0) {
+		days.push(day);
+	}
+
 	// compress each days worth of data
 	days.forEach(function(day) {
 		var compressed = this._compressDay(day, now, datapoints, distribution);

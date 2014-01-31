@@ -179,6 +179,11 @@ ProcessData.prototype._compressResourceUsage = function(data) {
 		}
 	});
 
+	// all datapoints were in one day..
+	if(days.length == 0) {
+		days.push(day);
+	}
+
 	// compress each days worth of data
 	days.forEach(function(day) {
 		var compressed = this._compressDay(day, now, datapoints, distribution);
@@ -1597,7 +1602,7 @@ module.exports = {
 
 },{}],12:[function(require,module,exports){
 //! moment.js
-//! version : 2.5.1
+//! version : 2.5.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -1609,7 +1614,7 @@ module.exports = {
     ************************************/
 
     var moment,
-        VERSION = "2.5.1",
+        VERSION = "2.5.0",
         global = this,
         round = Math.round,
         i,
@@ -1624,19 +1629,6 @@ module.exports = {
 
         // internal storage for language config files
         languages = {},
-
-        // moment internal properties
-        momentProperties = {
-            _isAMomentObject: null,
-            _i : null,
-            _f : null,
-            _l : null,
-            _strict : null,
-            _isUTC : null,
-            _offset : null,  // optional. Combine with _isUTC
-            _pf : null,
-            _lang : null  // optional
-        },
 
         // check for nodeJS
         hasModule = (typeof module !== 'undefined' && module.exports && typeof require !== 'undefined'),
@@ -1669,21 +1661,19 @@ module.exports = {
         parseTokenTwoDigits = /\d\d/, // 00 - 99
         parseTokenThreeDigits = /\d{3}/, // 000 - 999
         parseTokenFourDigits = /\d{4}/, // 0000 - 9999
-        parseTokenSixDigits = /[+-]?\d{6}/, // -999,999 - 999,999
-        parseTokenSignedNumber = /[+-]?\d+/, // -inf - inf
+        parseTokenSixDigits = /[+\-]?\d{6}/, // -999,999 - 999,999
 
         // iso 8601 regex
         // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
-        isoRegex = /^\s*(?:[+-]\d{6}|\d{4})-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
+        isoRegex = /^\s*\d{4}-(?:(\d\d-\d\d)|(W\d\d$)|(W\d\d-\d)|(\d\d\d))((T| )(\d\d(:\d\d(:\d\d(\.\d+)?)?)?)?([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
 
         isoFormat = 'YYYY-MM-DDTHH:mm:ssZ',
 
         isoDates = [
-            ['YYYYYY-MM-DD', /[+-]\d{6}-\d{2}-\d{2}/],
-            ['YYYY-MM-DD', /\d{4}-\d{2}-\d{2}/],
-            ['GGGG-[W]WW-E', /\d{4}-W\d{2}-\d/],
-            ['GGGG-[W]WW', /\d{4}-W\d{2}/],
-            ['YYYY-DDD', /\d{4}-\d{3}/]
+            'YYYY-MM-DD',
+            'GGGG-[W]WW',
+            'GGGG-[W]WW-E',
+            'YYYY-DDD'
         ],
 
         // iso time formats and regexes
@@ -1793,7 +1783,7 @@ module.exports = {
                 return leftZeroFill(this.weekYear() % 100, 2);
             },
             gggg : function () {
-                return leftZeroFill(this.weekYear(), 4);
+                return this.weekYear();
             },
             ggggg : function () {
                 return leftZeroFill(this.weekYear(), 5);
@@ -1802,7 +1792,7 @@ module.exports = {
                 return leftZeroFill(this.isoWeekYear() % 100, 2);
             },
             GGGG : function () {
-                return leftZeroFill(this.isoWeekYear(), 4);
+                return this.isoWeekYear();
             },
             GGGGG : function () {
                 return leftZeroFill(this.isoWeekYear(), 5);
@@ -1876,23 +1866,6 @@ module.exports = {
         },
 
         lists = ['months', 'monthsShort', 'weekdays', 'weekdaysShort', 'weekdaysMin'];
-
-    function defaultParsingFlags() {
-        // We need to deep clone this object, and es5 standard is not very
-        // helpful.
-        return {
-            empty : false,
-            unusedTokens : [],
-            unusedInput : [],
-            overflow : -2,
-            charsLeftOver : 0,
-            nullInput : false,
-            invalidMonth : null,
-            invalidFormat : false,
-            userInvalidated : false,
-            iso: false
-        };
-    }
 
     function padToken(func, count) {
         return function (a) {
@@ -1985,17 +1958,6 @@ module.exports = {
         return a;
     }
 
-    function cloneMoment(m) {
-        var result = {}, i;
-        for (i in m) {
-            if (m.hasOwnProperty(i) && momentProperties.hasOwnProperty(i)) {
-                result[i] = m[i];
-            }
-        }
-
-        return result;
-    }
-
     function absRound(number) {
         if (number < 0) {
             return Math.ceil(number);
@@ -2007,7 +1969,7 @@ module.exports = {
     // left zero fill a number
     // see http://jsperf.com/left-zero-filling for performance comparison
     function leftZeroFill(number, targetLength, forceSign) {
-        var output = '' + Math.abs(number),
+        var output = Math.abs(number) + '',
             sign = number >= 0;
 
         while (output.length < targetLength) {
@@ -2185,6 +2147,21 @@ module.exports = {
 
             m._pf.overflow = overflow;
         }
+    }
+
+    function initializeParsingFlags(config) {
+        config._pf = {
+            empty : false,
+            unusedTokens : [],
+            unusedInput : [],
+            overflow : -2,
+            charsLeftOver : 0,
+            nullInput : false,
+            invalidMonth : null,
+            invalidFormat : false,
+            userInvalidated : false,
+            iso: false
+        };
     }
 
     function isValid(m) {
@@ -2555,10 +2532,6 @@ module.exports = {
         case 'GGGG':
         case 'gggg':
             return strict ? parseTokenFourDigits : parseTokenOneToFourDigits;
-        case 'Y':
-        case 'G':
-        case 'g':
-            return parseTokenSignedNumber;
         case 'YYYYYY':
         case 'YYYYY':
         case 'GGGGG':
@@ -2571,10 +2544,8 @@ module.exports = {
             if (strict) { return parseTokenTwoDigits; }
             /* falls through */
         case 'SSS':
-            if (strict) { return parseTokenThreeDigits; }
-            /* falls through */
         case 'DDD':
-            return parseTokenOneToThreeDigits;
+            return strict ? parseTokenThreeDigits : parseTokenOneToThreeDigits;
         case 'MMM':
         case 'MMMM':
         case 'dd':
@@ -2616,7 +2587,7 @@ module.exports = {
         case 'W':
         case 'e':
         case 'E':
-            return parseTokenOneOrTwoDigits;
+            return strict ? parseTokenOneDigit : parseTokenOneOrTwoDigits;
         default :
             a = new RegExp(regexpEscape(unescapeFormat(token.replace('\\', '')), "i"));
             return a;
@@ -2947,7 +2918,7 @@ module.exports = {
         for (i = 0; i < config._f.length; i++) {
             currentScore = 0;
             tempConfig = extend({}, config);
-            tempConfig._pf = defaultParsingFlags();
+            initializeParsingFlags(tempConfig);
             tempConfig._f = config._f[i];
             makeDateFromStringAndFormat(tempConfig);
 
@@ -2974,20 +2945,20 @@ module.exports = {
 
     // date from iso format
     function makeDateFromString(config) {
-        var i, l,
+        var i,
             string = config._i,
             match = isoRegex.exec(string);
 
         if (match) {
             config._pf.iso = true;
-            for (i = 0, l = isoDates.length; i < l; i++) {
-                if (isoDates[i][1].exec(string)) {
+            for (i = 4; i > 0; i--) {
+                if (match[i]) {
                     // match[5] should be "T" or undefined
-                    config._f = isoDates[i][0] + (match[6] || " ");
+                    config._f = isoDates[i - 1] + (match[6] || " ");
                     break;
                 }
             }
-            for (i = 0, l = isoTimes.length; i < l; i++) {
+            for (i = 0; i < 4; i++) {
                 if (isoTimes[i][1].exec(string)) {
                     config._f += isoTimes[i][0];
                     break;
@@ -3128,10 +3099,14 @@ module.exports = {
 
     //http://en.wikipedia.org/wiki/ISO_week_date#Calculating_a_date_given_the_year.2C_week_number_and_weekday
     function dayOfYearFromWeeks(year, week, weekday, firstDayOfWeekOfYear, firstDayOfWeek) {
-        var d = makeUTCDate(year, 0, 1).getUTCDay(), daysToAdd, dayOfYear;
+        // The only solid way to create an iso date from year is to use
+        // a string format (Date.UTC handles only years > 1900). Don't ask why
+        // it doesn't need Z at the end.
+        var d = new Date(leftZeroFill(year, 6, true) + '-01-01').getUTCDay(),
+            daysToAdd, dayOfYear;
 
         weekday = weekday != null ? weekday : firstDayOfWeek;
-        daysToAdd = firstDayOfWeek - d + (d > firstDayOfWeekOfYear ? 7 : 0) - (d < firstDayOfWeek ? 7 : 0);
+        daysToAdd = firstDayOfWeek - d + (d > firstDayOfWeekOfYear ? 7 : 0);
         dayOfYear = 7 * (week - 1) + (weekday - firstDayOfWeek) + daysToAdd + 1;
 
         return {
@@ -3148,6 +3123,10 @@ module.exports = {
         var input = config._i,
             format = config._f;
 
+        if (typeof config._pf === 'undefined') {
+            initializeParsingFlags(config);
+        }
+
         if (input === null) {
             return moment.invalid({nullInput: true});
         }
@@ -3157,7 +3136,7 @@ module.exports = {
         }
 
         if (moment.isMoment(input)) {
-            config = cloneMoment(input);
+            config = extend({}, input);
 
             config._d = new Date(+input._d);
         } else if (format) {
@@ -3174,47 +3153,37 @@ module.exports = {
     }
 
     moment = function (input, format, lang, strict) {
-        var c;
-
         if (typeof(lang) === "boolean") {
             strict = lang;
             lang = undefined;
         }
-        // object construction must be done this way.
-        // https://github.com/moment/moment/issues/1423
-        c = {};
-        c._isAMomentObject = true;
-        c._i = input;
-        c._f = format;
-        c._l = lang;
-        c._strict = strict;
-        c._isUTC = false;
-        c._pf = defaultParsingFlags();
-
-        return makeMoment(c);
+        return makeMoment({
+            _i : input,
+            _f : format,
+            _l : lang,
+            _strict : strict,
+            _isUTC : false
+        });
     };
 
     // creating with utc
     moment.utc = function (input, format, lang, strict) {
-        var c;
+        var m;
 
         if (typeof(lang) === "boolean") {
             strict = lang;
             lang = undefined;
         }
-        // object construction must be done this way.
-        // https://github.com/moment/moment/issues/1423
-        c = {};
-        c._isAMomentObject = true;
-        c._useUTC = true;
-        c._isUTC = true;
-        c._l = lang;
-        c._i = input;
-        c._f = format;
-        c._strict = strict;
-        c._pf = defaultParsingFlags();
+        m = makeMoment({
+            _useUTC : true,
+            _isUTC : true,
+            _l : lang,
+            _i : input,
+            _f : format,
+            _strict : strict
+        }).utc();
 
-        return makeMoment(c).utc();
+        return m;
     };
 
     // creating with unix timestamp (in seconds)
@@ -3324,8 +3293,7 @@ module.exports = {
 
     // compare moment object
     moment.isMoment = function (obj) {
-        return obj instanceof Moment ||
-            (obj != null &&  obj.hasOwnProperty('_isAMomentObject'));
+        return obj instanceof Moment;
     };
 
     // for typechecking Duration objects
