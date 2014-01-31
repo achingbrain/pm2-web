@@ -14,7 +14,7 @@ var HostData = function(name, config) {
 HostData.prototype.update = function(data) {
 	this.lastUpdated = Date.now();
 
-	["hostname", "cpu_count", "uptime"].forEach(function(key) {
+	["hostname", "cpu_count", "uptime", "time"].forEach(function(key) {
 		this.system[key] = data.system[key]
 	}.bind(this));
 

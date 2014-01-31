@@ -95,6 +95,11 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 		processes: []
 	};
 
+	// support for pm2 < 0.7.2
+	if(!data.system.time) {
+		data.system.time = Date.now();
+	}
+
 	data.processes.forEach(function(process) {
 		systemData.processes.push({
 			id: process.pm_id,
