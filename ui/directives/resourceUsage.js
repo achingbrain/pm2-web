@@ -1,5 +1,5 @@
 
-module.exports = [function() {
+module.exports = ["config", function(config) {
 	return {
 		restrict: "A",
 		scope: {
@@ -58,7 +58,9 @@ module.exports = [function() {
 					gridLineColor: "#EEEEEE"
 				},
 				tooltip: {
-					valueSuffix: " %"
+					valueSuffix: " %",
+					// disabled until data interpolation is added
+					enabled: false
 				},
 				plotOptions: {
 					areaspline: {
@@ -71,8 +73,6 @@ module.exports = [function() {
 						marker: {
 							enabled: false
 						},
-						//pointInterval: 3600000, // one hour
-						//pointStart: Date.UTC(2009, 9, 6, 0, 0, 0),
 						fillOpacity: 0.1
 					}
 				},
@@ -87,10 +87,11 @@ module.exports = [function() {
 				}]
 			});
 
-			$scope.$watchCollection("data.memory", function() {
-				chart.series[0].setData($scope.data.cpu);
+			// much simpler than $scope.$watchCollection
+			setInterval(function() {
 				chart.series[1].setData($scope.data.memory, true);
-			});
+				chart.series[0].setData($scope.data.cpu, true);
+			}, config.get("updateFrequency"));
 		}
 	};
 }];

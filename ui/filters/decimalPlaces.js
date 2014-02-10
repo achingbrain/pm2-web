@@ -1,7 +1,7 @@
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
-		if(!number) {
+		if(!number && number !== 0) {
 			return 0;
 		}
 

@@ -671,7 +671,7 @@ module.exports = function isBuffer(arg) {
     && typeof arg.readUInt8 === 'function';
 }
 },{}],7:[function(require,module,exports){
-var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
+(function (process,global){// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -1257,8 +1257,8 @@ exports._extend = function(origin, add) {
 function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
-
-},{"./support/isBuffer":6,"__browserify_process":5,"inherits":4}],8:[function(require,module,exports){
+}).call(this,require("/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":6,"/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"inherits":4}],8:[function(require,module,exports){
 module.exports = {
   XmlEntities: require('./lib/xml-entities.js').XmlEntities,
   Html4Entities: require('./lib/html4-entities.js').Html4Entities,
@@ -4547,7 +4547,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 
 },{}],21:[function(require,module,exports){
 
-module.exports = [function() {
+module.exports = ["config", function(config) {
 	return {
 		restrict: "A",
 		scope: {
@@ -4606,7 +4606,9 @@ module.exports = [function() {
 					gridLineColor: "#EEEEEE"
 				},
 				tooltip: {
-					valueSuffix: " %"
+					valueSuffix: " %",
+					// disabled until data interpolation is added
+					enabled: false
 				},
 				plotOptions: {
 					areaspline: {
@@ -4619,8 +4621,6 @@ module.exports = [function() {
 						marker: {
 							enabled: false
 						},
-						//pointInterval: 3600000, // one hour
-						//pointStart: Date.UTC(2009, 9, 6, 0, 0, 0),
 						fillOpacity: 0.1
 					}
 				},
@@ -4635,10 +4635,11 @@ module.exports = [function() {
 				}]
 			});
 
-			$scope.$watchCollection("data.memory", function() {
-				chart.series[0].setData($scope.data.cpu);
+			// much simpler than $scope.$watchCollection
+			setInterval(function() {
 				chart.series[1].setData($scope.data.memory, true);
-			});
+				chart.series[0].setData($scope.data.cpu, true);
+			}, config.get("updateFrequency"));
 		}
 	};
 }];
@@ -4703,7 +4704,7 @@ module.exports = ["$sce", function($sce) {
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
-		if(!number) {
+		if(!number && number !== 0) {
 			return 0;
 		}
 
@@ -4726,7 +4727,7 @@ module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
 
 	return function(bytes) {
-		if(!bytes) {
+		if(!bytes && bytes !== 0) {
 			return "0B";
 		}
 

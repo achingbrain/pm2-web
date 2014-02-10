@@ -41,10 +41,10 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 		client.send(JSON.stringify({
 			method: "onConfig",
 			args: [{
-					graph: this._config.get("graph"),
-					logs: this._config.get("logs")
-				}
-			]
+				graph: this._config.get("graph"),
+				logs: this._config.get("logs"),
+				updateFrequency: this._config.get("updateFrequency")
+			}]
 		}));
 
 		// send all host data

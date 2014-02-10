@@ -3,7 +3,7 @@ module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
 
 	return function(bytes) {
-		if(!bytes) {
+		if(!bytes && bytes !== 0) {
 			return "0B";
 		}
 
