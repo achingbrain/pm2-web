@@ -1,5 +1,5 @@
 # pm2-web
-[![Dependency Status](https://david-dm.org/achingbrain/pm2-web.png)](https://david-dm.org/achingbrain/pm2-web) [![devDependency Status](https://david-dm.org/achingbrain/pm2-web/dev-status.png)](https://david-dm.org/achingbrain/pm2-web#info=devDependencies) [![Build Status](https://travis-ci.org/achingbrain/pm2-web.png)](https://travis-ci.org/achingbrain/pm2-web) [![Coverage Status](https://coveralls.io/repos/achingbrain/pm2-web/badge.png)](https://coveralls.io/r/achingbrain/pm2-web)
+[![Dependency Status](https://david-dm.org/achingbrain/pm2-web.svg?theme=shields.io)](https://david-dm.org/achingbrain/pm2-web) [![devDependency Status](https://david-dm.org/achingbrain/pm2-web/dev-status.svg?theme=shields.io)](https://david-dm.org/achingbrain/pm2-web#info=devDependencies) [![Build Status](https://img.shields.io/travis/achingbrain/pm2-web/master.svg)](https://travis-ci.org/achingbrain/pm2-web) [![Coverage Status](http://img.shields.io/coveralls/achingbrain/pm2-web/master.svg)](https://coveralls.io/r/achingbrain/pm2-web)
 
 A web based monitor for [PM2](https://github.com/Unitech/pm2).
 
