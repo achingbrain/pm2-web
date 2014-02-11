@@ -4618,8 +4618,14 @@ module.exports = ["config", function(config) {
 								lineWidth: 5
 							}
 						},
+						// disabled markers until data interpolation is supported
 						marker: {
-							enabled: false
+							enabled: false,
+							states: {
+								hover: {
+									enabled: false
+								}
+							}
 						},
 						fillOpacity: 0.1
 					}
