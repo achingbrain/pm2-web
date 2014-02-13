@@ -8,12 +8,14 @@ var READYSTATE = {
 	CLOSED: 3
 };
 
-WebSocketResponder = function(socketUrl, $rootScope) {
+WebSocketResponder = function(location, port, $rootScope) {
 	EventEmitter.apply(this);
 
-	console.info("WebSocketResponder", "Connecting to", socketUrl);
+	this.url = this._detectLocation(location, port);
 
-	this._ws = new ReconnectingWebSocket(socketUrl);
+	console.info("WebSocketResponder", "Connecting to", this.url);
+
+	this._ws = new ReconnectingWebSocket(this.url);
 	this._ws.onconnecting = function() {
 		this.emit("connecting");
 	}.bind(this);
@@ -37,6 +39,16 @@ WebSocketResponder = function(socketUrl, $rootScope) {
 	}.bind(this);
 };
 util.inherits(WebSocketResponder, EventEmitter);
+
+WebSocketResponder.prototype._detectLocation = function(location, port ) {
+	var protocol = "ws";
+
+	if(location.protocol == "https") {
+		protocol += "s";
+	}
+
+	return protocol + "://" + location.hostname + ":" + port;
+}
 
 WebSocketResponder.prototype.isClosed = function() {
 	return this._ws.readyState == READYSTATE.CLOSED;

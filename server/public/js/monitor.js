@@ -4283,12 +4283,14 @@ var READYSTATE = {
 	CLOSED: 3
 };
 
-WebSocketResponder = function(socketUrl, $rootScope) {
+WebSocketResponder = function(location, port, $rootScope) {
 	EventEmitter.apply(this);
 
-	console.info("WebSocketResponder", "Connecting to", socketUrl);
+	this.url = this._detectLocation(location, port);
 
-	this._ws = new ReconnectingWebSocket(socketUrl);
+	console.info("WebSocketResponder", "Connecting to", this.url);
+
+	this._ws = new ReconnectingWebSocket(this.url);
 	this._ws.onconnecting = function() {
 		this.emit("connecting");
 	}.bind(this);
@@ -4312,6 +4314,16 @@ WebSocketResponder = function(socketUrl, $rootScope) {
 	}.bind(this);
 };
 util.inherits(WebSocketResponder, EventEmitter);
+
+WebSocketResponder.prototype._detectLocation = function(location, port ) {
+	var protocol = "ws";
+
+	if(location.protocol == "https") {
+		protocol += "s";
+	}
+
+	return protocol + "://" + location.hostname + ":" + port;
+}
 
 WebSocketResponder.prototype.isClosed = function() {
 	return this._ws.readyState == READYSTATE.CLOSED;
@@ -4394,7 +4406,7 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 		$scope.$apply(function() {
 			$scope.alerts = [{
 				type: "info",
-				message: "Connecting to " + $window.settings.ws
+				message: "Connecting to " + webSocketResponder.url
 			}];
 		});
 	});
@@ -4768,7 +4780,7 @@ pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, web
 	return new HostList(config, webSocketResponder);
 }]);
 pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
-	return new WebSocketResponder($window.settings.ws, $rootScope);
+	return new WebSocketResponder($window.location, $window.settings.ws, $rootScope);
 }]);
 pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 	return new Config(webSocketResponder);

@@ -2,7 +2,7 @@ var WebSocketResponder = require(__dirname + "/../../../../ui/components/WebSock
 	sinon = require("sinon"),
 	should = require("should");
 
-var socketUrl = "ws://fake.socket:1234";
+var port = 1234;
 
 module.exports = {
 	setUp: function(done) {
@@ -14,7 +14,7 @@ module.exports = {
 			$apply: sinon.spy()
 		};
 
-		this._webSocketResponder = new WebSocketResponder(socketUrl, this._rootScope);
+		this._webSocketResponder = new WebSocketResponder({protocol: "http", hostname: "localhost"}, port, this._rootScope);
 
 		done();
 	},

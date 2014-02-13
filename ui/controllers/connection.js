@@ -13,7 +13,7 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 		$scope.$apply(function() {
 			$scope.alerts = [{
 				type: "info",
-				message: "Connecting to " + $window.settings.ws
+				message: "Connecting to " + webSocketResponder.url
 			}];
 		});
 	});

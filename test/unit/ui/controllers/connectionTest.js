@@ -38,8 +38,9 @@ module.exports = {
 
 	"Should show connecting message": function(test) {
 		this._window.settings = {
-			ws: "foo"
+			ws: 10
 		}
+		this._webSocketResponder.url = "ws://location:" + this._window.settings.ws;
 
 		this._controller(this._window, this._scope, this._location, this._webSocketResponder, this._hostList);
 

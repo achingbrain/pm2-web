@@ -27,6 +27,9 @@ PM2Web = function(options) {
 		]
 	});
 
+	// print out current configuration
+	this._container.find("logger").info("PM2Web", "Configuration", JSON.stringify(config.get()));
+
 	// web controllers
 	this._container.createAndRegister("homeController", require(__dirname + "/routes/Home"));
 
