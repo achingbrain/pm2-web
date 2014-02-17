@@ -4746,7 +4746,7 @@ module.exports = function() {
 
 	return function(bytes) {
 		if(!bytes && bytes !== 0) {
-			return "0B";
+			return "0 B";
 		}
 
 		for(var i = sizes.length; i > 0; i--) {

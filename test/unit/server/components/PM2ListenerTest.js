@@ -14,9 +14,6 @@ module.exports = {
 			error: sinon.stub(),
 			debug: sinon.stub()
 		};
-		this._listener._pm2ArgumentParser = {
-			findHosts: sinon.stub()
-		};
 		this._listener._pm2InterfaceFactory = sinon.stub();
 
 		this._clock = sinon.useFakeTimers();
@@ -41,7 +38,7 @@ module.exports = {
 			on: sinon.stub()
 		};
 
-		this._listener._pm2ArgumentParser.findHosts.returns(hosts);
+		this._listener._config.get.withArgs("pm2").returns(hosts);
 		this._listener._pm2InterfaceFactory.returns(remote);
 
 		this._listener.afterPropertiesSet();

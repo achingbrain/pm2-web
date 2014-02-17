@@ -1,26 +1,62 @@
+// pm2-web configuration file
 {
+
+	// Web server settings
 	"www": {
-		"port": 9000,
-		"title": "PM2 Process Monitor"
+		"port": 9000
 	},
+
+	// Web socket settings
 	"ws": {
 		"port": 9001
 	},
+
+	// To monitor multiple hosts, add extra entries to this array
 	"pm2": [{
-		"host": "localhost"
+		"host": "localhost",
+		"rpc": 6666,
+		"events": 6667
 	}],
+
+	// How often to poll hosts for data (in ms)
 	"updateFrequency": 5000,
+
+	// Log settings
+	"logs": {
+
+		// The max number of log entries per process that will be shown in the browser
+		"max": 1000
+	},
+
+	// Settings for removing hosts that have gone away
 	"hostPurge": {
+
+		// How often to see if hosts have gone away (in ms)
 		"frequency": 10000,
+
+		// Hosts not having returned system data within this
+		// time period will be removed from display (in ms)
 		"cutoff": 60000
 	},
+
+	// Graph settings
 	"graph": {
+
+		// Max number of points to plot on the graph
 		"datapoints": 1000,
+
+		// Graph data will be compressed over time. Distribution is the % distribution going back in time.
+		// e.g. [40, 25, 10, 10, 5] means the last 24 hours will hold 40% of graph:datapoints, the 24
+		// hours prior to that will hold 25%, the 24 hours prior to that will hold 10% and so on.  You
+		// may add as many entries to this array as you wish but they must add up to 100.
 		"distribution": [
 			40, 25, 10, 10, 5
 		]
-	},
-	"logs": {
-		"max": 1000
 	}
+
+	// Uncomment this section to enable a Bonjour/ZeroConf/MDNS advert for pm2-web
+	// N.B. Linux and Windows need Avahi and Bonjour installed respectively for this to work
+	// , "mdns": {
+	//	"name": "pm2"
+	//}
 }

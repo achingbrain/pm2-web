@@ -6,7 +6,7 @@ module.exports = {
 	},
 	"server": {
 		"components": {
-			"PM2ArgumentParser": require(__dirname + "/server/components/PM2ArgumentParserTest.js"),
+			"Configuration": require(__dirname + "/server/components/ConfigurationTest.js"),
 			"PM2Listener": require(__dirname + "/server/components/PM2ListenerTest.js"),
 			"ServerHostList": require(__dirname + "/server/components/ServerHostListTest.js"),
 			"WebSocketResponder": require(__dirname + "/server/components/WebSocketResponderTest.js")

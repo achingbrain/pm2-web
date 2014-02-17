@@ -6,7 +6,6 @@ var HomeController = function() {
 
 HomeController.prototype.get = function(request, response){
 	response.render("index", {
-		title: this._config.get("www:title"),
 		ws: this._config.get("ws:port")
 	});
 };

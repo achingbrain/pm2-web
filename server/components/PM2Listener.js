@@ -8,7 +8,6 @@ var PM2Listener = function() {
 
 	this._config = Autowire;
 	this._logger = Autowire;
-	this._pm2ArgumentParser = Autowire;
 	this._pm2InterfaceFactory = Autowire;
 
 	this._pm2List = {};
@@ -16,7 +15,7 @@ var PM2Listener = function() {
 util.inherits(PM2Listener, EventEmitter);
 
 PM2Listener.prototype.afterPropertiesSet = function() {
-	this._pm2ArgumentParser.findHosts().forEach(function(pm2Details) {
+	this._config.get("pm2").forEach(function(pm2Details) {
 		this._connect(pm2Details);
 	}.bind(this));
 }

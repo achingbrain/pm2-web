@@ -13,5 +13,12 @@ module.exports = {
 		decimalPlaces()(1, 2).length.should.equal(4);
 
 		test.done();
+	},
+
+	"Should survive bad input": function( test ) {
+		decimalPlaces()().should.equal(0);
+		decimalPlaces()(undefined).should.equal(0);
+
+		test.done();
 	}
 };

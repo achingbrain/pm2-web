@@ -23,7 +23,33 @@ Then run:
 $ pm2-web
 ```
 
-You can specify several command line arguments:
+## Configuration
+
+All configuration options are documented in the [default configuration file](https://github.com/achingbrain/pm2-web/blob/master/config.json).
+
+pm2-web will load one of the following files if they exist (in order of preference)
+
+ - A file specified by the `--config /path/to/config.json` argument
+ - From the current users' home directory: `~/.config/pm2-web/config.json`
+ - A global configuration file: `/etc/pm2-web/config.json`
+
+The default configuration file is always loaded and other config files will be applied to the default configuration so if the only change you wish to make is to monitor multiple hosts and those hosts are using the default `rpc` and `event` ports, all your configuration file need contain is:
+
+```javascript
+{
+	"pm2": [{
+		"host": "foo.baz.com"
+	}, {
+		"host": "bar.baz.com"
+	}]
+}
+```
+
+The configuration file(s) loaded and the final configuration object will both be recorded in the logs.
+
+Configuration files are loaded using [cjson](https://www.npmjs.org/package/cjson) so comments are ok.
+
+All options can also be passed on the command line and will override any config files.  For example:
 
  - `--www:port 9000` This is the port the web interface listens on.
  - `--mdns:name pm2-web` Publish an mdns (Bonjour/Zeroconf) advert with the specified name
@@ -87,6 +113,10 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 ```
 
 ## Release notes
+
+### 1.5.x
+
+ - Introduced external configuration file
 
 ### 1.4.x
 

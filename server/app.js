@@ -1,5 +1,4 @@
 var winston = require("winston"),
-	config = require("nconf"),
 	Container = require("wantsit").Container
 	Express = require("express"),
 	http = require("http"),
@@ -11,11 +10,8 @@ var winston = require("winston"),
 PM2Web = function(options) {
 	EventEmitter.call(this);
 
-	// set up arguments
-	config.overrides(options).argv().env().file(__dirname + "/../config.json");
-
+	// create container
 	this._container = new Container();
-	this._container.register("config", config);
 
 	// set up logging
 	this._container.createAndRegister("logger", winston.Logger, {
@@ -27,8 +23,8 @@ PM2Web = function(options) {
 		]
 	});
 
-	// print out current configuration
-	this._container.find("logger").info("PM2Web", "Configuration", JSON.stringify(config.get()));
+	// parse configuration
+	this._container.createAndRegister("config", require(__dirname + "/components/Configuration"), options);
 
 	// web controllers
 	this._container.createAndRegister("homeController", require(__dirname + "/routes/Home"));
@@ -36,12 +32,11 @@ PM2Web = function(options) {
 	// listens for events
 	this._container.register("pm2InterfaceFactory", require("pm2-interface"));
 	this._container.createAndRegister("pm2Listener", require(__dirname + "/components/PM2Listener"));
-	this._container.createAndRegister("pm2ArgumentParser", require(__dirname + "/components/PM2ArgumentParser"));
 
 	// client interactions
 	this._container.createAndRegister("webSocketResponder", require(__dirname + "/components/WebSocketResponder"));
  	this._container.createAndRegister("webSocketServer", WebSocketServer, {
-		port: config.get("ws:port")
+		port: this._container.find("config").get("ws:port")
 	});
 
 	// holds host data
@@ -50,7 +45,7 @@ PM2Web = function(options) {
 	this._express = Express();
 
 	// all environments
-	this._express.set("port", config.get("www:port"));
+	this._express.set("port", this._container.find("config").get("www:port"));
 	this._express.set("view engine", "jade");
 	this._express.set("views", __dirname + "/views");
 	this._express.use(Express.logger("dev"));
@@ -99,13 +94,15 @@ PM2Web.prototype.start = function() {
 			this.emit("start");
 		}.bind(this));
 
-		if(config.get("mdns:name")) {
+		if(this._container.find("config").get("mdns:name")) {
 			try {
 				var mdns = require("mdns2");
 
+				this._container.find("logger").info("Starting MDNS adverisment with name", this._container.find("config").get("mdns:name"));
+
 				// publish via Bonjour
 				var advert = mdns.createAdvertisement(mdns.tcp("http"), this._express.get("port"), {
-					name: config.get("mdns:name")
+					name: this._container.find("config").get("mdns:name")
 				});
 				advert.start();
 			} catch(e) {

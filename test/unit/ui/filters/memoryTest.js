@@ -43,5 +43,12 @@ module.exports = {
 		memory()(Math.pow(2, 60)).should.equal("1.00 EB");
 
 		test.done();
+	},
+
+	"Should survive bad input": function( test ) {
+		memory()().should.equal("0 B");
+		memory()(undefined).should.equal("0 B");
+
+		test.done();
 	}
 };
