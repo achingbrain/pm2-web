@@ -1,5 +1,5 @@
 
-module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
+module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", "webSocketResponder", function($scope, $routeParams, $location, $window, hostList, webSocketResponder) {
 	$scope.showDetails = {};
 
 	var updateScope = function() {
@@ -12,6 +12,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 		}
 
 		$scope.processes = hostData.processes;
+		$scope.debugEnabled = hostData.inspector ? true : false;
 
 		$scope.toggleDetails = function(pm_id) {
 			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
@@ -36,6 +37,13 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 			process.reloading = true;
 
 			webSocketResponder.reloadProcess(hostData.name, process.id);
+
+			$event.stopPropagation();
+		};
+		$scope.debug = function(process, $event) {
+			webSocketResponder.debugProcess(hostData.name, process.id);
+
+			$window.open("http://" + hostData.name + ":" + hostData.inspector + "/debug?port=" + process.debugPort, "_blank", "location=no,menubar=no,status=no,toolbar=no");
 
 			$event.stopPropagation();
 		};

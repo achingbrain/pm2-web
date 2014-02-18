@@ -119,6 +119,13 @@ WebSocketResponder.prototype.reloadProcess = function(host, pm_id) {
 	});
 };
 
+WebSocketResponder.prototype.debugProcess = function(host, pm_id) {
+	this._send({
+		method: "debugProcess",
+		args: [host, pm_id]
+	});
+};
+
 WebSocketResponder.READYSTATE = READYSTATE;
 
 module.exports = WebSocketResponder;

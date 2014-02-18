@@ -60,7 +60,7 @@ UIHostList.prototype.empty = function() {
 };
 
 UIHostList.prototype.add = function(data) {
-	this._hosts[data.name] = new HostData(data.name, this._config);
+	this._hosts[data.name] = new HostData(data, this._config);
 
 	this.update(data);
 

@@ -35,13 +35,13 @@ PM2Listener.prototype._connect = function(pm2Details) {
 		bind_host: pm2Details.host
 	});
 
-	remote.on("ready", this._pm2RPCSocketReady.bind(this, remote));
+	remote.on("ready", this._pm2RPCSocketReady.bind(this, remote, pm2Details));
 	remote.on("closed", this._pm2RPCSocketClosed.bind(this, remote));
 	remote.on("close", this._pm2EventSocketClosed.bind(this, remote));
 	remote.on("reconnecting", this._pm2EventSocketReconnecting.bind(this, remote));
 }
 
-PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
+PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 	if(this._pm2List[pm2Interface.bind_host]) {
 		return;
 	}
@@ -60,7 +60,7 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 				this._logger.warn("PM2Listener", "Error retrieving system data", error.message);
 			} else {
 				// only expose fields we are interested in
-				var systemData = this._mapSystemData(pm2Interface, data);
+				var systemData = this._mapSystemData(pm2Interface, data, pm2Details);
 
 				this.emit("systemData", systemData);
 			}
@@ -73,7 +73,7 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface) {
 	this._pm2List[pm2Interface.bind_host] = pm2Interface;
 }
 
-PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
+PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) {
 	// support for pm2 < 0.7.2
 	if(!data.system.time) {
 		data.system.time = Date.now();
@@ -81,6 +81,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 
 	var systemData = {
 		name: pm2Interface.bind_host,
+		inspector: pm2Details.inspector,
 		system: {
 			hostname: data.system.hostname,
 			cpu_count: data.system.cpus.length,
@@ -110,6 +111,10 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 			return;
 		}
 
+		if(process.pm2_env.status != "online" && process.pm2_env.status != "stopped" && process.pm2_env.status != "errored" && process.pm2_env.status != "launching") {
+			this._logger.warn("Unknown status!", process.pm2_env.status);
+		}
+
 		systemData.processes.push({
 			id: process.pm_id,
 			pid: process.pid,
@@ -119,7 +124,8 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 			restarts: process.pm2_env.restart_time,
 			status: process.pm2_env.status,
 			memory: process.monit.memory,
-			cpu: process.monit.cpu
+			cpu: process.monit.cpu,
+			debugPort: 5858
 		});
 	}.bind(this));
 
@@ -164,6 +170,16 @@ PM2Listener.prototype.reloadProcess = function(host, pm_id) {
 		this._doByProcessId(host, pm_id, "softReloadProcessId");
 	}
 }
+
+PM2Listener.prototype.debugProcess = function(host, pm_id) {
+	// put the remot process into debug mode
+	this._pm2List[host].rpc.sendSignalToProcessId({
+		process_id: pm_id,
+		signal: "SIGUSR1"
+	}, function(error) {
+
+	});
+};
 
 PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
 	if(!this._pm2List[host]) {
