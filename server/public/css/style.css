@@ -214,6 +214,9 @@ section .logs h3 {
 .processes .information .status i.icon-exclamation-sign {
   color: #ff1100;
 }
+.processes .information .status i.icon-repeat {
+  color: #33b763;
+}
 .processes .information .actions a {
   color: #888888;
   cursor: pointer;

@@ -14,7 +14,6 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 		$scope.processes = hostData.processes;
 
 		$scope.toggleDetails = function(pm_id) {
-			console.info("Toggling details for", pm_id, !$scope.showDetails[pm_id]);
 			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
 		};
 
@@ -33,8 +32,10 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 
 			$event.stopPropagation();
 		};
-		$scope.reload = function(pm_id, $event) {
-			webSocketResponder.reloadProcess(hostData.name, pm_id);
+		$scope.reload = function(process, $event) {
+			process.reloading = true;
+
+			webSocketResponder.reloadProcess(hostData.name, process.id);
 
 			$event.stopPropagation();
 		};
