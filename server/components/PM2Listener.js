@@ -99,7 +99,17 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 		processes: []
 	};
 
+	var reloading = [];
+
 	data.processes.forEach(function(process) {
+		if((typeof process.pm_id == "string" || process.pm_id instanceof String) && process.pm_id.substring(0, 8) == "todelete") {
+			// process has been reloaded - this is the old process that will be killed
+			// so record that it's reloading but do not create a duplicate process for it.
+			reloading.push(parseInt(process.pm_id.substring(8), 10));
+
+			return;
+		}
+
 		systemData.processes.push({
 			id: process.pm_id,
 			pid: process.pid,
@@ -112,6 +122,11 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data) {
 			cpu: process.monit.cpu
 		});
 	}.bind(this));
+
+	// mark processes that are reloading as such
+	systemData.processes.forEach(function(process) {
+		process.reloading = reloading.indexOf(process.id) != -1;
+	});
 
 	return systemData;
 }
@@ -140,6 +155,14 @@ PM2Listener.prototype.startProcess = function(host, pm_id) {
 
 PM2Listener.prototype.restartProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "restartProcessId");
+}
+
+PM2Listener.prototype.reloadProcess = function(host, pm_id) {
+	if(this._config.get("forceHardReload")) {
+		this._doByProcessId(host, pm_id, "reloadProcessId");
+	} else {
+		this._doByProcessId(host, pm_id, "softReloadProcessId");
+	}
 }
 
 PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {

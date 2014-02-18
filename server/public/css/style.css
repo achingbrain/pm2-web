@@ -228,9 +228,22 @@ section .logs h3 {
 .processes .information .actions a.icon-refresh:hover {
   color: #33b763;
 }
+.processes .information .actions a.icon-repeat:hover {
+  color: #1597e0;
+}
 .processes .information:hover p {
   background-color: #ebebeb;
   cursor: pointer;
+}
+.processes .information.reloading p {
+  background-color: #c7e8fa;
+  -webkit-animation: reloading 2.5s linear infinite;
+  -moz-animation: reloading 2.5s linear infinite;
+  -ms-animation: reloading 2.5s linear infinite;
+  -animation: reloading 2.5s linear infinite;
+}
+.processes .information.reloading:hover p {
+  background-color: #c7e8fa;
 }
 .processes .details,
 .processes .logs {
@@ -307,18 +320,10 @@ section .logs h3 {
 .processes .details ul:after {
   content: "\2588";
   margin-left: 5px;
-  -webkit-animation-name: blinker;
-  -webkit-animation-duration: 1s;
-  -webkit-animation-timing-function: linear;
-  -webkit-animation-iteration-count: infinite;
-  -moz-animation-name: blinker;
-  -moz-animation-duration: 1s;
-  -moz-animation-timing-function: linear;
-  -moz-animation-iteration-count: infinite;
-  animation-name: blinker;
-  animation-duration: 1s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+  -webkit-animation: blinker 1s linear infinite;
+  -moz-animation: blinker 1s linear infinite;
+  -ms-animation: blinker 1s linear infinite;
+  -animation: blinker 1s linear infinite;
 }
 @-moz-keyframes blinker {
   0% {
@@ -351,6 +356,39 @@ section .logs h3 {
   }
   100% {
     opacity: 1.0;
+  }
+}
+@-moz-keyframes reloading {
+  0% {
+    background: rgba(21, 151, 224, 0.2);
+  }
+  50% {
+    background: rgba(21, 151, 224, 0.05);
+  }
+  100% {
+    background: rgba(21, 151, 224, 0.2);
+  }
+}
+@-webkit-keyframes reloading {
+  0% {
+    background: rgba(21, 151, 224, 0.2);
+  }
+  50% {
+    background: rgba(21, 151, 224, 0.05);
+  }
+  100% {
+    background: rgba(21, 151, 224, 0.2);
+  }
+}
+@keyframes reloading {
+  0% {
+    background: rgba(21, 151, 224, 0.2);
+  }
+  50% {
+    background: rgba(21, 151, 224, 0.05);
+  }
+  100% {
+    background: rgba(21, 151, 224, 0.2);
   }
 }
 @media only screen and (max-width: 700px) {

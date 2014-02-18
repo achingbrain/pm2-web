@@ -33,7 +33,7 @@
 	<h2>Processes</h2>
 	<p class="noprocesses" ng-show="processes.length == 0">There are no processes running.</p>
 	<article ng-repeat="process in processes">
-		<ul class="information">
+		<ul class="information" ng-class="{'reloading': process.reloading}">
 			<li class="pid">
 				<h3>PID</h3>
 				<p ng-click="toggleDetails(process.id)">{{process.pid}}</p>
@@ -72,6 +72,7 @@
 					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id, $event)"></a>
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>
 					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id, $event)"></a>
+					<a class="icon-repeat" title="Reload process" ng-hide="process.status != 'online'" ng-click="reload(process.id, $event)"></a>
 				</p>
 			</li>
 		</ul>

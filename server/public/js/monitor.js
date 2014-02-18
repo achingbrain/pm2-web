@@ -123,7 +123,7 @@ ProcessData.prototype.log = function(type, data) {
 }
 
 ProcessData.prototype._map = function(data) {
-	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu"].forEach(function(key) {
+	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "reloading"].forEach(function(key) {
 		this[key] = data[key];
 	}.bind(this));
 }
@@ -671,7 +671,8 @@ module.exports = function isBuffer(arg) {
     && typeof arg.readUInt8 === 'function';
 }
 },{}],7:[function(require,module,exports){
-(function (process,global){// Copyright Joyent, Inc. and other Node contributors.
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -1257,6 +1258,7 @@ exports._extend = function(origin, add) {
 function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
+
 }).call(this,require("/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./support/isBuffer":6,"/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"inherits":4}],8:[function(require,module,exports){
 module.exports = {
@@ -4387,6 +4389,13 @@ WebSocketResponder.prototype.restartProcess = function(host, pm_id) {
 	});
 };
 
+WebSocketResponder.prototype.reloadProcess = function(host, pm_id) {
+	this._send({
+		method: "reloadProcess",
+		args: [host, pm_id]
+	});
+};
+
 WebSocketResponder.READYSTATE = READYSTATE;
 
 module.exports = WebSocketResponder;
@@ -4506,6 +4515,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 		$scope.processes = hostData.processes;
 
 		$scope.toggleDetails = function(pm_id) {
+			console.info("Toggling details for", pm_id, !$scope.showDetails[pm_id]);
 			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
 		};
 
@@ -4521,6 +4531,11 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 		};
 		$scope.restart = function(pm_id, $event) {
 			webSocketResponder.restartProcess(hostData.name, pm_id);
+
+			$event.stopPropagation();
+		};
+		$scope.reload = function(pm_id, $event) {
+			webSocketResponder.reloadProcess(hostData.name, pm_id);
 
 			$event.stopPropagation();
 		};

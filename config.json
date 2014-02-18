@@ -21,6 +21,9 @@
 	// How often to poll hosts for data (in ms)
 	"updateFrequency": 5000,
 
+	// If true, processes will be killed without notifying them first
+	"forceHardReload": false,
+
 	// Log settings
 	"logs": {
 

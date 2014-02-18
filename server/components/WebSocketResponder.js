@@ -115,4 +115,8 @@ WebSocketResponder.prototype.restartProcess = function(client, host, pm_id) {
 	this._pm2Listener.restartProcess(host, pm_id);
 };
 
+WebSocketResponder.prototype.reloadProcess = function(client, host, pm_id) {
+	this._pm2Listener.reloadProcess(host, pm_id);
+};
+
 module.exports = WebSocketResponder;

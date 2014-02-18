@@ -18,6 +18,7 @@
 @processactions: #888;
 @killaction: #F10;
 @restartaction: @green;
+@reloadaction: #1597E0;
 @processonline: #33B763;
 @processoffline: #920e00;
 @processerror: #F10;
@@ -283,12 +284,25 @@ section {
 			a.icon-refresh:hover {
 				color: @restartaction;
 			}
+
+			a.icon-repeat:hover {
+				color: @reloadaction;
+			}
 		}
 	}
 
 	.information:hover p {
 		background-color: darken(@section, 5%);
 		cursor: pointer;
+	}
+
+	.information.reloading p {
+		background-color: lighten(@reloadaction, 40%);
+		.animation(reloading, 2.5s, linear, infinite);
+	}
+
+	.information.reloading:hover p {
+		background-color: lighten(@reloadaction, 40%);
 	}
 
 	.details, .logs {
@@ -368,22 +382,16 @@ section {
 			content: "\2588";
 			margin-left: 5px;
 
-			-webkit-animation-name: blinker;
-			-webkit-animation-duration: 1s;
-			-webkit-animation-timing-function: linear;
-			-webkit-animation-iteration-count: infinite;
-
-			-moz-animation-name: blinker;
-			-moz-animation-duration: 1s;
-			-moz-animation-timing-function: linear;
-			-moz-animation-iteration-count: infinite;
-
-			animation-name: blinker;
-			animation-duration: 1s;
-			animation-timing-function: linear;
-			animation-iteration-count: infinite;
+			.animation(blinker, 1s, linear, infinite);
 		}
 	}
+}
+
+.animation(@name, @duration: 300ms, @timingFunction: linear, @iterationCount: infinite) {
+	-webkit-animation: @name @duration @timingFunction @iterationCount;
+	-moz-animation: @name @duration @timingFunction @iterationCount;
+	-ms-animation: @name @duration @timingFunction @iterationCount;
+	-animation: @name @duration @timingFunction @iterationCount;
 }
 
 @-moz-keyframes blinker {
@@ -402,6 +410,24 @@ section {
 	0% { opacity: 1.0; }
 	50% { opacity: 0.0; }
 	100% { opacity: 1.0; }
+}
+
+@-moz-keyframes reloading {
+  0% { background: fade(@reloadaction, 20%); }
+  50% { background: fade(@reloadaction, 5%); }
+  100% { background: fade(@reloadaction, 20%); }
+}
+
+@-webkit-keyframes reloading {
+  0% { background: fade(@reloadaction, 20%); }
+  50% { background: fade(@reloadaction, 5%); }
+  100% { background: fade(@reloadaction, 20%); }
+}
+
+@keyframes reloading {
+  0% { background: fade(@reloadaction, 20%); }
+  50% { background: fade(@reloadaction, 5%); }
+  100% { background: fade(@reloadaction, 20%); }
 }
 
 @media only screen and (max-width: 700px) {

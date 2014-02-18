@@ -112,6 +112,13 @@ WebSocketResponder.prototype.restartProcess = function(host, pm_id) {
 	});
 };
 
+WebSocketResponder.prototype.reloadProcess = function(host, pm_id) {
+	this._send({
+		method: "reloadProcess",
+		args: [host, pm_id]
+	});
+};
+
 WebSocketResponder.READYSTATE = READYSTATE;
 
 module.exports = WebSocketResponder;
