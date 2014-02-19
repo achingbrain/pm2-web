@@ -102,7 +102,7 @@ module.exports = {
 			}
 		};
 
-		this._listener._pm2RPCSocketReady(remote);
+		this._listener._pm2RPCSocketReady(remote, {});
 
 		var systemData = {
 			system: {
@@ -275,6 +275,118 @@ module.exports = {
 		this._listener.close();
 
 		this._listener._pm2List[host].disconnect.callCount.should.equal(1);
+
+		test.done();
+	},
+
+	"Should mark process as reloading": function(test) {
+		var remote = {
+			bind_host: "foo",
+			bus: {
+				on: sinon.stub()
+			},
+			rpc: {
+				getSystemData: sinon.stub()
+			}
+		};
+
+		this._listener._pm2RPCSocketReady(remote, {});
+
+		var systemData = {
+			system: {
+				hostname: "foo",
+				cpus: [0],
+				load: [0, 0, 0],
+				memory: {
+					free: 0,
+					total: 0
+				}
+			},
+			processes: [{
+				pm_id: 0,
+				pm2_env: {
+					status: "launching"
+				},
+				monit: {
+					memory: 0,
+					cpu: 5
+				}
+			}, {
+				pm_id: "todelete0",
+				pm2_env: {
+					status: "online"
+				},
+				monit: {
+					memory: 0,
+					cpu: 0
+				}
+			}]
+		};
+
+		this._listener.once("systemData", function(data) {
+			remote.bind_host.should.equal(data.name);
+			data.processes.length.should.equal(1);
+			data.processes[0].reloading.should.equal(true);
+
+			test.done();
+		});
+
+		remote.rpc.getSystemData.getCall(0).args[1](null, systemData);
+	},
+
+	"Should send hard reload to process": function(test) {
+		var host = "foo";
+		var pm_id = 10;
+
+		this._listener._pm2List[host] = {
+			rpc: {
+				reloadProcessId: sinon.stub()
+			}
+		};
+		this._listener._config.get.withArgs("forceHardReload").returns(true);
+
+		this._listener.reloadProcess(host, pm_id);
+
+		this._listener._pm2List[host].rpc.reloadProcessId.callCount.should.equal(1);
+		this._listener._pm2List[host].rpc.reloadProcessId.getCall(0).args[0].should.equal(pm_id);
+
+		test.done();
+	},
+
+	"Should send soft reload to process": function(test) {
+		var host = "foo";
+		var pm_id = 10;
+
+		this._listener._pm2List[host] = {
+			rpc: {
+				softReloadProcessId: sinon.stub()
+			}
+		};
+		this._listener._config.get.withArgs("forceHardReload").returns(false);
+
+		this._listener.reloadProcess(host, pm_id);
+
+		this._listener._pm2List[host].rpc.softReloadProcessId.callCount.should.equal(1);
+		this._listener._pm2List[host].rpc.softReloadProcessId.getCall(0).args[0].should.equal(pm_id);
+
+		test.done();
+	},
+
+	"Should send debug message to process": function(test) {
+		var host = "foo";
+		var pm_id = 10;
+
+		this._listener._pm2List[host] = {
+			rpc: {
+				sendSignalToProcessId: sinon.stub()
+			}
+		};
+
+		this._listener.debugProcess(host, pm_id);
+
+		this._listener._pm2List[host].rpc.sendSignalToProcessId.callCount.should.equal(1);
+		this._listener._pm2List[host].rpc.sendSignalToProcessId.getCall(0).args[0].process_id.should.equal(pm_id);
+		this._listener._pm2List[host].rpc.sendSignalToProcessId.getCall(0).args[0].signal.should.equal("SIGUSR1");
 
 		test.done();
 	}

@@ -11,6 +11,9 @@ module.exports = {
 		this._location = {
 			path: sinon.stub()
 		};
+		this._window = {
+			open: sinon.stub()
+		};
 		this._hostList = {
 			find: sinon.stub(),
 			on: sinon.stub()
@@ -19,7 +22,8 @@ module.exports = {
 			startProcess: sinon.stub(),
 			stopProcess: sinon.stub(),
 			restartProcess: sinon.stub(),
-			reloadProcess: sinon.stub()
+			reloadProcess: sinon.stub(),
+			debugProcess: sinon.stub()
 		};
 
 		this._controller = processList[processList.length - 1];
@@ -34,7 +38,7 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._scope.processes.should.equal(hostData.processes);
 
@@ -42,7 +46,7 @@ module.exports = {
 	},
 
 	"Should redirect to root path if host data not found": function(test) {
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._location.path.callCount.should.equal(1);
 		this._location.path.getCall(0).args[0].should.equal("/");
@@ -61,7 +65,7 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._scope.start(10, event);
 
@@ -84,7 +88,7 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._scope.stop(10, event);
 
@@ -107,7 +111,7 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._scope.restart(10, event);
 
@@ -133,7 +137,7 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._scope.reload(process, event);
 
@@ -155,7 +159,7 @@ module.exports = {
 
 		this._hostList.find.callCount.should.equal(0);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._hostList.find.callCount.should.equal(1);
 
@@ -176,13 +180,42 @@ module.exports = {
 		this._routeParams.host = "foo";
 		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
 
-		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
 
 		this._hostList.on.callCount.should.equal(1);
 		this._hostList.on.getCall(0).args[0].should.equal("update");
 		this._hostList.on.getCall(0).args[1]("bar");
 
 		this._scope.$apply.callCount.should.equal(0);
+
+		test.done();
+	},
+
+	"Should open debug window": function(test) {
+		var hostData = {
+			name: "foo",
+			processes: []
+		};
+		var process = {
+			id: 10
+		}
+		var event = {
+			stopPropagation: sinon.stub()
+		};
+		this._routeParams.host = "foo";
+		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
+
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
+
+		this._window.open.callCount.should.equal(0);
+
+		this._scope.debug(process, event);
+
+		this._webSocketResponder.debugProcess.callCount.should.equal(1);
+		this._webSocketResponder.debugProcess.getCall(0).args[0].should.equal(hostData.name);
+		this._webSocketResponder.debugProcess.getCall(0).args[1].should.equal(process.id);
+
+		this._window.open.callCount.should.equal(1);
 
 		test.done();
 	}

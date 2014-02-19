@@ -48,7 +48,8 @@
 			</li>
 			<li class="uptime">
 				<h3>Uptime</h3>
-				<p ng-click="toggleDetails(process.id)">{{process.uptime | humanise}}</p>
+				<p ng-hide="process.status == 'online'" ng-click="toggleDetails(process.id)">N/A</p>
+				<p ng-show="process.status == 'online'" ng-click="toggleDetails(process.id)">{{process.uptime | humanise}}</p>
 			</li>
 			<li class="status {{process.status}}">
 				<h3>Status</h3>
@@ -73,7 +74,7 @@
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>
 					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id, $event)"></a>
 					<a class="icon-repeat" title="Reload process" ng-hide="process.status != 'online'" ng-click="reload(process, $event)"></a>
-					<a class="icon-wrench" title="Debug process" ng-show="debugEnabled" ng-click="debug(process, $event)"></a>
+					<a class="icon-wrench" title="Debug process" ng-show="debugEnabled && process.status == 'online'" ng-click="debug(process, $event)"></a>
 				</p>
 			</li>
 		</ul>
