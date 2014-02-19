@@ -26,8 +26,6 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 	};
 	this._webSocketServer.on("connection", function(client) {
 		client.on("message", function(message) {
-			this._logger.info("WebSocketResponder", "Incoming message", message);
-
 			var request = JSON.parse(message);
 
 			if(request.method && request.args && this[request.method]) {
