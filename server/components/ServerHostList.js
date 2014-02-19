@@ -21,7 +21,7 @@ ServerHostList.prototype.afterPropertiesSet = function() {
 
 ServerHostList.prototype._onSystemData = function(data) {
 	if(!this._hostData[data.name]) {
-		this._hostData[data.name] = new HostData(data.name, this._config);
+		this._hostData[data.name] = new HostData(data, this._config);
 	}
 
 	this._hostData[data.name].update(data);

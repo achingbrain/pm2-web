@@ -85,12 +85,14 @@ Configuration.prototype._normaliseHosts = function() {
 
 			args.rpc = this._arrayify(args.rpc);
 			args.events = this._arrayify(args.events);
+			args.inspector = this._arrayify(args.inspector);
 
 			args.host.forEach(function(host, index) {
 				hosts.push(defaults({
 					"host": host,
 					"rpc": args.rpc[index] ? args.rpc[index] : undefined,
-					"events": args.events[index] ? args.events[index] : undefined
+					"events": args.events[index] ? args.events[index] : undefined,
+					"inspector": args.inspector[index] ? args.inspector[index] : undefined
 				}, {
 					"host": "localhost",
 					"rpc": 6666,
@@ -109,6 +111,10 @@ Configuration.prototype._normaliseHosts = function() {
 		host.host = host.host || "localhost";
 		host.rpc = host.rpc || 6666;
 		host.events = host.events || 6667;
+
+		if(host.inspector === undefined) {
+			delete host.inspector;
+		}
 	});
 
 	this.set("pm2", args);

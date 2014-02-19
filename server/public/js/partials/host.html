@@ -73,6 +73,7 @@
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>
 					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id, $event)"></a>
 					<a class="icon-repeat" title="Reload process" ng-hide="process.status != 'online'" ng-click="reload(process, $event)"></a>
+					<a class="icon-wrench" title="Debug process" ng-show="debugEnabled" ng-click="debug(process, $event)"></a>
 				</p>
 			</li>
 		</ul>

@@ -16,6 +16,10 @@
 		"host": "localhost",
 		"rpc": 6666,
 		"events": 6667
+
+		// If you have node-inspector running on this host, specify
+		// the port here
+		//,"inspector": 8080
 	}],
 
 	// How often to poll hosts for data (in ms)

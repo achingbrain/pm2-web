@@ -1,12 +1,13 @@
 var ProcessData = require("./ProcessData");
 
-var HostData = function(name, config) {
+var HostData = function(data, config) {
 	Object.defineProperty(this, "_config", {
 		enumerable: false,
 		value: config
 	});
 
-	this.name = name;
+	this.name = data.name;
+	this.inspector = data.inspector;
 	this.system = {};
 	this.processes = [];
 };

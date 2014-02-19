@@ -1,13 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var ProcessData = require("./ProcessData");
 
-var HostData = function(name, config) {
+var HostData = function(data, config) {
 	Object.defineProperty(this, "_config", {
 		enumerable: false,
 		value: config
 	});
 
-	this.name = name;
+	this.name = data.name;
+	this.inspector = data.inspector;
 	this.system = {};
 	this.processes = [];
 };
@@ -123,7 +124,7 @@ ProcessData.prototype.log = function(type, data) {
 }
 
 ProcessData.prototype._map = function(data) {
-	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "reloading"].forEach(function(key) {
+	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "reloading", "debugPort"].forEach(function(key) {
 		this[key] = data[key];
 	}.bind(this));
 }
@@ -4247,7 +4248,7 @@ UIHostList.prototype.empty = function() {
 };
 
 UIHostList.prototype.add = function(data) {
-	this._hosts[data.name] = new HostData(data.name, this._config);
+	this._hosts[data.name] = new HostData(data, this._config);
 
 	this.update(data);
 
@@ -4406,6 +4407,13 @@ WebSocketResponder.prototype.reloadProcess = function(host, pm_id) {
 	});
 };
 
+WebSocketResponder.prototype.debugProcess = function(host, pm_id) {
+	this._send({
+		method: "debugProcess",
+		args: [host, pm_id]
+	});
+};
+
 WebSocketResponder.READYSTATE = READYSTATE;
 
 module.exports = WebSocketResponder;
@@ -4510,7 +4518,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 
 },{}],19:[function(require,module,exports){
 
-module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketResponder", function($scope, $routeParams, $location, hostList, webSocketResponder) {
+module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", "webSocketResponder", function($scope, $routeParams, $location, $window, hostList, webSocketResponder) {
 	$scope.showDetails = {};
 
 	var updateScope = function() {
@@ -4523,6 +4531,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 		}
 
 		$scope.processes = hostData.processes;
+		$scope.debugEnabled = hostData.inspector ? true : false;
 
 		$scope.toggleDetails = function(pm_id) {
 			$scope.showDetails[pm_id] = !$scope.showDetails[pm_id];
@@ -4547,6 +4556,13 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", "webSocketR
 			process.reloading = true;
 
 			webSocketResponder.reloadProcess(hostData.name, process.id);
+
+			$event.stopPropagation();
+		};
+		$scope.debug = function(process, $event) {
+			webSocketResponder.debugProcess(hostData.name, process.id);
+
+			$window.open("http://" + hostData.name + ":" + hostData.inspector + "/debug?port=" + process.debugPort, "_blank", "location=no,menubar=no,status=no,toolbar=no");
 
 			$event.stopPropagation();
 		};
