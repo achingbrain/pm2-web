@@ -19,33 +19,33 @@ module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", 
 		};
 
 		$scope.start = function(pm_id, $event) {
-			webSocketResponder.startProcess(hostData.name, pm_id);
-
 			$event.stopPropagation();
+
+			webSocketResponder.startProcess(hostData.name, pm_id);
 		};
 		$scope.stop = function(pm_id, $event) {
-			webSocketResponder.stopProcess(hostData.name, pm_id);
-
 			$event.stopPropagation();
+
+			webSocketResponder.stopProcess(hostData.name, pm_id);
 		};
 		$scope.restart = function(pm_id, $event) {
-			webSocketResponder.restartProcess(hostData.name, pm_id);
-
 			$event.stopPropagation();
+
+			webSocketResponder.restartProcess(hostData.name, pm_id);
 		};
 		$scope.reload = function(process, $event) {
+			$event.stopPropagation();
+
 			process.reloading = true;
 
 			webSocketResponder.reloadProcess(hostData.name, process.id);
-
-			$event.stopPropagation();
 		};
 		$scope.debug = function(process, $event) {
+			$event.stopPropagation();
+
 			webSocketResponder.debugProcess(hostData.name, process.id);
 
-			$window.open("http://" + hostData.name + ":" + hostData.inspector + "/debug?port=" + process.debugPort, "_blank", "location=no,menubar=no,status=no,toolbar=no");
-
-			$event.stopPropagation();
+			$window.open("http://" + hostData.name + ":" + hostData.inspector + "/debug?port=" + process.debugPort, hostData.name + "-" + process.id, "location=no,menubar=no,status=no,toolbar=no");
 		};
 	};
 	updateScope();

@@ -9,6 +9,8 @@ A web based monitor for [PM2](https://github.com/Unitech/pm2).
 
 pm2 must allow connections to an external port.  To do this, set the `$PM2_BIND_ADDR` environmental variable to `0.0.0.0` on the host you wish to monitor before starting pm2.
 
+For debugging to work, [node-inspector](https://www.npmjs.org/package/node-inspector) must be installed and running on the same machine as pm2 (not necessarily the same as pm2-web).
+
 ## To run
 
 Install pm2-web:
@@ -49,35 +51,65 @@ The configuration file(s) loaded and the final configuration object will both be
 
 Configuration files are loaded using [cjson](https://www.npmjs.org/package/cjson) so comments are ok.
 
-All options can also be passed on the command line and will override any config files.  For example:
+All options can be passed as command line arguments and will override any settings found in configuration files.
 
- - `--www:port 9000` This is the port the web interface listens on.
- - `--mdns:name pm2-web` Publish an mdns (Bonjour/Zeroconf) advert with the specified name
- - `--ws:port 9001` The port the websocket that the ui connects to listens on
- - `--updateFrequency 5000` How often in ms we poll pm2 for it's status
-
-### Specifying multiple hosts
-
-By default pm2-web will monitor localhost but you can specify hosts as command line arguments:
+e.g. to replicate the above you'd use:
 
 ```
-$ pm2-web --pm2.host localhost --pm2.host another.host --pm2.host yet.another.host
+$ pm2-web --pm2.host foo.baz.com --pm2.host bar.baz.com
 ```
 
-### Overriding ports
+## Debugging running processes
 
-pm2 listens on a port for RPC connections and publishes events on another so pm2-web needs to connect to them.
+To debug a running process, [node-inspector](https://www.npmjs.org/package/node-inspector) must be installed and running on the same host as the process.
 
-You can override the ports pm2-web will try to connect to like so:
+Specify the port it's running on as the `inspector` property of pm2:host.  E.g.:
 
+```javascript
+{
+	"pm2": [{
+		"host": "foo.baz.com",
+		"inspector": 8080
+	}]
+}
 ```
-$ pm2-web --pm2.host localhost --pm2.rpc 6666 --pm2.events 6667
+
+You should then see a debug icon appear next to the stop/restart/reload icons when the process is running.
+
+Clicking this icon will send a `SIGUSR1` signal to the process to put it into debug mode and open node-inspector in a new window.
+
+N.b. you may need to change which source file you are looking at in node-inspector to see anything useful.
+
+N.b.b. by default node will listen for debugger connections on port 5858. If you attempt to debug multiple processes you must specify different debug ports for them!
+
+## Reload/restart processes
+
+Restarting a process stops the current process and starts a new one, dropping connections in the process.
+
+Reloading starts a new process in the background, killing the old process after the new one has initialised which reduces downtime.
+
+N.b. your process must exit cleanly (e.g. close sockets, database connections) otherwise the old process will never be killed.
+
+### Hard vs soft reloading
+
+Soft reloading (the default) will cause pm2 to send your process a `shutdown` message and kill it shortly afterwards.  Hard reloading will kill it immediately.
+
+To control this behaviour, specify the following in your config file:
+
+```javascript
+{
+	"forceHardReload": false
+}
 ```
 
-And with multiple hosts like so:
+To listen for the `shutdown` event, add the following to your program:
 
-```
-$ pm2-web --pm2.host localhost --pm2.rpc 6666 --pm2.events 6667 --pm2.host another.host --pm2.rpc 6666 --pm2.events 6667
+```javascript
+process.on("message", function(message) {
+	if(message == "shutdown") {
+		// do tidy up here
+	}
+});
 ```
 
 ### Resource usage graphs
@@ -113,6 +145,11 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 ```
 
 ## Release notes
+
+### 1.6.x
+
+ - Allow reloading of processes as well as restarting
+ - Debug button added to use node-inspector to debug running processes
 
 ### 1.5.x
 
