@@ -3,6 +3,8 @@ var Autowire = require("wantsit").Autowire,
 	util = require("util"),
 	defaults = require("defaults");
 
+var DEFAULT_DEBUG_PORT = 5858;
+
 var PM2Listener = function() {
 	EventEmitter.call(this);
 
@@ -125,9 +127,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			status: process.pm2_env.status,
 			memory: process.monit.memory,
 			cpu: process.monit.cpu,
-
-			// hard coded until https://github.com/Unitech/pm2/issues/45 is fixed
-			debugPort: 5858
+			debugPort: this._findDebugPort(process.pm2_env.execArgv)
 		});
 	}.bind(this));
 
@@ -192,6 +192,24 @@ PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
 	this._pm2List[host].rpc[action](pm_id, function(error) {
 
 	});
+}
+
+PM2Listener.prototype._findDebugPort = function(execArgv) {
+	var port = DEFAULT_DEBUG_PORT;
+
+	if(Array.isArray(execArgv)) {
+		execArgv.forEach(function(argument) {
+			if(argument.match(/--debug=[0-9]+/)) {
+				port = parseInt(argument.split("=")[1], 10);
+			}
+
+			if(argument.match(/--debug-brk=[0-9]+/)) {
+				port = parseInt(argument.split("=")[1], 10);
+			}
+		});
+	}
+
+	return port;
 }
 
 module.exports = PM2Listener;

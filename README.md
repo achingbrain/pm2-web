@@ -86,21 +86,14 @@ N.b. you may need to change which source file you are looking at in node-inspect
 
 By default node will listen for debugger connections on port 5858. If you attempt to debug multiple processes you must specify different debug ports for them.
 
-You'd normally do this:
+Once (if) [#313](https://github.com/Unitech/pm2/pull/313) is merged you'll be able to do this sort of thing:
 
 ```
-$ node --debug 7000 foo.js
+$ pm2 --node-args="--debug=7000" foo.js
+$ pm2 --node-args="--debug=7001" bar.js
 ```
 
-or via the v8 argument:
-
-```
-$ node --debugger_port=7000 foo.js
-```
-
-At the time of writing pm2 doesn't allow passing options to node when starting managed processes. See [#45](https://github.com/Unitech/pm2/issues/45) for more details.
-
-Furthermore node consumes `--debugger_port` as if it were `--debug` and throws an error. This has been fixed in [bd9c666](https://github.com/joyent/node/commit/bd9c666) although it remains unreleased.
+But until then you'll only be able to debug one process at a time and you'll have to restart it to debug anything else.  Boo.
 
 ## Reload/restart processes
 

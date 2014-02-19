@@ -389,5 +389,17 @@ module.exports = {
 		this._listener._pm2List[host].rpc.sendSignalToProcessId.getCall(0).args[0].signal.should.equal("SIGUSR1");
 
 		test.done();
+	},
+
+	"Should parse debug port from configuration": function(test) {
+		this._listener._findDebugPort().should.equal(5858);
+		this._listener._findDebugPort("").should.equal(5858);
+		this._listener._findDebugPort([]).should.equal(5858);
+		this._listener._findDebugPort([""]).should.equal(5858);
+		this._listener._findDebugPort(["--debug=1000"]).should.equal(1000);
+		this._listener._findDebugPort(["bar", "--debug=1000"]).should.equal(1000);
+		this._listener._findDebugPort(["bar", "--debug-brk=2000"]).should.equal(2000);
+
+		test.done();
 	}
 };
