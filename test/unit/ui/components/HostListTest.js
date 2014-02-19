@@ -14,6 +14,14 @@ module.exports = {
 
 		this._hostList = new HostList(this._config, this._webSocketResponder);
 
+		this._clock = sinon.useFakeTimers();
+
+		done();
+	},
+
+	tearDown: function (done) {
+		this._clock.restore();
+
 		done();
 	},
 
@@ -291,6 +299,37 @@ module.exports = {
 
 		process.log.getCall(0).args[0].should.equal("error");
 		process.log.getCall(0).args[1].should.equal(message);
+
+		test.done();
+	},
+
+	"Should process exception": function(test) {
+		var message = "message";
+		var hostName = "foo";
+		var processId = 5;
+
+		var host = {
+			findProcessById: sinon.stub()
+		};
+
+		var process = {
+			log: sinon.stub()
+		};
+
+		host.findProcessById.withArgs(processId).returns(process);
+
+		this._hostList._hosts[hostName] = host;
+
+		this._webSocketResponder.on.getCall(3).args[0].should.equal("process:exception");
+		var callback = this._webSocketResponder.on.getCall(3).args[1];
+
+		callback(hostName, processId, message);
+
+		process.throwing.should.equal(true);
+
+		this._clock.tick(2000);
+
+		should(undefined).equal(process.throwing);
 
 		test.done();
 	}

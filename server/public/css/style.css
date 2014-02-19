@@ -248,6 +248,16 @@ section .logs h3 {
 .processes .information.reloading:hover p {
   background-color: #c7e8fa;
 }
+.processes .information.erroring p {
+  background-color: #ffcfcc;
+  -webkit-animation: erroring 2.5s linear infinite;
+  -moz-animation: erroring 2.5s linear infinite;
+  -ms-animation: erroring 2.5s linear infinite;
+  -animation: erroring 2.5s linear infinite;
+}
+.processes .information.erroring:hover p {
+  background-color: #ffcfcc;
+}
 .processes .details,
 .processes .logs {
   -webkit-border-radius: 6px;
@@ -392,6 +402,39 @@ section .logs h3 {
   }
   100% {
     background: rgba(21, 151, 224, 0.2);
+  }
+}
+@-moz-keyframes erroring {
+  0% {
+    background: rgba(255, 17, 0, 0.2);
+  }
+  50% {
+    background: rgba(255, 17, 0, 0.05);
+  }
+  100% {
+    background: rgba(255, 17, 0, 0.2);
+  }
+}
+@-webkit-keyframes erroring {
+  0% {
+    background: rgba(255, 17, 0, 0.2);
+  }
+  50% {
+    background: rgba(255, 17, 0, 0.05);
+  }
+  100% {
+    background: rgba(255, 17, 0, 0.2);
+  }
+}
+@keyframes erroring {
+  0% {
+    background: rgba(255, 17, 0, 0.2);
+  }
+  50% {
+    background: rgba(255, 17, 0, 0.05);
+  }
+  100% {
+    background: rgba(255, 17, 0, 0.2);
   }
 }
 @media only screen and (max-width: 700px) {

@@ -19,13 +19,7 @@ UIHostList = function(config, webSocketResponder) {
 
 	// update host data occasionally
 	webSocketResponder.on("log:info", function(host, pm_id, data) {
-		var host = this.find(host);
-
-		if(!host) {
-			return;
-		}
-
-		var process = host.findProcessById(pm_id);
+		var process = this._findByHostAndProcessId(host, pm_id);
 
 		if(!process) {
 			return;
@@ -35,19 +29,27 @@ UIHostList = function(config, webSocketResponder) {
 	}.bind(this));
 
 	webSocketResponder.on("log:error", function(host, pm_id, data) {
-		var host = this.find(host);
-
-		if(!host) {
-			return;
-		}
-
-		var process = host.findProcessById(pm_id);
+		var process = this._findByHostAndProcessId(host, pm_id);
 
 		if(!process) {
 			return;
 		}
 
 		process.log("error", data);
+	}.bind(this));
+
+	webSocketResponder.on("process:exception", function(host, pm_id, message, stack) {
+		var process = this._findByHostAndProcessId(host, pm_id);
+
+		if(!process) {
+			return;
+		}
+
+		process.throwing = true;
+
+		setTimeout(function() {
+			delete process.throwing;
+		}, 1000);
 	}.bind(this));
 
 	this._config = config;
@@ -83,6 +85,16 @@ UIHostList.prototype.hosts = function() {
 	var result = Object.keys(this._hosts);
 
 	return result ? result : null;
+};
+
+UIHostList.prototype._findByHostAndProcessId = function(host, pm_id) {
+	var host = this.find(host);
+
+	if(!host) {
+		return;
+	}
+
+	return host.findProcessById(pm_id);
 };
 
 module.exports = UIHostList;

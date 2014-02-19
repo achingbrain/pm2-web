@@ -309,6 +309,15 @@ section {
 		background-color: lighten(@reloadaction, 40%);
 	}
 
+	.information.erroring p {
+		background-color: lighten(@processerror, 40%);
+		.animation(erroring, 2.5s, linear, infinite);
+	}
+
+	.information.erroring:hover p {
+		background-color: lighten(@processerror, 40%);
+	}
+
 	.details, .logs {
 		.rounded-corners(6px);
 		background: @details;
@@ -432,6 +441,24 @@ section {
   0% { background: fade(@reloadaction, 20%); }
   50% { background: fade(@reloadaction, 5%); }
   100% { background: fade(@reloadaction, 20%); }
+}
+
+@-moz-keyframes erroring {
+  0% { background: fade(@processerror, 20%); }
+  50% { background: fade(@processerror, 5%); }
+  100% { background: fade(@processerror, 20%); }
+}
+
+@-webkit-keyframes erroring {
+  0% { background: fade(@processerror, 20%); }
+  50% { background: fade(@processerror, 5%); }
+  100% { background: fade(@processerror, 20%); }
+}
+
+@keyframes erroring {
+  0% { background: fade(@processerror, 20%); }
+  50% { background: fade(@processerror, 5%); }
+  100% { background: fade(@processerror, 20%); }
 }
 
 @media only screen and (max-width: 700px) {

@@ -33,7 +33,7 @@
 	<h2>Processes</h2>
 	<p class="noprocesses" ng-show="processes.length == 0">There are no processes running.</p>
 	<article ng-repeat="process in processes">
-		<ul class="information" ng-class="{'reloading': process.reloading}">
+		<ul class="information" ng-class="{'reloading': process.reloading, 'erroring': process.throwing}">
 			<li class="pid">
 				<h3>PID</h3>
 				<p ng-click="toggleDetails(process.id)">{{process.pid}}</p>

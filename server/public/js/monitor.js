@@ -671,7 +671,8 @@ module.exports = function isBuffer(arg) {
     && typeof arg.readUInt8 === 'function';
 }
 },{}],7:[function(require,module,exports){
-var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -1258,7 +1259,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"./support/isBuffer":6,"__browserify_process":5,"inherits":4}],8:[function(require,module,exports){
+}).call(this,require("/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":6,"/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"inherits":4}],8:[function(require,module,exports){
 module.exports = {
   XmlEntities: require('./lib/xml-entities.js').XmlEntities,
   Html4Entities: require('./lib/html4-entities.js').Html4Entities,
@@ -4204,13 +4206,7 @@ UIHostList = function(config, webSocketResponder) {
 
 	// update host data occasionally
 	webSocketResponder.on("log:info", function(host, pm_id, data) {
-		var host = this.find(host);
-
-		if(!host) {
-			return;
-		}
-
-		var process = host.findProcessById(pm_id);
+		var process = this._findByHostAndProcessId(host, pm_id);
 
 		if(!process) {
 			return;
@@ -4220,19 +4216,27 @@ UIHostList = function(config, webSocketResponder) {
 	}.bind(this));
 
 	webSocketResponder.on("log:error", function(host, pm_id, data) {
-		var host = this.find(host);
-
-		if(!host) {
-			return;
-		}
-
-		var process = host.findProcessById(pm_id);
+		var process = this._findByHostAndProcessId(host, pm_id);
 
 		if(!process) {
 			return;
 		}
 
 		process.log("error", data);
+	}.bind(this));
+
+	webSocketResponder.on("process:exception", function(host, pm_id, message, stack) {
+		var process = this._findByHostAndProcessId(host, pm_id);
+
+		if(!process) {
+			return;
+		}
+
+		process.throwing = true;
+
+		setTimeout(function() {
+			delete process.throwing;
+		}, 1000);
 	}.bind(this));
 
 	this._config = config;
@@ -4268,6 +4272,16 @@ UIHostList.prototype.hosts = function() {
 	var result = Object.keys(this._hosts);
 
 	return result ? result : null;
+};
+
+UIHostList.prototype._findByHostAndProcessId = function(host, pm_id) {
+	var host = this.find(host);
+
+	if(!host) {
+		return;
+	}
+
+	return host.findProcessById(pm_id);
 };
 
 module.exports = UIHostList;

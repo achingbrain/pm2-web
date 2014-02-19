@@ -18,7 +18,8 @@ module.exports = {
 		this._webSocketResponder = {
 			startProcess: sinon.stub(),
 			stopProcess: sinon.stub(),
-			restartProcess: sinon.stub()
+			restartProcess: sinon.stub(),
+			reloadProcess: sinon.stub()
 		};
 
 		this._controller = processList[processList.length - 1];
@@ -112,6 +113,32 @@ module.exports = {
 
 		this._webSocketResponder.restartProcess.getCall(0).args[0].should.equal(hostData.name);
 		this._webSocketResponder.restartProcess.getCall(0).args[1].should.equal(10);
+
+		event.stopPropagation.callCount.should.equal(1);
+
+		test.done();
+	},
+
+	"Should reload process": function(test) {
+		var hostData = {
+			name: "bar",
+			processes: []
+		};
+		var event = {
+			stopPropagation: sinon.stub()
+		};
+		var process = {
+			id: 10
+		}
+		this._routeParams.host = "foo";
+		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
+
+		this._controller(this._scope, this._routeParams, this._location, this._hostList, this._webSocketResponder);
+
+		this._scope.reload(process, event);
+
+		this._webSocketResponder.reloadProcess.getCall(0).args[0].should.equal(hostData.name);
+		this._webSocketResponder.reloadProcess.getCall(0).args[1].should.equal(10);
 
 		event.stopPropagation.callCount.should.equal(1);
 
