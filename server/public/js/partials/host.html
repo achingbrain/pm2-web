@@ -69,6 +69,7 @@
 				<p ng-click="toggleDetails(process.id)">{{process.memory | memory}}</p>
 			</li>
 			<li class="actions">
+				<h3>Actions</h3>
 				<p ng-click="toggleDetails(process.id)">
 					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id, $event)"></a>
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>

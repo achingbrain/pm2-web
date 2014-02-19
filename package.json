@@ -49,5 +49,12 @@
 	"preferGlobal": "true",
 	"bin": {
 		"pm2-web" : "bin/pm2-web.sh"
-	}
+	},
+	"keywords": [
+		"pm2",
+		"monitor",
+		"web",
+		"ui",
+		"process"
+	]
 }

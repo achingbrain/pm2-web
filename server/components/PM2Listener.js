@@ -125,6 +125,8 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			status: process.pm2_env.status,
 			memory: process.monit.memory,
 			cpu: process.monit.cpu,
+
+			// hard coded until https://github.com/Unitech/pm2/issues/45 is fixed
 			debugPort: 5858
 		});
 	}.bind(this));
