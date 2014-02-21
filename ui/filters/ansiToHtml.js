@@ -1,5 +1,5 @@
-var Convert = require('ansi-to-html'),
-	Entities = require('html-entities').XmlEntities;
+var Convert = require("ansi-to-html"),
+	Entities = require("html-entities").XmlEntities;
 
 var convert = new Convert();
 var entities = new Entities();

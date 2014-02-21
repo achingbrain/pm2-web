@@ -29,6 +29,14 @@ module.exports = {
 			addLog: sinon.stub()
 		};
 
+		this._clock = sinon.useFakeTimers();
+
+		done();
+	},
+
+	tearDown: function (done) {
+		this._clock.restore();
+
 		done();
 	},
 
@@ -106,9 +114,9 @@ module.exports = {
 	},
 
 	"Should broadcast system data": function(test) {
-		this._responder.afterPropertiesSet();
+		this._responder._config.get.withArgs("ws:frequency").returns(500);
 
-		this._responder._webSocketServer.broadcast = sinon.stub();
+		this._responder.afterPropertiesSet();
 
 		// find the callback
 		this._responder._pm2Listener.on.getCall(3).args[0].should.equal("systemData");
@@ -120,16 +128,21 @@ module.exports = {
 		// invoke the callback
 		callback(data);
 
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].method.should.equal("onSystemData");
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[0].should.equal(data);
+		// event should have been broadcast
+		this._responder._webSocketServer.broadcast = function(events) {
+			events[0].method.should.equal("onSystemData");
+			events[0].args[0].should.equal(data);
 
-		test.done();
+			test.done();
+		};
+
+		this._clock.tick(600);
 	},
 
 	"Should broadcast error logs": function(test) {
-		this._responder.afterPropertiesSet();
+		this._responder._config.get.withArgs("ws:frequency").returns(500);
 
-		this._responder._webSocketServer.broadcast = sinon.stub();
+		this._responder.afterPropertiesSet();
 
 		// find the callback
 		this._responder._pm2Listener.on.getCall(0).args[0].should.equal("log:err");
@@ -149,18 +162,23 @@ module.exports = {
 		// invoke the callback
 		callback(data);
 
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].method.should.equal("onErrorLog");
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[0].should.equal("foo");
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[1].should.equal(1);
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[2].should.equal("bar");
+		// event should have been broadcast
+		this._responder._webSocketServer.broadcast = function(events) {
+			events[0].method.should.equal("onErrorLog");
+			events[0].args[0].should.equal("foo");
+			events[0].args[1].should.equal(1);
+			events[0].args[2].should.equal("bar");
 
-		test.done();
+			test.done();
+		};
+
+		this._clock.tick(600);
 	},
 
 	"Should broadcast info logs": function(test) {
-		this._responder.afterPropertiesSet();
+		this._responder._config.get.withArgs("ws:frequency").returns(500);
 
-		this._responder._webSocketServer.broadcast = sinon.stub();
+		this._responder.afterPropertiesSet();
 
 		// find the callback
 		this._responder._pm2Listener.on.getCall(1).args[0].should.equal("log:out");
@@ -180,11 +198,16 @@ module.exports = {
 		// invoke the callback
 		callback(data);
 
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].method.should.equal("onInfoLog");
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[0].should.equal("foo");
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[1].should.equal(1);
-		this._responder._webSocketServer.broadcast.getCall(0).args[0].args[2].should.equal("bar");
+		// event should have been broadcast
+		this._responder._webSocketServer.broadcast = function(events) {
+			events[0].method.should.equal("onInfoLog");
+			events[0].args[0].should.equal("foo");
+			events[0].args[1].should.equal(1);
+			events[0].args[2].should.equal("bar");
 
-		test.done();
+			test.done();
+		};
+
+		this._clock.tick(600);
 	}
 };

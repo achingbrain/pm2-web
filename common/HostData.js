@@ -33,7 +33,7 @@ HostData.prototype.update = function(data) {
 	this._removeMissingProcesses(data.processes);
 
 	data.processes.forEach(function(reportedProcess) {
-		var existingProcess = this.findProcess(reportedProcess.name);
+		var existingProcess = this.findProcessById(reportedProcess.id);
 
 		if(!existingProcess) {
 			existingProcess = new ProcessData(this._config, reportedProcess);
@@ -55,16 +55,6 @@ HostData.prototype._removeMissingProcesses = function(reportedProcesses) {
 		return false;
 	});
 };
-
-HostData.prototype.findProcess = function(name) {
-	for(var i = 0; i < this.processes.length; i++) {
-		if(this.processes[i].name == name) {
-			return this.processes[i];
-		}
-	}
-
-	return null;
-}
 
 HostData.prototype.findProcessById = function(id) {
 	for(var i = 0; i < this.processes.length; i++) {

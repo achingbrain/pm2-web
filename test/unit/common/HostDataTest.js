@@ -33,21 +33,6 @@ module.exports = {
 		test.done();
 	},
 
-	"Should find process by name": function(test) {
-		this._data.processes.push({
-			name: "foo"
-		});
-		this._data.processes.push({
-			name: "bar"
-		});
-
-		var returned = this._data.findProcess("bar");
-
-		returned.name.should.equal("bar");
-
-		test.done();
-	},
-
 	"Should find process by id": function(test) {
 		this._data.processes.push({
 			id: "foo"

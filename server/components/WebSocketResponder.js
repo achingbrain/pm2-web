@@ -8,6 +8,7 @@ var WebSocketResponder = function() {
 	this._pm2Listener = Autowire;
 	this._webSocketServer = Autowire;
 	this._hostList = Autowire;
+	this._events = [];
 }
 
 WebSocketResponder.prototype.afterPropertiesSet = function() {
@@ -35,30 +36,28 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 			}
 		}.bind(this));
 
-		// send config
-		client.send(JSON.stringify({
-			method: "onConfig",
-			args: [{
-				graph: this._config.get("graph"),
-				logs: this._config.get("logs"),
-				updateFrequency: this._config.get("updateFrequency")
-			}]
-		}));
-
-		// send all host data
-		client.send(JSON.stringify({
-			method: "onHosts",
-			args: [
-				this._hostList.getHosts()
-			]
-		}));
+		// send config and all host data
+		client.send(JSON.stringify([{
+				method: "onConfig",
+				args: [{
+					graph: this._config.get("graph"),
+					logs: this._config.get("logs"),
+					updateFrequency: this._config.get("updateFrequency")
+				}]
+			}, {
+				method: "onHosts",
+				args: [
+					this._hostList.getHosts()
+				]
+			}
+		]));
 	}.bind(this));
 
 	// broadcast error logging
 	this._pm2Listener.on("log:err", function(event) {
 		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "error", event.data);
 
-		this._webSocketServer.broadcast({
+		this._events.push({
 			method: "onErrorLog",
 			args: [
 				event.name, event.process.pm2_env.pm_id, event.data
@@ -70,7 +69,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 	this._pm2Listener.on("log:out", function(event) {
 		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "info", event.data);
 
-		this._webSocketServer.broadcast({
+		this._events.push({
 			method: "onInfoLog",
 			args: [
 				event.name, event.process.pm2_env.pm_id, event.data
@@ -82,7 +81,7 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 	this._pm2Listener.on("process:exception", function(event) {
 		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "error", event.data);
 
-		this._webSocketServer.broadcast({
+		this._events.push({
 			method: "onProcessException",
 			args: [
 				event.name, event.process.pm2_env.pm_id, event.err.message, event.err.stack
@@ -92,14 +91,26 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 
 	// broadcast system data updates
 	this._pm2Listener.on("systemData", function(data) {
-		this._webSocketServer.broadcast({
+		this._events.push({
 			method: "onSystemData",
 			args: [
 				data
 			]
 		});
 	}.bind(this));
+
+	setInterval(this._processEvents.bind(this), this._config.get("ws:frequency"));
 };
+
+WebSocketResponder.prototype._processEvents = function() {
+	if(this._events.length == 0) {
+		return;
+	}
+
+	this._webSocketServer.broadcast(this._events);
+
+	this._events.length = 0;
+}
 
 WebSocketResponder.prototype.startProcess = function(client, host, pm_id) {
 	this._pm2Listener.startProcess(host, pm_id);

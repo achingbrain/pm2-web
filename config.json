@@ -8,7 +8,12 @@
 
 	// Web socket settings
 	"ws": {
-		"port": 9001
+		"port": 9001,
+
+		// Incoming log/exeption events arrive in real time and are batched before begin sent to
+		// the browser. This is how frequently they are sent to the UI in ms.  If your processes
+		// log excessively, you may wish to increase this number.
+		"frequency": 500
 	},
 
 	// To monitor multiple hosts, add extra entries to this array
@@ -16,9 +21,13 @@
 		"host": "localhost",
 		"rpc": 6666,
 		"events": 6667
+
+		// To debug remote processes, run node-inspector on the remote host and add the port
+		// it's listnening on here:
+		//, inspector: 8080
 	}],
 
-	// How often to poll hosts for data (in ms)
+	// How often to poll hosts for system usage data (in ms)
 	"updateFrequency": 5000,
 
 	// If true, processes will be killed without notifying them first

@@ -133,7 +133,7 @@ module.exports = {
 			test.done();
 		};
 
-		this._webSocketResponder._ws.onmessage({data: JSON.stringify(message)});
+		this._webSocketResponder._ws.onmessage({data: JSON.stringify([message])});
 		this._rootScope.$apply.callCount.should.equal(1);
 
 		var callback = this._rootScope.$apply.getCall(0).args[0];

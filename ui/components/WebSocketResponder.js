@@ -23,13 +23,19 @@ WebSocketResponder = function(location, port, $rootScope) {
 		this.emit("open");
 	}.bind(this);
 	this._ws.onmessage = function(message) {
-		var event = JSON.parse(message.data);
+		var events = JSON.parse(message.data);
 
-		if(event && event.method && this[event.method]) {
-			$rootScope.$apply(function() {
-				this[event.method].apply(this, event.args);
-			}.bind(this));
+		if(!Array.isArray(events)) {
+			return;
 		}
+
+		$rootScope.$apply(function() {
+			events.forEach(function(event) {
+				if(event && event.method && this[event.method]) {
+					this[event.method].apply(this, event.args);
+				}
+			}.bind(this));
+		}.bind(this));
 	}.bind(this);
 	this._ws.onclose = function() {
 		this.emit("closed");
