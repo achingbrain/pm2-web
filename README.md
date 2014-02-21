@@ -163,6 +163,7 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 
  - Allow reloading of processes as well as restarting
  - Debug button added to use node-inspector to debug running processes
+ - Batch UI updates together in an attempt to improve performance
 
 ### 1.5.x
 
