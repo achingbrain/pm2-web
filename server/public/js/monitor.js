@@ -4326,10 +4326,10 @@ WebSocketResponder = function(location, $rootScope) {
 };
 util.inherits(WebSocketResponder, EventEmitter);
 
-WebSocketResponder.prototype._detectLocation = function(location ) {
+WebSocketResponder.prototype._detectLocation = function(location) {
 	var protocol = "ws";
 
-	if(location.protocol == "https") {
+	if(location.protocol.indexOf("https") != -1) {
 		protocol += "s";
 	}
 
