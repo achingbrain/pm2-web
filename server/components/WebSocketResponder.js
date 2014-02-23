@@ -54,28 +54,10 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 	}.bind(this));
 
 	// broadcast error logging
-	this._pm2Listener.on("log:err", function(event) {
-		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "error", event.data);
-
-		this._events.push({
-			method: "onErrorLog",
-			args: [
-				event.name, event.process.pm2_env.pm_id, event.data
-			]
-		});
-	}.bind(this));
+	this._pm2Listener.on("log:err", this._broadcastLog.bind(this, "error"));
 
 	// broadcast info logging
-	this._pm2Listener.on("log:out", function(event) {
-		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "info", event.data);
-
-		this._events.push({
-			method: "onInfoLog",
-			args: [
-				event.name, event.process.pm2_env.pm_id, event.data
-			]
-		});
-	}.bind(this));
+	this._pm2Listener.on("log:out", this._broadcastLog.bind(this, "info"));
 
 	// broadcast exceptions
 	this._pm2Listener.on("process:exception", function(event) {
@@ -110,6 +92,23 @@ WebSocketResponder.prototype._processEvents = function() {
 	this._webSocketServer.broadcast(this._events);
 
 	this._events.length = 0;
+}
+
+WebSocketResponder.prototype._broadcastLog = function(type, event) {
+	if(!event.data.trim) {
+		return;
+	}
+
+	var log = event.data.trim();
+
+	this._hostList.addLog(event.name, event.process.pm2_env.pm_id, type, log);
+
+	this._events.push({
+		method: "on" + _s.capitalize(type) + "Log",
+		args: [
+			event.name, event.process.pm2_env.pm_id, log
+		]
+	});
 }
 
 WebSocketResponder.prototype.startProcess = function(client, host, pm_id) {

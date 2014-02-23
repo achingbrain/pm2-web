@@ -2,8 +2,6 @@ var WebSocketResponder = require(__dirname + "/../../../../ui/components/WebSock
 	sinon = require("sinon"),
 	should = require("should");
 
-var port = 1234;
-
 module.exports = {
 	setUp: function(done) {
 		ReconnectingWebSocket = function() {
@@ -14,7 +12,7 @@ module.exports = {
 			$apply: sinon.spy()
 		};
 
-		this._webSocketResponder = new WebSocketResponder({protocol: "http", hostname: "localhost"}, port, this._rootScope);
+		this._webSocketResponder = new WebSocketResponder({protocol: "http", hostname: "localhost", port: 1234}, this._rootScope);
 
 		done();
 	},
@@ -183,5 +181,33 @@ module.exports = {
 		};
 
 		this._webSocketResponder.restartProcess();
+	},
+
+	"Should send reload process": function(test) {
+		this._webSocketResponder._ws.send = function(sent) {
+			JSON.parse(sent).method.should.equal("reloadProcess");
+
+			test.done();
+		};
+
+		this._webSocketResponder.reloadProcess();
+	},
+
+	"Should send debug process": function(test) {
+		this._webSocketResponder._ws.send = function(sent) {
+			JSON.parse(sent).method.should.equal("debugProcess");
+
+			test.done();
+		};
+
+		this._webSocketResponder.debugProcess();
+	},
+
+	"Should detect https port": function(test) {
+		var webSocketResponder = new WebSocketResponder({protocol: "https", hostname: "localhost", port: 1234}, this._rootScope);
+
+		webSocketResponder.url.should.equal("wss://localhost:1234/ws");
+
+		test.done();
 	}
 };

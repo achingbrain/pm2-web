@@ -8,7 +8,6 @@
 
 	// Web socket settings
 	"ws": {
-		"port": 9001,
 
 		// Incoming log/exeption events arrive in real time and are batched before begin sent to
 		// the browser. This is how frequently they are sent to the UI in ms.  If your processes

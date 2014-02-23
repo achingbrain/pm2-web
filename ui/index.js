@@ -16,7 +16,7 @@ pm2Web.factory("hostList", ["config", "webSocketResponder", function(config, web
 	return new HostList(config, webSocketResponder);
 }]);
 pm2Web.factory("webSocketResponder", ["$window", "$rootScope", function($window, $rootScope) {
-	return new WebSocketResponder($window.location, $window.settings.ws, $rootScope);
+	return new WebSocketResponder($window.location, $rootScope);
 }]);
 pm2Web.factory("config", ["webSocketResponder", function(webSocketResponder) {
 	return new Config(webSocketResponder);

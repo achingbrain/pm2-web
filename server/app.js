@@ -33,33 +33,25 @@ PM2Web = function(options) {
 	this._container.register("pm2InterfaceFactory", require("pm2-interface"));
 	this._container.createAndRegister("pm2Listener", require(__dirname + "/components/PM2Listener"));
 
+	// create express
+	this._express = this._createExpress();
+
+	// create routes
+	this._route("homeController", "/", "get");
+	this._route("homeController", "/hosts/:host", "get");
+
+	// http server
+	this._server = http.createServer(this._express);
+
 	// client interactions
 	this._container.createAndRegister("webSocketResponder", require(__dirname + "/components/WebSocketResponder"));
  	this._container.createAndRegister("webSocketServer", WebSocketServer, {
-		port: this._container.find("config").get("ws:port")
+		server: this._server,
+		path: "/ws"
 	});
 
 	// holds host data
 	this._container.createAndRegister("hostList", require(__dirname + "/components/ServerHostList"));
-
-	this._express = Express();
-
-	// all environments
-	this._express.set("port", this._container.find("config").get("www:port"));
-	this._express.set("view engine", "jade");
-	this._express.set("views", __dirname + "/views");
-	this._express.use(Express.logger("dev"));
-	this._express.use(Express.urlencoded())
-	this._express.use(Express.json())
-	this._express.use(Express.methodOverride());
-	this._express.use(this._express.router);
-	this._express.use(Express.static(__dirname + "/public"));
-
-	// development only
-	this._express.use(Express.errorHandler());
-
-	this._route("homeController", "/", "get");
-	this._route("homeController", "/hosts/:host", "get");
 
 	// make errors a little more descriptive
 	process.on("uncaughtException", function (exception) {
@@ -76,6 +68,27 @@ PM2Web.prototype._route = function(controller, url, method) {
 	this._express[method](url, component[method].bind(component));
 };
 
+PM2Web.prototype._createExpress = function() {
+	// create express
+	var express = Express();
+
+	// all environments
+	express.set("port", this._container.find("config").get("www:port"));
+	express.set("view engine", "jade");
+	express.set("views", __dirname + "/views");
+	express.use(Express.logger("dev"));
+	express.use(Express.urlencoded())
+	express.use(Express.json())
+	express.use(Express.methodOverride());
+	express.use(express.router);
+	express.use(Express.static(__dirname + "/public"));
+
+	// development only
+	express.use(Express.errorHandler());
+
+	return express;
+}
+
 PM2Web.prototype.setAddress = function(address) {
 	this._address = address;
 };
@@ -86,7 +99,6 @@ PM2Web.prototype.getAddress = function() {
 
 PM2Web.prototype.start = function() {
 	process.nextTick(function() {
-		this._server = http.createServer(this._express);
 		this._server.listen(this._express.get("port"), function() {
 			this._container.find("logger").info("Express server listening on port " + this._server.address().port);
 

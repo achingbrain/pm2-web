@@ -5,9 +5,7 @@ var HomeController = function() {
 };
 
 HomeController.prototype.get = function(request, response){
-	response.render("index", {
-		ws: this._config.get("ws:port")
-	});
+	response.render("index");
 };
 
 module.exports = HomeController;
