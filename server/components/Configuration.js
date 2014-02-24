@@ -174,4 +174,8 @@ Configuration.prototype._apply = function(key, value, target) {
 	});
 }
 
+Configuration.prototype._defaults = function(object, defaults) {
+
+}
+
 module.exports = Configuration;

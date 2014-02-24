@@ -3,18 +3,33 @@
 
 	// Web server settings
 	"www": {
-		"port": 9000
+		"host": "localhost",
+		"port": 9000,
 
-		// Uncomment the following for SSL support.  N.b. two http servers will be started - one
-		// will serve https traffic on www:ssl:port, the other will listen on www:port and
-		// upgrade all connections to https
-		// , "ssl": {
-		//	"port": 9001,
-		//	"host": "localhost",
-		//	"passphrase": "the certificate passphrase",
-		//	"key": "/path/to/key/file",
-		//	"certificate": "/path/to/certificate/file"
-		//}
+		"authentication": {
+			// set to true to enable basic http auth
+			"enabled": true,
+
+			// basic http auth credentials
+			"username": "a_user_name",
+			"password": "a_password"
+		},
+
+		"ssl": {
+			// set this to true to listen over https
+			"enabled": true,
+
+			// if true, a http server will be started on www:port that upgrades all connections to https
+			"upgrade": true,
+
+			// the port the https server will listen on
+			"port": 9001,
+
+			// your SSL certificate details - see ./certs/generate_certificate.sh if you don't have one
+			"passphrase": "the certificate passphrase",
+			"key": "/path/to/key/file",
+			"certificate": "/path/to/certificate/file"
+		}
 	},
 
 	// Web socket settings
@@ -74,11 +89,13 @@
 		"distribution": [
 			40, 25, 10, 10, 5
 		]
-	}
+	},
 
-	// Uncomment this section to enable a Bonjour/ZeroConf/MDNS advert for pm2-web
-	// N.B. Linux and Windows need Avahi and Bonjour installed respectively for this to work
-	// , "mdns": {
-	//	"name": "pm2"
-	//}
+	"mdns": {
+		// Set this to true to start a Bonjour/ZeroConf/MDNS advert for pm2-web
+		// N.B. Linux and Windows need Avahi and Bonjour installed respectively for this to work
+		"enabled": false,
+
+		"name": "pm2"
+	}
 }

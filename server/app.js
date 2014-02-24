@@ -73,24 +73,26 @@ PM2Web.prototype._route = function(controller, url, method) {
 PM2Web.prototype._createServer = function(express) {
 	var config = this._container.find("config");
 
-	if(config.get("www:ssl")) {
-		// create an app that will redirect all requests to the https version
-		var httpsUrl = "https://" + config.get("www:ssl:host");
+	if(config.get("www:ssl:enabled")) {
+		if(config.get("www:ssl:upgrade")) {
+			// create an app that will redirect all requests to the https version
+			var httpsUrl = "https://" + config.get("www:host");
 
-		if(config.get("www:ssl:port") != 443) {
-			httpsUrl += ":" + config.get("www:ssl:port");
-		}
+			if(config.get("www:ssl:port") != 443) {
+				httpsUrl += ":" + config.get("www:ssl:port");
+			}
 
-		var redirectApp = Express();
-		redirectApp.get("*",function(request, response){
-			response.redirect(httpsUrl + request.url);
-		});
-		process.nextTick(function() {
-			var redirectServer = http.createServer(redirectApp);
-			redirectServer.listen(config.get("www:port"), function() {
-				this._container.find("logger").info("HTTP to HTTPS upgrade server listening on port " + redirectServer.address().port);
+			var redirectApp = Express();
+			redirectApp.get("*",function(request, response){
+				response.redirect(httpsUrl + request.url);
+			});
+			process.nextTick(function() {
+				var redirectServer = http.createServer(redirectApp);
+				redirectServer.listen(config.get("www:port"), function() {
+					this._container.find("logger").info("HTTP to HTTPS upgrade server listening on port " + redirectServer.address().port);
+				}.bind(this));
 			}.bind(this));
-		}.bind(this));
+		}
 
 		return https.createServer({
 			passphrase: config.get("www:ssl:passphrase"),
@@ -106,7 +108,7 @@ PM2Web.prototype._createExpress = function() {
 	var config = this._container.find("config");
 	var port = config.get("www:port");
 
-	if(config.get("www:ssl")) {
+	if(config.get("www:ssl:enabled")) {
 		port = config.get("www:ssl:port");
 	}
 
@@ -127,6 +129,10 @@ PM2Web.prototype._createExpress = function() {
 	// development only
 	express.use(Express.errorHandler());
 
+	if(config.get("www:authentication:enabled")) {
+		express.use(Express.basicAuth(config.get("www:authentication:username"), config.get("www:authentication:password")));
+	}
+
 	return express;
 }
 
@@ -139,15 +145,17 @@ PM2Web.prototype.getAddress = function() {
 };
 
 PM2Web.prototype.start = function() {
+	var config = this._container.find("config");
+
 	process.nextTick(function() {
 		this._server.listen(this._express.get("port"), function() {
 			this._container.find("logger").info("Express server listening on port " + this._server.address().port);
 
-			this.setAddress("http://127.0.0.1:" + this._server.address().port);
+			this.setAddress("http" + (config.get("www:ssl:enabled") ? "s": "") + "://" + config.get("www:host") + ":" + this._server.address().port);
 			this.emit("start");
 		}.bind(this));
 
-		if(this._container.find("config").get("mdns:name")) {
+		if(config.get("mdns:enabled")) {
 			try {
 				var mdns = require("mdns2");
 
@@ -155,7 +163,7 @@ PM2Web.prototype.start = function() {
 
 				// publish via Bonjour
 				var advert = mdns.createAdvertisement(mdns.tcp("http"), this._express.get("port"), {
-					name: this._container.find("config").get("mdns:name")
+					name: config.get("mdns:name")
 				});
 				advert.start();
 			} catch(e) {
