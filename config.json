@@ -4,6 +4,17 @@
 	// Web server settings
 	"www": {
 		"port": 9000
+
+		// Uncomment the following for SSL support.  N.b. two http servers will be started - one
+		// will serve https traffic on www:ssl:port, the other will listen on www:port and
+		// upgrade all connections to https
+		// , "ssl": {
+		//	"port": 9001,
+		//	"host": "localhost",
+		//	"passphrase": "the certificate passphrase",
+		//	"key": "/path/to/key/file",
+		//	"certificate": "/path/to/certificate/file"
+		//}
 	},
 
 	// Web socket settings

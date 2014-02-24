@@ -70,6 +70,10 @@ UIHostList.prototype.add = function(data) {
 };
 
 UIHostList.prototype.update = function(data) {
+	if(!this._hosts[data.name]) {
+		return this.add(data);
+	}
+
 	this._hosts[data.name].update(data);
 
 	this.emit("update", data.name);

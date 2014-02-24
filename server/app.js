@@ -2,10 +2,12 @@ var winston = require("winston"),
 	Container = require("wantsit").Container
 	Express = require("express"),
 	http = require("http"),
+	https = require("https"),
 	path = require("path"),
 	WebSocketServer = require("ws").Server,
 	EventEmitter = require("wildemitter"),
-	util = require("util");
+	util = require("util"),
+	fs = require("fs");
 
 PM2Web = function(options) {
 	EventEmitter.call(this);
@@ -40,10 +42,10 @@ PM2Web = function(options) {
 	this._route("homeController", "/", "get");
 	this._route("homeController", "/hosts/:host", "get");
 
-	// http server
-	this._server = http.createServer(this._express);
+	// http(s) server
+	this._server = this._createServer(this._express);
 
-	// client interactions
+	// web sockets
 	this._container.createAndRegister("webSocketResponder", require(__dirname + "/components/WebSocketResponder"));
  	this._container.createAndRegister("webSocketServer", WebSocketServer, {
 		server: this._server,
@@ -68,12 +70,51 @@ PM2Web.prototype._route = function(controller, url, method) {
 	this._express[method](url, component[method].bind(component));
 };
 
+PM2Web.prototype._createServer = function(express) {
+	var config = this._container.find("config");
+
+	if(config.get("www:ssl")) {
+		// create an app that will redirect all requests to the https version
+		var httpsUrl = "https://" + config.get("www:ssl:host");
+
+		if(config.get("www:ssl:port") != 443) {
+			httpsUrl += ":" + config.get("www:ssl:port");
+		}
+
+		var redirectApp = Express();
+		redirectApp.get("*",function(request, response){
+			response.redirect(httpsUrl + request.url);
+		});
+		process.nextTick(function() {
+			var redirectServer = http.createServer(redirectApp);
+			redirectServer.listen(config.get("www:port"), function() {
+				this._container.find("logger").info("HTTP to HTTPS upgrade server listening on port " + redirectServer.address().port);
+			}.bind(this));
+		}.bind(this));
+
+		return https.createServer({
+			passphrase: config.get("www:ssl:passphrase"),
+			key: fs.readFileSync(config.get("www:ssl:key")),
+			cert: fs.readFileSync(config.get("www:ssl:certificate"))
+		}, this._express);
+	}
+
+	return http.createServer(express);
+}
+
 PM2Web.prototype._createExpress = function() {
+	var config = this._container.find("config");
+	var port = config.get("www:port");
+
+	if(config.get("www:ssl")) {
+		port = config.get("www:ssl:port");
+	}
+
 	// create express
 	var express = Express();
 
 	// all environments
-	express.set("port", this._container.find("config").get("www:port"));
+	express.set("port", port);
 	express.set("view engine", "jade");
 	express.set("views", __dirname + "/views");
 	express.use(Express.logger("dev"));

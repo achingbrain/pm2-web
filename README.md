@@ -125,6 +125,10 @@ process.on("message", function(message) {
 });
 ```
 
+### SSL support
+
+pm2-web can start a https server if so desired.  To do so, uncomment the `www:ssl` section from the configuration file and supply your certificate details.  If you do not have a SSL certificate, the `generate_certificate.sh` script in the `/certs` directory will create a self-signed certificate for you.
+
 ### Resource usage graphs
 
 You can tweak the resource usage graph to be more or less specific.  The thinking here is that lots of processes with lots of process usage data will make your browser a bit crashey.
