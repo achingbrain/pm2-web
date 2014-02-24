@@ -8,7 +8,7 @@
 
 		"authentication": {
 			// set to true to enable basic http auth
-			"enabled": true,
+			"enabled": false,
 
 			// basic http auth credentials
 			"username": "a_user_name",
@@ -17,7 +17,7 @@
 
 		"ssl": {
 			// set this to true to listen over https
-			"enabled": true,
+			"enabled": false,
 
 			// if true, a http server will be started on www:port that upgrades all connections to https
 			"upgrade": true,

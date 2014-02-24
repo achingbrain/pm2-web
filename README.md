@@ -59,6 +59,18 @@ e.g. to replicate the above you'd use:
 $ pm2-web --pm2.host foo.baz.com --pm2.host bar.baz.com
 ```
 
+## Authentication
+
+First, a warning - `pm2-interface` does not support any kind of authentication, so just enabling auth for pm2-web will not secure your system.  If you are planning on exposing pm2-web on a publicly accessible host, please ensure that you cannot connect to `pm2-interface`'s RPC or event ports on monitored hosts across the Internet.
+
+To use HTTP basic auth, set `www:authentication:enabled` to true in your configuration file.  See the [default configuration file](https://github.com/achingbrain/pm2-web/blob/master/config.json) for more information.
+
+N.b. Your password will be sent in plain text.  If you enable HTTP auth, you should probably enable SSL as well.
+
+### SSL support
+
+pm2-web can start a https server if so desired.  To do so, set `www:ssl:enabled` to true in your configuration file and supply your certificate details.  If you do not have a SSL certificate, the `generate_certificate.sh` script in the `/certs` directory will create a self-signed certificate for you.
+
 ## Debugging running processes
 
 To debug a running process, [node-inspector](https://www.npmjs.org/package/node-inspector) must be installed and running on the same host as the process.
@@ -82,18 +94,24 @@ N.b. you may need to change which source file you are looking at in node-inspect
 
 ### Debugging multiple processes
 
-*Experimental future tech, doesn't really work yet!*
-
-By default node will listen for debugger connections on port 5858. If you attempt to debug multiple processes you must specify different debug ports for them.
-
-Once pm2 0.7.8 is released you'll be able to do this sort of thing:
+By default node will listen for debugger connections on port 5858. If you attempt to debug multiple processes you must specify different debug ports for them:
 
 ```
 $ pm2 start --node-args="--debug=7000" foo.js
 $ pm2 start --node-args="--debug=7001" bar.js
 ```
 
-But until then you'll only be able to debug one process at a time and you'll have to restart it to debug anything else.  Boo.
+### Debugging multiple instances
+
+This is not possible because:
+
+```
+$ pm2 start --node-args="--debug=7000" -i 4 foo.js
+```
+
+will start four separate processes all listening on port 7000.
+
+If you are expecting to debug your process, please only start one of them.
 
 ## Reload/restart processes
 
@@ -124,10 +142,6 @@ process.on("message", function(message) {
 	}
 });
 ```
-
-### SSL support
-
-pm2-web can start a https server if so desired.  To do so, uncomment the `www:ssl` section from the configuration file and supply your certificate details.  If you do not have a SSL certificate, the `generate_certificate.sh` script in the `/certs` directory will create a self-signed certificate for you.
 
 ### Resource usage graphs
 
@@ -168,6 +182,9 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
  - Allow reloading of processes as well as restarting
  - Debug button added to use node-inspector to debug running processes
  - Batch UI updates together in an attempt to improve performance
+ - Supports http basic auth
+ - Supports serving over HTTPS
+ - Serve websockets and UI from a single port to make proxying easier
 
 ### 1.5.x
 

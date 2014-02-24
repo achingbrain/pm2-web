@@ -22,7 +22,6 @@
 		"wantsit": "^1.0",
 		"pm2-interface": "^0.1",
 		"ws": "^0.4",
-		"defaults": "^1.0",
 		"wildemitter": "^1.0",
 		"cjson": "^0.3",
 

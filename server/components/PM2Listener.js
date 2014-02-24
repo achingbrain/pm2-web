@@ -1,7 +1,6 @@
 var Autowire = require("wantsit").Autowire,
 	EventEmitter = require("wildemitter"),
-	util = require("util"),
-	defaults = require("defaults");
+	util = require("util");
 
 var DEFAULT_DEBUG_PORT = 5858;
 

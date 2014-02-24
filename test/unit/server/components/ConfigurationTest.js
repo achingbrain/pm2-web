@@ -80,6 +80,17 @@ module.exports = {
 		test.done();
 	},
 
+	"Should get inspector port, even though it's not in the defaults": function(test) {
+		var config = createConfig({pm2: {host: "foo", inspector: 8001}});
+		var hosts = config.get("pm2");
+
+		hosts.length.should.equal(1);
+		hosts[0].host.should.equal("foo");
+		hosts[0].inspector.should.equal(8001);
+
+		test.done();
+	},
+
 	"Should survive setting and getting invalid values": function(test) {
 		var config = createConfig();
 

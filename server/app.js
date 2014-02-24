@@ -38,10 +38,6 @@ PM2Web = function(options) {
 	// create express
 	this._express = this._createExpress();
 
-	// create routes
-	this._route("homeController", "/", "get");
-	this._route("homeController", "/hosts/:host", "get");
-
 	// http(s) server
 	this._server = this._createServer(this._express);
 
@@ -64,10 +60,10 @@ PM2Web = function(options) {
 };
 util.inherits(PM2Web, EventEmitter);
 
-PM2Web.prototype._route = function(controller, url, method) {
+PM2Web.prototype._route = function(express, controller, url, method) {
 	var component = this._container.find(controller);
 
-	this._express[method](url, component[method].bind(component));
+	express[method](url, component[method].bind(component));
 };
 
 PM2Web.prototype._createServer = function(express) {
@@ -112,13 +108,19 @@ PM2Web.prototype._createExpress = function() {
 		port = config.get("www:ssl:port");
 	}
 
-	// create express
 	var express = Express();
-
-	// all environments
 	express.set("port", port);
 	express.set("view engine", "jade");
 	express.set("views", __dirname + "/views");
+
+	// create routes
+	this._route(express, "homeController", "/", "get");
+	this._route(express, "homeController", "/hosts/:host", "get");
+
+	if(config.get("www:authentication:enabled")) {
+		express.use(Express.basicAuth(config.get("www:authentication:username"), config.get("www:authentication:password")));
+	}
+
 	express.use(Express.logger("dev"));
 	express.use(Express.urlencoded())
 	express.use(Express.json())
@@ -128,10 +130,6 @@ PM2Web.prototype._createExpress = function() {
 
 	// development only
 	express.use(Express.errorHandler());
-
-	if(config.get("www:authentication:enabled")) {
-		express.use(Express.basicAuth(config.get("www:authentication:username"), config.get("www:authentication:password")));
-	}
 
 	return express;
 }

@@ -1,5 +1,4 @@
 var Autowire = require("wantsit").Autowire,
-	defaults = require("defaults"),
 	cjson = require("cjson"),
 	fs = require("fs"),
 	argv = require("yargs").argv;
@@ -11,8 +10,11 @@ var USER_CONFIG_FILE = process.env["HOME"] + "/.config/pm2-web/config.json";
 var Configuration = function(options) {
 	this._logger = Autowire;
 
-	// let options override anything passed
-	this._config = options || {};
+	// load defaults from bundled config file
+	this._config = cjson.load(DEFAULT_CONFIG_FILE);
+
+	// override defaults with config file
+	this._override(this._loadConfigFile(), this._config);
 
 	// remove extra bits from command line arguments
 	delete argv._;
@@ -25,13 +27,11 @@ var Configuration = function(options) {
 		this._apply(key, argv[key], commandLine);
 	}.bind(this));
 
-	this._config = defaults(this._config, commandLine);
+	// override config file with command line
+	this._override(commandLine, this._config);
 
-	// load config file
-	this._config = defaults(this._config, this._loadConfigFile());
-
-	// load defaults from bundled config file
-	this._config = defaults(this._config, cjson.load(DEFAULT_CONFIG_FILE));
+	// override everything with passed arguments
+	this._override(options || {}, this._config);
 
 	this._normaliseHosts();
 }
@@ -46,8 +46,13 @@ Configuration.prototype.afterPropertiesSet = function() {
 		this._logger.info("Configuration", "Loading config file from", GLOBAL_CONFIG_FILE);
 	}
 
+	// do not print passwords in the logs...
+	var config = JSON.parse(JSON.stringify(this._config));
+	config.www.authentication.password = "**** LA LA LA, NOTHING TO SEE HERE ****";
+	config.www.ssl.passphrase = "**** LA LA LA, NOTHING TO SEE HERE ****";
+
 	this._logger.info("Configuration", "Loaded default configuration from", DEFAULT_CONFIG_FILE);
-	this._logger.info("Configuration", "Final configuration:", JSON.stringify(this._config, null, 2));
+	this._logger.info("Configuration", "Final configuration:", JSON.stringify(config, null, 2));
 }
 
 Configuration.prototype._loadConfigFile = function() {
@@ -79,31 +84,31 @@ Configuration.prototype._normaliseHosts = function() {
 	// command line arguments arrive like:
 	// --pm2:host=foo --pm2:rpc=6666 --pm2:host=bar
 	// {host: ["foo", "bar"], rpc: 6666}
-	if(!Array.isArray(args)) {
-		if(Array.isArray(args.host)) {
-			var hosts = [];
+	if(Array.isArray(args.host)) {
+		var hosts = [];
 
-			args.rpc = this._arrayify(args.rpc);
-			args.events = this._arrayify(args.events);
-			args.inspector = this._arrayify(args.inspector);
+		args.rpc = this._arrayify(args.rpc);
+		args.events = this._arrayify(args.events);
+		args.inspector = this._arrayify(args.inspector);
 
-			args.host.forEach(function(host, index) {
-				hosts.push(defaults({
-					"host": host,
-					"rpc": args.rpc[index] ? args.rpc[index] : undefined,
-					"events": args.events[index] ? args.events[index] : undefined,
-					"inspector": args.inspector[index] ? args.inspector[index] : undefined
-				}, {
-					"host": "localhost",
-					"rpc": 6666,
-					"events": 6667
-				}));
-			});
+		args.host.forEach(function(host, index) {
+			hosts.push(this._defaults({
+				"host": host,
+				"rpc": args.rpc[index] ? args.rpc[index] : undefined,
+				"events": args.events[index] ? args.events[index] : undefined,
+				"inspector": args.inspector[index] ? args.inspector[index] : undefined
+			}, {
+				"host": "localhost",
+				"rpc": 6666,
+				"events": 6667
+			}));
+		}.bind(this));
 
-			args = hosts;
-		} else {
-			args = [args];
-		}
+		args = hosts;
+	}
+
+	if(!Array.isArray(args) && typeof args == "object") {
+		args = [args];
 	}
 
 	// ensure data is correct for each host
@@ -175,7 +180,63 @@ Configuration.prototype._apply = function(key, value, target) {
 }
 
 Configuration.prototype._defaults = function(object, defaults) {
+	if(typeof object == "undefined" || object == null) {
+		return defaults;
+	}
 
+	if(typeof defaults == "string" || defaults instanceof String) {
+		return object ? object : defaults;
+	}
+
+	if(typeof defaults == "boolean") {
+		return object ? true : false;
+	}
+
+	if(!isNaN(parseFloat(defaults)) && isFinite(defaults)) {
+		return typeof object == "undefined" ? defaults : object;
+	}
+
+	if(Array.isArray(defaults)) {
+		var output = [];
+
+		object.forEach(function(entry, index) {
+			output.push(this._defaults(entry, defaults[index] ? defaults[index] : defaults[0]));
+		}.bind(this));
+
+		return output;
+	}
+
+	if(typeof defaults == "object") {
+		var output = {};
+
+		Object.keys(defaults).forEach(function(key) {
+			output[key] = this._defaults(object[key], defaults[key]);
+		}.bind(this));
+
+		return output;
+	}
+
+	this._logger.error("Configuration", "Don't know what to do with", object, "expected", defaults);
+}
+
+Configuration.prototype._override = function(source, target) {
+	Object.keys(source).forEach(function(key) {
+		if(typeof source[key] == "string" || source[key] instanceof String ||
+			typeof source[key] == "boolean" ||
+			(!isNaN(parseFloat(source[key])) && isFinite(source[key]))) {
+			target[key] = source[key];
+		}
+
+		if(Array.isArray(source[key])) {
+			target[key] = source[key];
+		} else if(Array.isArray(target[key])) {
+			target[key] = [source[key]];
+		}
+
+		if(typeof source[key] == "object") {
+			this._override(source[key], target[key]);
+		}
+	}.bind(this));
 }
 
 module.exports = Configuration;
