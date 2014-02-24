@@ -61,7 +61,7 @@ $ pm2-web --pm2.host foo.baz.com --pm2.host bar.baz.com
 
 ## Authentication
 
-First, a warning - `pm2-interface` does not support any kind of authentication, so just enabling auth for pm2-web will not secure your system.  If you are planning on exposing pm2-web on a publicly accessible host, please ensure that you cannot connect to `pm2-interface`'s RPC or event ports on monitored hosts across the Internet.
+First, a warning - `pm2-interface` does not support any kind of authentication, so just enabling auth for pm2-web will not secure your system.  If you are planning on exposing pm2-web on a publicly accessible host, please ensure that you cannot connect to `pm2-interface`'s RPC or event ports on monitored hosts across the Internet.  Please follow [pm2-interface #10](https://github.com/Unitech/pm2-interface/issues/10) for more information.
 
 To use HTTP basic auth, set `www:authentication:enabled` to true in your configuration file.  See the [default configuration file](https://github.com/achingbrain/pm2-web/blob/master/config.json) for more information.
 
