@@ -1,13 +1,12 @@
 var Autowire = require("wantsit").Autowire,
 	cjson = require("cjson"),
-	fs = require("fs"),
-	argv = require("yargs").argv;
+	fs = require("fs");
 
 var DEFAULT_CONFIG_FILE = __dirname + "/../../config.json";
 var GLOBAL_CONFIG_FILE = "/etc/pm2-web/config.json";
 var USER_CONFIG_FILE = process.env["HOME"] + "/.config/pm2-web/config.json";
 
-var Configuration = function(options) {
+var Configuration = function(options, argv) {
 	this._logger = Autowire;
 
 	// load defaults from bundled config file
@@ -17,18 +16,20 @@ var Configuration = function(options) {
 	this._override(this._loadConfigFile(), this._config);
 
 	// remove extra bits from command line arguments
-	delete argv._;
-	delete argv.$0;
+	if(argv) {
+		delete argv._;
+		delete argv.$0;
 
-	// respect arguments passed on the command line
-	var commandLine = {};
+		// respect arguments passed on the command line
+		var commandLine = {};
 
-	Object.keys(argv).forEach(function(key) {
-		this._apply(key, argv[key], commandLine);
-	}.bind(this));
+		Object.keys(argv).forEach(function(key) {
+			this._apply(key, argv[key], commandLine);
+		}.bind(this));
 
-	// override config file with command line
-	this._override(commandLine, this._config);
+		// override config file with command line
+		this._override(commandLine, this._config);
+	}
 
 	// override everything with passed arguments
 	this._override(options || {}, this._config);
@@ -164,7 +165,13 @@ Configuration.prototype.set = function(key, value) {
 }
 
 Configuration.prototype._apply = function(key, value, target) {
-	var parts = key.split(":");
+	var parts;
+
+	if(key.indexOf(":") != -1) {
+		parts = key.split(":");
+	} else {
+		parts = key.split(".");
+	}
 
 	parts.forEach(function(property, index) {
 		if((parts.length - 1) == index) {

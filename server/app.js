@@ -7,7 +7,8 @@ var winston = require("winston"),
 	WebSocketServer = require("ws").Server,
 	EventEmitter = require("wildemitter"),
 	util = require("util"),
-	fs = require("fs");
+	fs = require("fs"),
+	argv = require("minimist")(process.argv.slice(2));
 
 PM2Web = function(options) {
 	EventEmitter.call(this);
@@ -26,7 +27,7 @@ PM2Web = function(options) {
 	});
 
 	// parse configuration
-	this._container.createAndRegister("config", require(__dirname + "/components/Configuration"), options);
+	this._container.createAndRegister("config", require(__dirname + "/components/Configuration"), options, argv);
 
 	// web controllers
 	this._container.createAndRegister("homeController", require(__dirname + "/routes/Home"));

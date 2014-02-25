@@ -2,8 +2,8 @@ var Configuration = require(__dirname + "/../../../../server/components/Configur
 	sinon = require("sinon"),
 	should = require("should");
 
-var createConfig = function(options) {
-	var config = new Configuration(options);
+var createConfig = function(options, argv) {
+	var config = new Configuration(options, argv);
 	config._logger = {
 		info: sinon.stub(),
 		warn: sinon.stub(),
@@ -110,6 +110,104 @@ module.exports = {
 		config._apply(key, value, target);
 
 		target.foo.bar.baz.should.equal(value);
+
+		test.done();
+	},
+
+	"Should return an empty list of hosts": function(test) {
+		var config = createConfig();
+		config._config.pm2 = null;
+
+		config._normaliseHosts();
+
+		var hosts = config.get("pm2");
+
+		hosts.length.should.equal(0);
+
+		test.done();
+	},
+
+	"Should pass command line args with semi colon": function(test) {
+		var config = createConfig({}, {
+			"pm2:host": "baz"
+		});
+
+		var hosts = config.get("pm2");
+		hosts.length.should.equal(1);
+		hosts[0].host.should.equal("baz");
+
+		test.done();
+	},
+
+	"Should pass command line args with full stop": function(test) {
+		var config = createConfig({}, {
+			"pm2.host": "baz"
+		});
+
+		var hosts = config.get("pm2");
+		hosts.length.should.equal(1);
+		hosts[0].host.should.equal("baz");
+
+		test.done();
+	},
+
+	"Should arrayify object": function(test) {
+		var config = createConfig();
+		var output = config._arrayify({});
+
+		Array.isArray(output).should.be.true;
+
+		test.done();
+	},
+
+	"Should apply defaults to object": function(test) {
+		var config = createConfig();
+		var output = config._defaults({
+
+		}, {
+			bool: true,
+			string: "string",
+			number: 1,
+			array: [{}],
+			object: {
+				foo: "bar"
+			}
+		});
+
+		output.bool.should.be.true;
+		output.string.should.equal("string");
+		output.number.should.equal(1);
+		output.array.length.should.equal(1);
+		output.object.foo.should.equal("bar");
+
+		test.done();
+	},
+
+	"Should not apply defaults to object": function(test) {
+		var config = createConfig();
+		var output = config._defaults({
+			bool: false,
+			string: "foo",
+			number: 2,
+			array: [{}, {}],
+			object: {
+				foo: "baz"
+			}
+		}, {
+			bool: true,
+			string: "string",
+			number: 1,
+			array: [{}],
+			object: {
+				foo: "bar"
+			}
+		});
+
+		output.bool.should.be.false;
+		output.string.should.equal("foo");
+		output.number.should.equal(2);
+		output.array.length.should.equal(2);
+		output.object.foo.should.equal("baz");
 
 		test.done();
 	}

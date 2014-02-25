@@ -22,7 +22,9 @@ module.exports = {
 			on: sinon.stub(),
 			startProcess: sinon.stub(),
 			stopProcess: sinon.stub(),
-			restartProcess: sinon.stub()
+			restartProcess: sinon.stub(),
+			reloadProcess: sinon.stub(),
+			debugProcess: sinon.stub()
 		};
 		this._responder._hostList = {
 			getHosts: sinon.stub(),
@@ -109,6 +111,34 @@ module.exports = {
 		this._responder._pm2Listener.restartProcess.callCount.should.equal(1);
 		this._responder._pm2Listener.restartProcess.getCall(0).args[0].should.equal(host);
 		this._responder._pm2Listener.restartProcess.getCall(0).args[1].should.equal(pid);
+
+		test.done();
+	},
+
+	"Should reload a process": function(test) {
+		var client = "localhost";
+		var host = "foo";
+		var pid = 10;
+
+		this._responder.reloadProcess(client, host, pid);
+
+		this._responder._pm2Listener.reloadProcess.callCount.should.equal(1);
+		this._responder._pm2Listener.reloadProcess.getCall(0).args[0].should.equal(host);
+		this._responder._pm2Listener.reloadProcess.getCall(0).args[1].should.equal(pid);
+
+		test.done();
+	},
+
+	"Should debug a process": function(test) {
+		var client = "localhost";
+		var host = "foo";
+		var pid = 10;
+
+		this._responder.debugProcess(client, host, pid);
+
+		this._responder._pm2Listener.debugProcess.callCount.should.equal(1);
+		this._responder._pm2Listener.debugProcess.getCall(0).args[0].should.equal(host);
+		this._responder._pm2Listener.debugProcess.getCall(0).args[1].should.equal(pid);
 
 		test.done();
 	},
@@ -204,6 +234,47 @@ module.exports = {
 			events[0].args[0].should.equal("foo");
 			events[0].args[1].should.equal(1);
 			events[0].args[2].should.equal("bar");
+
+			test.done();
+		};
+
+		this._clock.tick(600);
+	},
+
+	"Should broadcast exceptions": function(test) {
+		this._responder._config.get.withArgs("ws:frequency").returns(500);
+
+		this._responder.afterPropertiesSet();
+
+		// find the callback
+		this._responder._pm2Listener.on.getCall(2).args[0].should.equal("process:exception");
+		var callback = this._responder._pm2Listener.on.getCall(2).args[1];
+
+		// the log data we are sending
+		var event = {
+			name: "foo",
+			process: {
+				pm2_env: {
+					pm_id: 1
+				}
+			},
+			data: "bar",
+			err: {
+				message: "panic!",
+				stack: []
+			}
+		};
+
+		// invoke the callback
+		callback(event);
+
+		// event should have been broadcast
+		this._responder._webSocketServer.broadcast = function(events) {
+			events[0].method.should.equal("onProcessException");
+			events[0].args[0].should.equal("foo");
+			events[0].args[1].should.equal(1);
+			events[0].args[2].should.equal("panic!");
+			events[0].args[3].length.should.equal(0);
 
 			test.done();
 		};
