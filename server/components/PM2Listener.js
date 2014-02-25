@@ -198,13 +198,13 @@ PM2Listener.prototype._findDebugPort = function(execArgv) {
 
 	if(Array.isArray(execArgv)) {
 		execArgv.forEach(function(argument) {
-			if(argument.match(/--debug=[0-9]+/)) {
-				port = parseInt(argument.split("=")[1], 10);
-			}
+			[/--debug\s*=?\s*([0-9]+)/, /--debug-brk\s*=?\s*([0-9]+)/].forEach(function(regex) {
+				var matches = argument.match(regex);
 
-			if(argument.match(/--debug-brk=[0-9]+/)) {
-				port = parseInt(argument.split("=")[1], 10);
-			}
+				if(matches && matches.length > 1) {
+					port = parseInt(matches[1], 10);
+				}
+			});
 		});
 	}
 

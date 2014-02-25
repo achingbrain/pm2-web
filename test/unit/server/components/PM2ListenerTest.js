@@ -399,6 +399,8 @@ module.exports = {
 		this._listener._findDebugPort(["--debug=1000"]).should.equal(1000);
 		this._listener._findDebugPort(["bar", "--debug=1000"]).should.equal(1000);
 		this._listener._findDebugPort(["bar", "--debug-brk=2000"]).should.equal(2000);
+		this._listener._findDebugPort(["bar", "--debug-brk 2000"]).should.equal(2000);
+		this._listener._findDebugPort(["bar", "--debug-brk   =  2000"]).should.equal(2000);
 
 		test.done();
 	}
