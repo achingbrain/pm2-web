@@ -20,6 +20,7 @@ module.exports = {
 		},
 		"controllers": {
 			"connection": require(__dirname + "/ui/controllers/connectionTest.js"),
+			"footer": require(__dirname + "/ui/controllers/footerTest.js"),
 			"hostList": require(__dirname + "/ui/controllers/hostListTest.js"),
 			"processList": require(__dirname + "/ui/controllers/processListTest.js"),
 			"system": require(__dirname + "/ui/controllers/systemTest.js")

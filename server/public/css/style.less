@@ -81,11 +81,22 @@ only screen and (min-device-pixel-ratio: 1.5) {
 }
 /* /Bootstrap overrides */
 
-article {
+article, footer {
 	width: 90%;
 	margin: 0 auto;
 	background: #FFF;
-	padding: 10px 10px 10px 10px;
+	padding: 10px;
+}
+
+footer {
+	padding-top: 0px;
+}
+footer small {
+	font-size: 10px;
+	color: lighten(@blue, 20%);
+	padding-left: 15px;
+	text-align: right;
+	display: block;
 }
 
 th, figcaption, .information h3, p.noprocesses {

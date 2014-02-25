@@ -37,3 +37,4 @@ pm2Web.controller("ConnectionController", require("./controllers/connection"));
 pm2Web.controller("SystemController", require("./controllers/system"));
 pm2Web.controller("ProcessListController", require("./controllers/processList"));
 pm2Web.controller("HostListController", require("./controllers/hostList"));
+pm2Web.controller("FooterController", require("./controllers/footer"));

@@ -40,11 +40,22 @@ h1 {
   padding-left: 5px;
 }
 /* /Bootstrap overrides */
-article {
+article,
+footer {
   width: 90%;
   margin: 0 auto;
   background: #FFF;
-  padding: 10px 10px 10px 10px;
+  padding: 10px;
+}
+footer {
+  padding-top: 0px;
+}
+footer small {
+  font-size: 10px;
+  color: #d3d3db;
+  padding-left: 15px;
+  text-align: right;
+  display: block;
 }
 th,
 figcaption,

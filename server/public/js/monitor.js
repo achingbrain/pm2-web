@@ -4485,6 +4485,12 @@ module.exports = ["$window", "$scope", "$location", "webSocketResponder", "hostL
 
 },{}],18:[function(require,module,exports){
 
+module.exports = ["$window", "$scope", function($window, $scope) {
+	$scope.version = $window.settings.version;
+}];
+
+},{}],19:[function(require,module,exports){
+
 module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
 	$scope.tabs = [];
 
@@ -4518,7 +4524,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 	});
 }];
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 
 module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", "webSocketResponder", function($scope, $routeParams, $location, $window, hostList, webSocketResponder) {
 	$scope.showDetails = {};
@@ -4579,7 +4585,7 @@ module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", 
 	});
 }];
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 
 module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
 	var updateScope = function() {
@@ -4601,7 +4607,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 	});
 }];
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 
 module.exports = ["config", function(config) {
 	return {
@@ -4706,7 +4712,7 @@ module.exports = ["config", function(config) {
 	};
 }];
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 function fakeNgModel(initValue){
 	return {
 		$setViewValue: function(value){
@@ -4747,7 +4753,7 @@ module.exports = [function() {
 	};
 }];
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var Convert = require("ansi-to-html"),
 	Entities = require("html-entities").XmlEntities;
 
@@ -4762,7 +4768,7 @@ module.exports = ["$sce", function($sce) {
 	}
 }];
 
-},{"ansi-to-html":3,"html-entities":8}],24:[function(require,module,exports){
+},{"ansi-to-html":3,"html-entities":8}],25:[function(require,module,exports){
 
 module.exports = function() {
 	return function(number, decimalPlaces) {
@@ -4774,7 +4780,7 @@ module.exports = function() {
 	}
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var Moment = require("moment");
 
 module.exports = function() {
@@ -4783,7 +4789,7 @@ module.exports = function() {
 	}
 };
 
-},{"moment":12}],26:[function(require,module,exports){
+},{"moment":12}],27:[function(require,module,exports){
 
 module.exports = function() {
 	var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
@@ -4805,7 +4811,7 @@ module.exports = function() {
 	}
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 var WebSocketResponder = require("./components/WebSocketResponder"),
@@ -4845,8 +4851,9 @@ pm2Web.controller("ConnectionController", require("./controllers/connection"));
 pm2Web.controller("SystemController", require("./controllers/system"));
 pm2Web.controller("ProcessListController", require("./controllers/processList"));
 pm2Web.controller("HostListController", require("./controllers/hostList"));
+pm2Web.controller("FooterController", require("./controllers/footer"));
 
-},{"./components/Config":14,"./components/UIHostList":15,"./components/WebSocketResponder":16,"./controllers/connection":17,"./controllers/hostList":18,"./controllers/processList":19,"./controllers/system":20,"./directives/resourceUsage":21,"./directives/scrollGlue":22,"./filters/ansiToHtml":23,"./filters/decimalPlaces":24,"./filters/humanise":25,"./filters/memory":26,"./routes":28}],28:[function(require,module,exports){
+},{"./components/Config":14,"./components/UIHostList":15,"./components/WebSocketResponder":16,"./controllers/connection":17,"./controllers/footer":18,"./controllers/hostList":19,"./controllers/processList":20,"./controllers/system":21,"./directives/resourceUsage":22,"./directives/scrollGlue":23,"./filters/ansiToHtml":24,"./filters/decimalPlaces":25,"./filters/humanise":26,"./filters/memory":27,"./routes":29}],29:[function(require,module,exports){
 
 module.exports = ["$routeProvider",
 	function($routeProvider) {
@@ -4861,4 +4868,4 @@ module.exports = ["$routeProvider",
 	}
 ];
 
-},{}]},{},[27])
+},{}]},{},[28])
