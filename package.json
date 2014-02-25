@@ -24,6 +24,7 @@
 		"wildemitter": "^1.0",
 		"cjson": "^0.3",
 		"minimist": "^0.0",
+		"semver": "^2.2",
 
 		"zepto-browserify": "^1.0",
 		"moment": "^2.5",

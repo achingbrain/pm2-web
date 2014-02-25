@@ -10,6 +10,8 @@ var winston = require("winston"),
 	fs = require("fs"),
 	argv = require("minimist")(process.argv.slice(2));
 
+var REQUIRED_PM2_VERSION = "0.7.7";
+
 PM2Web = function(options) {
 	EventEmitter.call(this);
 
@@ -25,6 +27,10 @@ PM2Web = function(options) {
 			})
 		]
 	});
+
+	// non-optional options
+	options = options || {};
+	options.requiredPm2Version = REQUIRED_PM2_VERSION;
 
 	// parse configuration
 	this._container.createAndRegister("config", require(__dirname + "/components/Configuration"), options, argv);

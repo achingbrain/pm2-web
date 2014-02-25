@@ -9,6 +9,7 @@ var HostData = function(data, config) {
 
 	this.name = data.name;
 	this.inspector = data.inspector;
+	this.pm2 = data.pm2,
 	this.system = {};
 	this.processes = [];
 };
@@ -4538,6 +4539,7 @@ module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", 
 			return $location.path("/");
 		}
 
+		$scope.hostData = hostData;
 		$scope.processes = hostData.processes;
 		$scope.debugEnabled = hostData.inspector ? true : false;
 
@@ -4587,7 +4589,7 @@ module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", 
 
 },{}],21:[function(require,module,exports){
 
-module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
+module.exports = ["$scope", "$routeParams", "$location", "$window", "config", "hostList", function($scope, $routeParams, $location, $window, config, hostList) {
 	var updateScope = function() {
 		var hostData = hostList.find($routeParams.host);
 
@@ -4605,6 +4607,9 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 			updateScope();
 		}
 	});
+
+	$scope.pm2WebVersion = $window.settings.version;
+	$scope.pm2VersionRequired = config.get("requiredPm2Version");
 }];
 
 },{}],22:[function(require,module,exports){

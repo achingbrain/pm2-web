@@ -1,6 +1,8 @@
 var Autowire = require("wantsit").Autowire,
 	EventEmitter = require("wildemitter"),
-	util = require("util");
+	util = require("util"),
+	semver = require("semver"),
+	pkg = require(__dirname + "/../../package.json");
 
 var DEFAULT_DEBUG_PORT = 5858;
 
@@ -48,6 +50,56 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 	}
 
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
+
+	pm2Interface.pm2 = {
+		version: "LATEST",
+		compatible: true
+	};
+
+	this._addCompatiblePm2(pm2Interface, pm2Interface.pm2.version, pm2Details);
+
+	/* Can uncomment this once https://github.com/Unitech/pm2/pull/320 is merged
+
+	if(!pm2Interface.rpc.getVersion) {
+		pm2Interface.pm2 = {
+			version: "WELL_OLD",
+			compatible: true
+		};
+
+		this._addIncompatiblePm2(pm2Interface, pm2Interface.pm2.version, pm2Details);
+	}
+
+	this._logger.info("PM2Listener", "Querying version number from", pm2Interface.bind_host);
+
+	pm2Interface.rpc.getVersion({}, function(err, version) {
+		pm2Interface.pm2 = {
+			version: version
+		};
+
+		if(!semver.gte(version, this._config.get("requiredPm2Version"))) {
+			pm2Interface.pm2.compatible = false;
+
+			return this._addIncompatiblePm2(pm2Interface);
+		}
+
+		pm2Interface.pm2.compatible = true;
+		this._addCompatiblePm2(pm2Interface, version, pm2Details);
+	}.bind(this));
+	*/
+}
+
+PM2Listener.prototype._addIncompatiblePm2 = function(pm2Interface, version) {
+	if(version) {
+		this._logger.error("PM2Listener", pm2Interface.bind_host, "is running pm2", version, "which is incompatible with pm2-web", pkg.version, "- please upgrade pm2 to", this._config.get("requiredPm2Version"), "or higher.");
+	} else {
+		this._logger.error("PM2Listener", "The version of pm2 running on", pm2Interface.bind_host, "is incompatible with pm2-web", pkg.version, "- please upgrade pm2 to", this._config.get("requiredPm2Version"), "or higher.");
+	}
+
+	this._pm2List[pm2Interface.bind_host] = pm2Interface;
+}
+
+PM2Listener.prototype._addCompatiblePm2 = function(pm2Interface, version, pm2Details) {
+	this._logger.info("PM2Listener", pm2Interface.bind_host, "is running pm2", version);
 
 	// listen for all events
 	pm2Interface.bus.on("*", function(event, data) {
@@ -98,6 +150,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			},
 			time: data.system.time
 		},
+		pm2: pm2Interface.pm2,
 		processes: []
 	};
 

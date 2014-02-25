@@ -11,6 +11,7 @@ module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", 
 			return $location.path("/");
 		}
 
+		$scope.hostData = hostData;
 		$scope.processes = hostData.processes;
 		$scope.debugEnabled = hostData.inspector ? true : false;
 

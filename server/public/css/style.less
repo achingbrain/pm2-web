@@ -1,6 +1,5 @@
 @import url(//fonts.googleapis.com/css?family=Abel);
 @import url(font-awesome.min.css);
-@import url("reset.css");
 
 @blue: #9B9BAD;
 @lighterblue: #58EAE0;
@@ -79,6 +78,9 @@ only screen and (min-device-pixel-ratio: 1.5) {
 	text-align: left;
 	padding-left: 5px;
 }
+.alert {
+	margin-bottom: 0;
+}
 /* /Bootstrap overrides */
 
 article, footer {
@@ -117,11 +119,13 @@ section {
 	h2, .details h3, .logs h3 {
 		font-size: 14px;
 		font-family: 'Abel', sans-serif;
+		font-weight: normal;
 		text-transform: uppercase;
 		letter-spacing: 2px;
 		margin: 0 0 0 5px;
-		padding: 5px 0;
+		padding: 0;
 		color: @blue;
+		line-height: 1.8;
 	}
 }
 
@@ -134,7 +138,7 @@ section {
 	figure {
 		display: inline-block;
 		width: 50%;
-		margin-top: 10px;
+		margin-top: 3px;
 		margin-bottom: 10px;
 
 		figcaption {
@@ -204,6 +208,9 @@ section {
 		display: block;
 		border-bottom: 1px solid #DDD;
 		padding-bottom: 9px;
+		margin: 0;
+		font-weight: normal;
+		line-height: 1;
 	}
 
 	article:first-of-type .information {
@@ -212,12 +219,14 @@ section {
 	}
 
 	.noprocesses {
-		padding: 10px 5px;
+		padding: 10px 5px 0 5px;
+		margin-bottom: 0;
 	}
 
 	.information {
 		border-top: 1px solid #DDD;
 		display: flex;
+		margin: 0;
 
 		li {
 			display: inline-block;
@@ -333,7 +342,6 @@ section {
 		.rounded-corners(6px);
 		background: @details;
 		padding: 10px;
-		margin-bottom: 10px;
 
 		h3 {
 			border-bottom: none;
@@ -384,7 +392,7 @@ section {
 			color: #FFF;
 			font-family: 'Lucida Console', Monaco, monospace;
 			height: 400px;
-			margin-top: 10px;
+			margin: 10px 5px 5px 5px;
 			overflow: auto;
 			padding: 5px 0;
 

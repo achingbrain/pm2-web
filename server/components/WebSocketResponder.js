@@ -42,7 +42,8 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 				args: [{
 					graph: this._config.get("graph"),
 					logs: this._config.get("logs"),
-					updateFrequency: this._config.get("updateFrequency")
+					updateFrequency: this._config.get("updateFrequency"),
+					requiredPm2Version: this._config.get("requiredPm2Version")
 				}]
 			}, {
 				method: "onHosts",

@@ -218,5 +218,30 @@ module.exports = {
 		this._window.open.callCount.should.equal(1);
 
 		test.done();
+	},
+
+	"Should toggle host list": function(test) {
+		var pm_id = 10;
+
+		var hostData = {
+			name: "foo",
+			processes: []
+		};
+		this._routeParams.host = "foo";
+		this._hostList.find.withArgs(this._routeParams.host).returns(hostData);
+
+		this._controller(this._scope, this._routeParams, this._location, this._window, this._hostList, this._webSocketResponder);
+
+		should(this._scope.showDetails[pm_id]).be.undefined;
+
+		this._scope.toggleDetails(pm_id);
+
+		this._scope.showDetails[pm_id].should.be.true;
+
+		this._scope.toggleDetails(pm_id);
+
+		this._scope.showDetails[pm_id].should.be.false;
+
+		test.done();
 	}
 };

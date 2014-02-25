@@ -1,5 +1,5 @@
 
-module.exports = ["$scope", "$routeParams", "$location", "hostList", function($scope, $routeParams, $location, hostList) {
+module.exports = ["$scope", "$routeParams", "$location", "$window", "config", "hostList", function($scope, $routeParams, $location, $window, config, hostList) {
 	var updateScope = function() {
 		var hostData = hostList.find($routeParams.host);
 
@@ -17,4 +17,7 @@ module.exports = ["$scope", "$routeParams", "$location", "hostList", function($s
 			updateScope();
 		}
 	});
+
+	$scope.pm2WebVersion = $window.settings.version;
+	$scope.pm2VersionRequired = config.get("requiredPm2Version");
 }];

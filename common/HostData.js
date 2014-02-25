@@ -8,6 +8,7 @@ var HostData = function(data, config) {
 
 	this.name = data.name;
 	this.inspector = data.inspector;
+	this.pm2 = data.pm2,
 	this.system = {};
 	this.processes = [];
 };

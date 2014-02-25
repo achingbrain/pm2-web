@@ -1,6 +1,5 @@
 @import url(//fonts.googleapis.com/css?family=Abel);
 @import url(font-awesome.min.css);
-@import url("reset.css");
 body {
   background: url(../img/satinweave.png);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -38,6 +37,9 @@ h1 {
 .table td {
   text-align: left;
   padding-left: 5px;
+}
+.alert {
+  margin-bottom: 0;
 }
 /* /Bootstrap overrides */
 article,
@@ -79,11 +81,13 @@ section .details h3,
 section .logs h3 {
   font-size: 14px;
   font-family: 'Abel', sans-serif;
+  font-weight: normal;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin: 0 0 0 5px;
-  padding: 5px 0;
+  padding: 0;
   color: #9b9bad;
+  line-height: 1.8;
 }
 .system table {
   width: 50%;
@@ -92,7 +96,7 @@ section .logs h3 {
 .system figure {
   display: inline-block;
   width: 50%;
-  margin-top: 10px;
+  margin-top: 3px;
   margin-bottom: 10px;
 }
 .system figure figcaption {
@@ -151,17 +155,22 @@ section .logs h3 {
   display: block;
   border-bottom: 1px solid #DDD;
   padding-bottom: 9px;
+  margin: 0;
+  font-weight: normal;
+  line-height: 1;
 }
 .processes article:first-of-type .information {
   border-top: none;
   margin-top: 7px;
 }
 .processes .noprocesses {
-  padding: 10px 5px;
+  padding: 10px 5px 0 5px;
+  margin-bottom: 0;
 }
 .processes .information {
   border-top: 1px solid #DDD;
   display: flex;
+  margin: 0;
 }
 .processes .information li {
   display: inline-block;
@@ -277,7 +286,6 @@ section .logs h3 {
   border-radius: 6px;
   background: #ffffff;
   padding: 10px;
-  margin-bottom: 10px;
 }
 .processes .details h3,
 .processes .logs h3 {
@@ -325,7 +333,7 @@ section .logs h3 {
   color: #FFF;
   font-family: 'Lucida Console', Monaco, monospace;
   height: 400px;
-  margin-top: 10px;
+  margin: 10px 5px 5px 5px;
   overflow: auto;
   padding: 5px 0;
 }
