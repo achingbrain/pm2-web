@@ -56,6 +56,7 @@
 				<h3>Status</h3>
 				<p ng-click="toggleDetails(process.id)">
 					<i title="Online" ng-show="process.status == 'online'" class="icon-ok-circle {{process.status}}"></i>
+					<i title="Stopping" ng-show="process.status == 'stopping'" class="icon-ban-circle {{process.status}}"></i>
 					<i title="Stopped" ng-show="process.status == 'stopped'" class="icon-ban-circle {{process.status}}"></i>
 					<i title="Error!" ng-show="process.status == 'errored'" class="icon-exclamation-sign {{process.status}}"></i>
 					<i title="Launching" ng-show="process.status == 'launching'" class="icon-repeat {{process.status}}"></i>

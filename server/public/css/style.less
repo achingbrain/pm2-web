@@ -225,6 +225,7 @@ section {
 
 	.information {
 		border-top: 1px solid #DDD;
+		display: -webkit-flex;
 		display: flex;
 		margin: 0;
 
@@ -242,10 +243,12 @@ section {
 
 		.pid {
 			width: 80px;
+			-webkit-flex-grow: 0;
 			flex-grow: 0;
 		}
 
 		.script {
+			-webkit-flex-grow: 1;
 			flex-grow: 1;
 
 			p {
@@ -255,6 +258,7 @@ section {
 
 		.restarts, .uptime, .status, .cpu, .memory, .actions {
 			width: 80px;
+			-webkit-flex-grow: 0;
 			flex-grow: 0;
 
 			p, h3 {

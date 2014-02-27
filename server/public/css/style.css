@@ -169,6 +169,7 @@ section .logs h3 {
 }
 .processes .information {
   border-top: 1px solid #DDD;
+  display: -webkit-flex;
   display: flex;
   margin: 0;
 }
@@ -184,9 +185,11 @@ section .logs h3 {
 }
 .processes .information .pid {
   width: 80px;
+  -webkit-flex-grow: 0;
   flex-grow: 0;
 }
 .processes .information .script {
+  -webkit-flex-grow: 1;
   flex-grow: 1;
 }
 .processes .information .script p {
@@ -199,6 +202,7 @@ section .logs h3 {
 .processes .information .memory,
 .processes .information .actions {
   width: 80px;
+  -webkit-flex-grow: 0;
   flex-grow: 0;
 }
 .processes .information .restarts p,

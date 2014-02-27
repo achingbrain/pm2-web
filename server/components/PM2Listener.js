@@ -165,7 +165,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			return;
 		}
 
-		if(process.pm2_env.status != "online" && process.pm2_env.status != "stopped" && process.pm2_env.status != "errored" && process.pm2_env.status != "launching") {
+		if(process.pm2_env.status != "online" && process.pm2_env.status != "stopped" && process.pm2_env.status != "errored" && process.pm2_env.status != "launching" && process.pm2_env.status != "stopping") {
 			this._logger.warn("Unknown status!", process.pm2_env.status);
 		}
 

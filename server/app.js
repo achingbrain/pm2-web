@@ -64,6 +64,19 @@ PM2Web = function(options) {
 
 		throw exception;
 	}.bind(this));
+
+	// make sure we shut down cleanly
+	process.on("SIGINT", this.stop.bind(this));
+
+	// make sure we shut down cleanly
+	process.on("message", function(message) {
+		if (message == "shutdown") {
+			this.stop();
+		}
+	});
+
+	// make sure we shut down cleanly
+	process.on("exit", this.stop.bind(this));
 };
 util.inherits(PM2Web, EventEmitter);
 
@@ -90,9 +103,9 @@ PM2Web.prototype._createServer = function(express) {
 				response.redirect(httpsUrl + request.url);
 			});
 			process.nextTick(function() {
-				var redirectServer = http.createServer(redirectApp);
-				redirectServer.listen(config.get("www:port"), function() {
-					this._container.find("logger").info("HTTP to HTTPS upgrade server listening on port " + redirectServer.address().port);
+				this._redirectServer = http.createServer(redirectApp);
+				this._redirectServer.listen(config.get("www:port"), function() {
+					this._container.find("logger").info("PM2Web", "HTTP to HTTPS upgrade server listening on port " + this._redirectServer.address().port);
 				}.bind(this));
 			}.bind(this));
 		}
@@ -157,6 +170,7 @@ PM2Web.prototype.start = function() {
 			this._container.find("logger").info("Express server listening on port " + this._server.address().port);
 
 			this.setAddress("http" + (config.get("www:ssl:enabled") ? "s": "") + "://" + config.get("www:host") + ":" + this._server.address().port);
+
 			this.emit("start");
 		}.bind(this));
 
@@ -167,10 +181,10 @@ PM2Web.prototype.start = function() {
 				this._container.find("logger").info("Starting MDNS adverisment with name", this._container.find("config").get("mdns:name"));
 
 				// publish via Bonjour
-				var advert = mdns.createAdvertisement(mdns.tcp("http"), this._express.get("port"), {
+				this._advert = mdns.createAdvertisement(mdns.tcp("http"), this._express.get("port"), {
 					name: config.get("mdns:name")
 				});
-				advert.start();
+				this._advert.start();
 			} catch(e) {
 				this._container.find("logger").warn("Could not start mdns argument - did mdns2 install correctly?", e.message);
 			}
@@ -179,9 +193,31 @@ PM2Web.prototype.start = function() {
 };
 
 PM2Web.prototype.stop = function() {
-	this._server.close();
+	var logger = this._container.find("logger");
+	logger = console;
+
+	logger.info("PM2Web", "Shutting down Express");
+	this._server.close(function() {
+		logger.info("PM2Web", "Express shut down.");
+	});
+
+	logger.info("PM2Web", "Shutting WebSocket");
 	this._container.find("webSocketServer").close();
+
+	logger.info("PM2Web", "Disconnecting from pm2-interface");
 	this._container.find("pm2Listener").close();
+
+	if(this._advert) {
+		logger.info("PM2Web", "Shutting down MDNS Advert");
+		this._advert.stop();
+	}
+
+	if(this._redirectServer) {
+		logger.info("PM2Web", "Shutting down HTTP to HTTPS upgrade server");
+		this._redirectServer.close(function() {
+			logger.info("PM2Web", "HTTP to HTTPS upgrade server shut down.");
+		});
+	}
 };
 
 module.exports = PM2Web;
