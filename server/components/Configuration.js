@@ -39,8 +39,8 @@ var Configuration = function(options, argv) {
 
 Configuration.prototype.afterPropertiesSet = function() {
 	// need to rethink this
-	if(this.get("config")) {
-		this._logger.info("Configuration", "Loading config file from", this.get("config"));
+	if(argv["config"]) {
+		this._logger.info("Configuration", "Loading config file from", argv["config"]);
 	} else if (fs.existsSync(USER_CONFIG_FILE)) {
 		this._logger.info("Configuration", "Loading config file from", USER_CONFIG_FILE);
 	} else if (fs.existsSync(GLOBAL_CONFIG_FILE)) {
@@ -58,10 +58,10 @@ Configuration.prototype.afterPropertiesSet = function() {
 
 Configuration.prototype._loadConfigFile = function() {
 	// try to find a config file
-	if(this.get("config")) {
+	if(argv["config"]) {
 		// if a config file has been specified make it override all settings
 		//this._logger.info("Loading config file from", this.get("config"));
-		return cjson.load(this.get("config"));
+		return cjson.load(argv["config"]);
 	} else if (fs.existsSync(USER_CONFIG_FILE)) {
 		// otherwise if a user specific config file is present, make that override all settings
 		//this._logger.info("Loading config file from", USER_CONFIG_FILE);
