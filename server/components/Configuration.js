@@ -1,12 +1,13 @@
 var Autowire = require("wantsit").Autowire,
 	cjson = require("cjson"),
-	fs = require("fs");
+	fs = require("fs"),
+  argv = require("minimist")(process.argv.slice(2));;
 
 var DEFAULT_CONFIG_FILE = __dirname + "/../../config.json";
 var GLOBAL_CONFIG_FILE = "/etc/pm2-web/config.json";
 var USER_CONFIG_FILE = process.env["HOME"] + "/.config/pm2-web/config.json";
 
-var Configuration = function(options, argv) {
+var Configuration = function(options) {
 	this._logger = Autowire;
 
 	// load defaults from bundled config file

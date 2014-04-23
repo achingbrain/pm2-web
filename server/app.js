@@ -7,8 +7,7 @@ var winston = require("winston"),
 	WebSocketServer = require("ws").Server,
 	EventEmitter = require("wildemitter"),
 	util = require("util"),
-	fs = require("fs"),
-	argv = require("minimist")(process.argv.slice(2));
+	fs = require("fs");
 
 var REQUIRED_PM2_VERSION = "0.7.7";
 
@@ -33,7 +32,7 @@ PM2Web = function(options) {
 	options.requiredPm2Version = REQUIRED_PM2_VERSION;
 
 	// parse configuration
-	this._container.createAndRegister("config", require(__dirname + "/components/Configuration"), options, argv);
+	this._container.createAndRegister("config", require(__dirname + "/components/Configuration"), options);
 
 	// web controllers
 	this._container.createAndRegister("homeController", require(__dirname + "/routes/Home"));

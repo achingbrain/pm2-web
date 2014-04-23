@@ -44,7 +44,8 @@
 		"sinon": "^1.8",
 		"istanbul": "^0.2",
 		"coveralls": "^2.8",
-		"protractor": "^0.19"
+		"protractor": "^0.19",
+		"proxyquire": "^0.4"
 	},
 	"preferGlobal": "true",
 	"bin": {

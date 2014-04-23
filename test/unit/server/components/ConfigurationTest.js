@@ -1,9 +1,16 @@
-var Configuration = require(__dirname + "/../../../../server/components/Configuration"),
-	sinon = require("sinon"),
+var proxyquire = require("proxyquire");
+
+var stubs = {
+
+};
+
+var	sinon = require("sinon"),
 	should = require("should");
 
-var createConfig = function(options, argv) {
-	var config = new Configuration(options, argv);
+var createConfig = function(options) {
+	var Configuration = proxyquire(__dirname + "/../../../../server/components/Configuration", stubs)
+
+	var config = new Configuration(options);
 	config._logger = {
 		info: sinon.stub(),
 		warn: sinon.stub(),
@@ -128,9 +135,13 @@ module.exports = {
 	},
 
 	"Should pass command line args with semi colon": function(test) {
-		var config = createConfig({}, {
-			"pm2:host": "baz"
-		});
+		stubs.minimist = function() {
+			return {
+				"pm2:host": "baz"
+			};
+		};
+
+		var config = createConfig({});
 
 		var hosts = config.get("pm2");
 		hosts.length.should.equal(1);
@@ -140,9 +151,13 @@ module.exports = {
 	},
 
 	"Should pass command line args with full stop": function(test) {
-		var config = createConfig({}, {
-			"pm2.host": "baz"
-		});
+		stubs.minimist = function() {
+			return {
+				"pm2.host": "baz"
+			};
+		};
+
+		var config = createConfig({});
 
 		var hosts = config.get("pm2");
 		hosts.length.should.equal(1);
