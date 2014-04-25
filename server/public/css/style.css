@@ -254,8 +254,8 @@ section .logs h3 {
 .processes .information .actions a.icon-repeat:hover {
   color: #1597e0;
 }
-.processes .information .actions a.icon-wrench:hover {
-  color: #a58f16;
+.processes .information .actions a.icon-bug:hover {
+  color: #c19600;
 }
 .processes .information:hover p {
   background-color: #ebebeb;

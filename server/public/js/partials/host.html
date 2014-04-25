@@ -77,7 +77,7 @@
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>
 					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id, $event)"></a>
 					<a class="icon-repeat" title="Reload process" ng-hide="process.status != 'online'" ng-click="reload(process, $event)"></a>
-					<a class="icon-wrench" title="Debug process" ng-show="debugEnabled && process.status == 'online'" ng-click="debug(process, $event)"></a>
+					<a class="icon-bug" title="Debug process" ng-show="debugEnabled && process.status == 'online'" ng-click="debug(process, $event)"></a>
 				</p>
 			</li>
 		</ul>
@@ -91,8 +91,11 @@
 				<dt class="memory">Memory</dt>
 				<dd>Memory</dd>
 			</dl>
-			<figure resourceusage data="process.usage" style="display: block; width: 100%; height: 300px; margin: 10px 0"></figure>
+			<figure resourceusage data="process.usage" style="display: block; width: 100%; height: 300px; margin: 10px 0 30px 0"></figure>
 			<h3>Logs</h3>
+<!--			<div class="btn-group">
+				<button ng-click="clearLogs(process)" class="btn btn-default btn-sm">Clear</button>
+			</div> -->
 			<ul scrollglue>
 				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml" />
 			</ul>

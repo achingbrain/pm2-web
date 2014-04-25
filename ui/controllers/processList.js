@@ -48,6 +48,9 @@ module.exports = ["$scope", "$routeParams", "$location", "$window", "hostList", 
 
 			$window.open("http://" + hostData.name + ":" + hostData.inspector + "/debug?port=" + process.debugPort, hostData.name + "-" + process.id, "location=no,menubar=no,status=no,toolbar=no");
 		};
+		$scope.clearLogs = function(process) {
+			process.logs.length = 0;
+		}
 	};
 	updateScope();
 

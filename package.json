@@ -1,6 +1,6 @@
 {
 	"name": "pm2-web",
-	"version": "1.6.3",
+	"version": "1.6.4",
 	"description": "A web based monitor for PM2",
 	"preferGlobal": true,
 	"main": "pm2-web.js",
@@ -45,7 +45,8 @@
 		"istanbul": "^0.2",
 		"coveralls": "^2.8",
 		"protractor": "^0.19",
-		"proxyquire": "^0.4"
+		"proxyquire": "^0.4",
+		"testsuite": "^0.0"
 	},
 	"preferGlobal": "true",
 	"bin": {
