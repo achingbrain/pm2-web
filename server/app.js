@@ -165,8 +165,8 @@ PM2Web.prototype.start = function() {
 	var config = this._container.find("config");
 
 	process.nextTick(function() {
-		this._server.listen(this._express.get("port"), function() {
-			this._container.find("logger").info("Express server listening on port " + this._server.address().port);
+		this._server.listen(this._express.get("port"), (config.get("www:address") ? config.get("www:address") : "0.0.0.0"), function() {
+			this._container.find("logger").info("Express server listening on " + this._server.address().address + ":" + this._server.address().port);
 
 			this.setAddress("http" + (config.get("www:ssl:enabled") ? "s": "") + "://" + config.get("www:host") + ":" + this._server.address().port);
 
