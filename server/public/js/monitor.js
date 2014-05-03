@@ -1258,8 +1258,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,require("/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":6,"/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/grunt-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"inherits":4}],8:[function(require,module,exports){
+}).call(this,require("/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":6,"/Users/alex/Documents/Workspaces/pm2/pm2-web/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5,"inherits":4}],8:[function(require,module,exports){
 module.exports = {
   XmlEntities: require('./lib/xml-entities.js').XmlEntities,
   Html4Entities: require('./lib/html4-entities.js').Html4Entities,
