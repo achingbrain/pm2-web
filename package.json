@@ -1,6 +1,6 @@
 {
 	"name": "pm2-web",
-	"version": "1.7.4",
+	"version": "1.7.5",
 	"description": "A web based monitor for PM2",
 	"preferGlobal": true,
 	"main": "pm2-web.js",
