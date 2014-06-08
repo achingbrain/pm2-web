@@ -76,7 +76,7 @@
 					<a class="icon-play" title="Start process" ng-hide="process.status == 'online'"  ng-click="start(process.id, $event)"></a>
 					<a class="icon-remove" title="Stop process" ng-hide="process.status != 'online'" ng-click="stop(process.id, $event)"></a>
 					<a class="icon-refresh" title="Restart process" ng-hide="process.status != 'online'" ng-click="restart(process.id, $event)"></a>
-					<a class="icon-repeat" title="Reload process" ng-hide="process.status != 'online'" ng-click="reload(process, $event)"></a>
+					<a class="icon-repeat" title="Reload process" ng-hide="process.status != 'online'" ng-click="reload(process, $event)" ng-show="process.mode == 'cluster'"></a>
 					<a class="icon-bug" title="Debug process" ng-show="debugEnabled && process.status == 'online'" ng-click="debug(process, $event)"></a>
 				</p>
 			</li>
@@ -96,7 +96,8 @@
 <!--			<div class="btn-group">
 				<button ng-click="clearLogs(process)" class="btn btn-default btn-sm">Clear</button>
 			</div> -->
-			<ul scrollglue>
+			<p ng-hide="process.mode == 'cluster'" class="alert alert-warning">Logs are only available for processes started in cluster mode.</p>
+			<ul ng-show="process.mode == 'cluster'" scrollglue>
 				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml" />
 			</ul>
 		</div>

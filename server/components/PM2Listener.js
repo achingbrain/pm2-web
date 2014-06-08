@@ -179,6 +179,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			status: process.pm2_env.status,
 			memory: process.monit.memory,
 			cpu: process.monit.cpu,
+      mode: process.pm2_env.exec_mode.substring(0, process.pm2_env.exec_mode.indexOf("_")),
 			debugPort: this._findDebugPort(process.pm2_env.nodeArgs)
 		});
 	}.bind(this));

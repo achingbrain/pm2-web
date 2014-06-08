@@ -305,7 +305,8 @@ module.exports = {
 			processes: [{
 				pm_id: 0,
 				pm2_env: {
-					status: "launching"
+					status: "launching",
+					exec_mode: "cluster_mode"
 				},
 				monit: {
 					memory: 0,
@@ -314,7 +315,8 @@ module.exports = {
 			}, {
 				pm_id: "todelete0",
 				pm2_env: {
-					status: "online"
+					status: "online",
+					exec_mode: "cluster_mode"
 				},
 				monit: {
 					memory: 0,
