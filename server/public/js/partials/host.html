@@ -96,8 +96,7 @@
 <!--			<div class="btn-group">
 				<button ng-click="clearLogs(process)" class="btn btn-default btn-sm">Clear</button>
 			</div> -->
-			<p ng-hide="process.mode == 'cluster'" class="alert alert-warning">Logs are only available for processes started in cluster mode.</p>
-			<ul ng-show="process.mode == 'cluster'" scrollglue>
+			<ul scrollglue>
 				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml" />
 			</ul>
 		</div>

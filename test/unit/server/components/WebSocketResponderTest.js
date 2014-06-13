@@ -241,6 +241,42 @@ module.exports = {
 		this._clock.tick(600);
 	},
 
+	"Should broadcast logs from forked process": function(test) {
+		this._responder._config.get.withArgs("ws:frequency").returns(500);
+
+		this._responder.afterPropertiesSet();
+
+		// find the callback
+		this._responder._pm2Listener.on.getCall(1).args[0].should.equal("log:out");
+		var callback = this._responder._pm2Listener.on.getCall(1).args[1];
+
+		// the log data we are sending
+		var data = {
+			name: "foo",
+			process: {
+				pm2_env: {
+					pm_id: 1
+				}
+			},
+			data: [98, 97, 114]
+		};
+
+		// invoke the callback
+		callback(data);
+
+		// event should have been broadcast
+		this._responder._webSocketServer.broadcast = function(events) {
+			events[0].method.should.equal("onInfoLog");
+			events[0].args[0].should.equal("foo");
+			events[0].args[1].should.equal(1);
+			events[0].args[2].should.equal("bar");
+
+			test.done();
+		};
+
+		this._clock.tick(600);
+	},
+
 	"Should broadcast exceptions": function(test) {
 		this._responder._config.get.withArgs("ws:frequency").returns(500);
 

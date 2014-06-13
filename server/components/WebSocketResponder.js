@@ -96,11 +96,15 @@ WebSocketResponder.prototype._processEvents = function() {
 }
 
 WebSocketResponder.prototype._broadcastLog = function(type, event) {
-	if(!event.data.trim) {
+	var log;
+
+	if(Array.isArray(event.data)) {
+		log = new Buffer(event.data).toString('utf8');
+	} else if(event.data.trim) {
+		log = event.data.trim();
+	} else {
 		return;
 	}
-
-	var log = event.data.trim();
 
 	this._hostList.addLog(event.name, event.process.pm2_env.pm_id, type, log);
 
