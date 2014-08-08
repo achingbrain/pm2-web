@@ -7,7 +7,8 @@ var winston = require("winston"),
 	WebSocketServer = require("ws").Server,
 	EventEmitter = require("wildemitter"),
 	util = require("util"),
-	fs = require("fs");
+	fs = require("fs"),
+	methodOverride = require('method-override');
 
 var REQUIRED_PM2_VERSION = "0.7.7";
 
@@ -143,7 +144,9 @@ PM2Web.prototype._createExpress = function() {
 	express.use(Express.logger("dev"));
 	express.use(Express.urlencoded())
 	express.use(Express.json())
-	express.use(Express.methodOverride());
+	express.use(methodOverride('X-HTTP-Method'));          // Microsoft
+	express.use(methodOverride('X-HTTP-Method-Override')); // Google/GData, default option
+	express.use(methodOverride('X-Method-Override'));      // IBM
 	express.use(express.router);
 	express.use(Express.static(__dirname + "/public"));
 
