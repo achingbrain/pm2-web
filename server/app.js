@@ -9,7 +9,7 @@ var winston = require("winston"),
 	util = require("util"),
 	fs = require("fs");
 
-var REQUIRED_PM2_VERSION = "0.7.7";
+var REQUIRED_PM2_VERSION = "0.10.0";
 
 PM2Web = function(options) {
 	EventEmitter.call(this);
