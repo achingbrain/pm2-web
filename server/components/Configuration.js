@@ -1,7 +1,8 @@
 var Autowire = require("wantsit").Autowire,
 	cjson = require("cjson"),
 	fs = require("fs"),
-  argv = require("minimist")(process.argv.slice(2));;
+  argv = require("minimist")(process.argv.slice(2)),
+	pwuid = require('pwuid');
 
 var DEFAULT_CONFIG_FILE = __dirname + "/../../config.json";
 var GLOBAL_CONFIG_FILE = "/etc/pm2-web/config.json";
@@ -101,8 +102,8 @@ Configuration.prototype._normaliseHosts = function() {
 				"inspector": args.inspector[index] ? args.inspector[index] : undefined
 			}, {
 				"host": "localhost",
-				"rpc": 6666,
-				"events": 6667
+				"rpc": "~/.pm2/rpc.sock",
+				"events": "~/.pm2/pub.sock"
 			}));
 		}.bind(this));
 
@@ -113,11 +114,21 @@ Configuration.prototype._normaliseHosts = function() {
 		args = [args];
 	}
 
+	var userDetails = pwuid()
+
 	// ensure data is correct for each host
 	args.forEach(function(host) {
 		host.host = host.host || "localhost";
-		host.rpc = host.rpc || 6666;
-		host.events = host.events || 6667;
+		host.rpc = host.rpc || "~/.pm2/rpc.sock";
+		host.events = host.events || "~/.pm2/pub.sock";
+
+		if(host.rpc.substring(0, 1) == "~") {
+			host.rpc = userDetails.dir + host.rpc.substring(1)
+		}
+
+		if(host.events.substring(0, 1) == "~") {
+			host.events = userDetails.dir + host.events.substring(1)
+		}
 
 		if(host.inspector === undefined) {
 			delete host.inspector;

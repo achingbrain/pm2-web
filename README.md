@@ -5,9 +5,13 @@ A web based monitor for [PM2](https://github.com/Unitech/pm2).
 
 ![Screenshot of web monitor](https://raw.github.com/achingbrain/pm2-web/master/assets/screenshot-1.0.png)
 
-## Prerequisites
+## Multiple hosts
 
-pm2 must allow connections to an external port.  To do this, set the `$PM2_BIND_ADDR` environmental variable to `0.0.0.0` on the host you wish to monitor before starting pm2.
+With the release of 0.11 pm2 no longer uses TCP sockets for the event bus, instead using unix sockets.  TCP sockets make monitoring hosts remotely possible so that functionality is currently broken.
+
+Hopefully the pm2 team have a solution for this.
+
+## Prerequisites
 
 For debugging to work, [node-inspector](https://www.npmjs.org/package/node-inspector) must be installed and running on the same machine as pm2 (not necessarily the same as pm2-web).
 
@@ -35,17 +39,7 @@ pm2-web will load one of the following files if they exist (in order of preferen
  - From the current users' home directory: `~/.config/pm2-web/config.json`
  - A global configuration file: `/etc/pm2-web/config.json`
 
-The default configuration file is always loaded and other config files will be applied to the default configuration so if the only change you wish to make is to monitor multiple hosts and those hosts are using the default `rpc` and `event` ports, all your configuration file need contain is:
-
-```javascript
-{
-	"pm2": [{
-		"host": "foo.baz.com"
-	}, {
-		"host": "bar.baz.com"
-	}]
-}
-```
+The default configuration file is always loaded and other config files will be applied to the default configuration.
 
 The configuration file(s) loaded and the final configuration object will both be recorded in the logs.
 
@@ -53,15 +47,7 @@ Configuration files are loaded using [cjson](https://www.npmjs.org/package/cjson
 
 All options can be passed as command line arguments and will override any settings found in configuration files.
 
-e.g. to replicate the above you'd use:
-
-```
-$ pm2-web --pm2.host foo.baz.com --pm2.host bar.baz.com
-```
-
 ## Authentication
-
-First, a warning - `pm2-interface` does not support any kind of authentication, so just enabling auth for pm2-web will not secure your system.  If you are planning on exposing pm2-web on a publicly accessible host, please ensure that you cannot connect to `pm2-interface`'s RPC or event ports on monitored hosts across the Internet.  Please follow [pm2-interface #10](https://github.com/Unitech/pm2-interface/issues/10) for more information.
 
 To use HTTP basic auth, set `www:authentication:enabled` to true in your configuration file.  See the [default configuration file](https://github.com/achingbrain/pm2-web/blob/master/config.json) for more information.
 
@@ -176,6 +162,9 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 ```
 
 ## Release notes
+
+### 2.0.x
+ - Uses 2.x version of pm2-interface, even though it breaks monitoring multiple hosts
 
 ### 1.6.x
 

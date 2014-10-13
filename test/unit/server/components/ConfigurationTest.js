@@ -61,28 +61,28 @@ module.exports = {
 	},
 
 	"Should override ports": function(test) {
-		var config = createConfig({pm2: {host: "foo", rpc: 10, events: 11}});
+		var config = createConfig({pm2: {host: "foo", rpc: "/rpc", events: "/pub"}});
 		var hosts = config.get("pm2");
 
 		hosts.length.should.equal(1);
 		hosts[0].host.should.equal("foo");
-		hosts[0].rpc.should.equal(10);
-		hosts[0].events.should.equal(11);
+		hosts[0].rpc.should.equal("/rpc");
+		hosts[0].events.should.equal("/pub");
 
 		test.done();
 	},
 
 	"Should override ports with arrays": function(test) {
-		var config = createConfig({pm2: {host: ["foo", "bar"], rpc: [10, 11], events: [12, 13]}});
+		var config = createConfig({pm2: {host: ["foo", "bar"], rpc: ["/1/rpc", "/2/rpc"], events: ["/1/pub", "/2/pub"]}});
 		var hosts = config.get("pm2");
 
 		hosts.length.should.equal(2);
 		hosts[0].host.should.equal("foo");
-		hosts[0].rpc.should.equal(10);
-		hosts[0].events.should.equal(12);
+		hosts[0].rpc.should.equal("/1/rpc");
+		hosts[0].events.should.equal("/1/pub");
 		hosts[1].host.should.equal("bar");
-		hosts[1].rpc.should.equal(11);
-		hosts[1].events.should.equal(13);
+		hosts[1].rpc.should.equal("/2/rpc");
+		hosts[1].events.should.equal("/2/pub");
 
 		test.done();
 	},

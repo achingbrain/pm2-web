@@ -1,6 +1,6 @@
 {
 	"name": "pm2-web",
-	"version": "1.7.8",
+	"version": "2.0.0",
 	"description": "A web based monitor for PM2",
 	"preferGlobal": true,
 	"main": "pm2-web.js",
@@ -19,12 +19,13 @@
 		"winston": "^0.7",
 		"underscore.string": "^2.3",
 		"wantsit": "^1.0",
-		"pm2-interface": "^1.0",
+		"pm2-interface": "^2.0",
 		"ws": "^0.4",
 		"wildemitter": "^1.0",
 		"cjson": "^0.3",
 		"minimist": "^1.0",
 		"semver": "^3.0",
+		"pwuid": "^1.0",
 
 		"zepto-browserify": "^1.0",
 		"moment": "^2.5",

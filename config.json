@@ -45,8 +45,8 @@
 	// To monitor multiple hosts, add extra entries to this array
 	"pm2": [{
 		"host": "localhost",
-		"rpc": 6666,
-		"events": 6667
+		"rpc": "~/.pm2/rpc.sock",
+		"events": "~/.pm2/pub.sock"
 
 		// To debug remote processes, run node-inspector on the remote host and add the port
 		// it's listnening on here:
