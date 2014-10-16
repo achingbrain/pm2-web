@@ -96,25 +96,27 @@ WebSocketResponder.prototype._processEvents = function() {
 }
 
 WebSocketResponder.prototype._broadcastLog = function(type, event) {
-	var log;
+	// where process id is stored changed with pm2 0.11
+  var id = event.process.pm_id;
+  var log;
 
 	if(Array.isArray(event.data)) {
 		log = new Buffer(event.data).toString('utf8');
-	} else if(event.data.trim) {
-		log = event.data.trim();
+	} else if(event.str && event.str.trim) {
+		log = event.str.trim();
 	} else {
 		return;
 	}
 
-	this._hostList.addLog(event.name, event.process.pm2_env.pm_id, type, log);
+	this._hostList.addLog(event.name, id, type, log);
 
 	this._events.push({
 		method: "on" + _s.capitalize(type) + "Log",
 		args: [
-			event.name, event.process.pm2_env.pm_id, log
+			event.name, id, log
 		]
 	});
-}
+};
 
 WebSocketResponder.prototype.startProcess = function(client, host, pm_id) {
 	this._pm2Listener.startProcess(host, pm_id);

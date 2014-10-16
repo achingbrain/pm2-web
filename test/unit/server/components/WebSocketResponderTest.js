@@ -182,11 +182,9 @@ module.exports = {
 		var data = {
 			name: "foo",
 			process: {
-				pm2_env: {
-					pm_id: 1
-				}
+				pm_id: 1
 			},
-			data: "bar"
+			str: "bar"
 		};
 
 		// invoke the callback
@@ -218,11 +216,9 @@ module.exports = {
 		var data = {
 			name: "foo",
 			process: {
-				pm2_env: {
-					pm_id: 1
-				}
+				pm_id: 1
 			},
-			data: "bar"
+			str: "bar"
 		};
 
 		// invoke the callback
@@ -254,9 +250,7 @@ module.exports = {
 		var data = {
 			name: "foo",
 			process: {
-				pm2_env: {
-					pm_id: 1
-				}
+        pm_id: 1
 			},
 			data: [98, 97, 114]
 		};

@@ -51,29 +51,21 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket ready");
 
-	pm2Interface.pm2 = {
-		version: "LATEST",
-		compatible: true
-	};
-
-	this._addCompatiblePm2(pm2Interface, pm2Interface.pm2.version, pm2Details);
-
-	/* Can uncomment this once https://github.com/Unitech/pm2/pull/320 is merged
-
 	if(!pm2Interface.rpc.getVersion) {
 		pm2Interface.pm2 = {
-			version: "WELL_OLD",
-			compatible: true
+			version: "OBSOLETE",
+			compatible: false
 		};
 
-		this._addIncompatiblePm2(pm2Interface, pm2Interface.pm2.version, pm2Details);
+		return this._addIncompatiblePm2(pm2Interface, pm2Interface.pm2.version, pm2Details);
 	}
 
 	this._logger.info("PM2Listener", "Querying version number from", pm2Interface.bind_host);
 
 	pm2Interface.rpc.getVersion({}, function(err, version) {
 		pm2Interface.pm2 = {
-			version: version
+			version: version,
+      compatible: true
 		};
 
 		if(!semver.gte(version, this._config.get("requiredPm2Version"))) {
@@ -82,10 +74,8 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 			return this._addIncompatiblePm2(pm2Interface);
 		}
 
-		pm2Interface.pm2.compatible = true;
 		this._addCompatiblePm2(pm2Interface, version, pm2Details);
 	}.bind(this));
-	*/
 }
 
 PM2Listener.prototype._addIncompatiblePm2 = function(pm2Interface, version) {
@@ -96,6 +86,21 @@ PM2Listener.prototype._addIncompatiblePm2 = function(pm2Interface, version) {
 	}
 
 	this._pm2List[pm2Interface.bind_host] = pm2Interface;
+
+  this.emit("systemData", {
+    name: pm2Interface.bind_host,
+    pm2: pm2Interface.pm2,
+    system: {
+      hostname: pm2Interface.bind_host,
+      load: [],
+      memory: {
+        free: 0,
+        total: 0
+      }
+    },
+    pm2: pm2Interface.pm2,
+    processes: []
+  });
 }
 
 PM2Listener.prototype._addCompatiblePm2 = function(pm2Interface, version, pm2Details) {
@@ -174,7 +179,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			pid: process.pid,
 			name: process.pm2_env.name,
 			script: process.pm2_env.pm_exec_path,
-			uptime: (data.system.time - process.pm2_env.pm_uptime) / 1000,
+			uptime: data.system.time - (process.pm2_env.pm_uptime / 1000),
 			restarts: process.pm2_env.restart_time,
 			status: process.pm2_env.status,
 			memory: process.monit.memory,

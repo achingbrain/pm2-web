@@ -79,9 +79,13 @@ module.exports = {
 				on: sinon.stub()
 			},
 			rpc: {
-				getSystemData: sinon.stub()
+				getSystemData: sinon.stub(),
+				getVersion: sinon.stub()
 			}
 		};
+
+		this._listener._config.get.withArgs("requiredPm2Version").returns("0.0.0")
+		remote.rpc.getVersion.callsArgWith(1, null, "1.0.0");
 
 		this._listener._pm2RPCSocketReady(remote);
 
@@ -98,9 +102,13 @@ module.exports = {
 				on: sinon.stub()
 			},
 			rpc: {
-				getSystemData: sinon.stub()
+				getSystemData: sinon.stub(),
+				getVersion: sinon.stub()
 			}
 		};
+
+		this._listener._config.get.withArgs("requiredPm2Version").returns("0.0.0")
+		remote.rpc.getVersion.callsArgWith(1, null, "1.0.0");
 
 		this._listener._pm2RPCSocketReady(remote, {});
 
@@ -134,9 +142,13 @@ module.exports = {
 				on: sinon.stub()
 			},
 			rpc: {
-				getSystemData: sinon.stub()
+				getSystemData: sinon.stub(),
+				getVersion: sinon.stub()
 			}
 		};
+
+		this._listener._config.get.withArgs("requiredPm2Version").returns("0.0.0")
+		remote.rpc.getVersion.callsArgWith(1, null, "1.0.0");
 
 		this._listener._pm2RPCSocketReady(remote);
 
@@ -163,9 +175,13 @@ module.exports = {
 				on: sinon.stub()
 			},
 			rpc: {
-				getSystemData: sinon.stub()
+				getSystemData: sinon.stub(),
+				getVersion: sinon.stub()
 			}
 		};
+
+		this._listener._config.get.withArgs("requiredPm2Version").returns("0.0.0")
+		remote.rpc.getVersion.callsArgWith(1, null, "1.0.0");
 
 		this._listener._pm2RPCSocketReady(remote);
 
@@ -286,9 +302,13 @@ module.exports = {
 				on: sinon.stub()
 			},
 			rpc: {
-				getSystemData: sinon.stub()
+				getSystemData: sinon.stub(),
+				getVersion: sinon.stub()
 			}
 		};
+
+		this._listener._config.get.withArgs("requiredPm2Version").returns("0.0.0")
+		remote.rpc.getVersion.callsArgWith(1, null, "1.0.0");
 
 		this._listener._pm2RPCSocketReady(remote, {});
 
