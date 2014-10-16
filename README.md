@@ -165,6 +165,7 @@ You can alter this behaviour by specifying `--logs:max`, so for example to lower
 
 ### 2.0.x
  - Uses 2.x version of pm2-interface, even though it breaks monitoring multiple hosts
+ - Shows an error message when attempting to monitor an old/incompatible version of pm2
 
 ### 1.6.x
 
