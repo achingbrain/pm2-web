@@ -31,6 +31,10 @@ ProcessData.prototype.update = function(data, system) {
 }
 
 ProcessData.prototype.log = function(type, data) {
+	if(!type || !data) {
+		return;
+	}
+
 	this.logs.push({
 		type: type,
 		data: data

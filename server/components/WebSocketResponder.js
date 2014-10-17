@@ -62,12 +62,28 @@ WebSocketResponder.prototype.afterPropertiesSet = function() {
 
 	// broadcast exceptions
 	this._pm2Listener.on("process:exception", function(event) {
-		this._hostList.addLog(event.name, event.process.pm2_env.pm_id, "error", event.data);
+		var data = event.data ? event.data : event.err
+		var host, id, message, stack;
+
+		host = event.name
+
+		if(event.process) {
+			id = event.process.pm_id;
+		}
+
+		message = data.message;
+		stack = data.stack;
+
+		if(!id) {
+			return
+		}
+
+		this._hostList.addLog(host, id, "error", stack);
 
 		this._events.push({
 			method: "onProcessException",
 			args: [
-				event.name, event.process.pm2_env.pm_id, event.err.message, event.err.stack
+				host, id, message, stack
 			]
 		});
 	}.bind(this));
@@ -96,15 +112,27 @@ WebSocketResponder.prototype._processEvents = function() {
 }
 
 WebSocketResponder.prototype._broadcastLog = function(type, event) {
-	// where process id is stored changed with pm2 0.11
-  var id = event.process.pm_id;
-  var log;
+	var id = event.process.pm_id;
+	var log;
 
-	if(Array.isArray(event.data)) {
-		log = new Buffer(event.data).toString('utf8');
-	} else if(event.str && event.str.trim) {
-		log = event.str.trim();
+	// ugh
+	if(event.data) {
+		if(event.data.str) {
+			log = event.data.str
+		} else if(Array.isArray(event.data)) {
+			log = new Buffer(event.data).toString('utf8');
+		}
+	} else if(event.str) {
+		log = event.str;
 	} else {
+		return;
+	}
+
+	if(log.trim) {
+		log = log.trim()
+	}
+
+	if(!log) {
 		return;
 	}
 

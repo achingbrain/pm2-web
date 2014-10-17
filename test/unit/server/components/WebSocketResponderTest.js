@@ -284,14 +284,11 @@ module.exports = {
 		var event = {
 			name: "foo",
 			process: {
-				pm2_env: {
-					pm_id: 1
-				}
+				pm_id: 1
 			},
-			data: "bar",
-			err: {
+			data: {
 				message: "panic!",
-				stack: []
+				stack: "stack"
 			}
 		};
 
@@ -304,7 +301,7 @@ module.exports = {
 			events[0].args[0].should.equal("foo");
 			events[0].args[1].should.equal(1);
 			events[0].args[2].should.equal("panic!");
-			events[0].args[3].length.should.equal(0);
+			events[0].args[3].should.equal("stack");
 
 			test.done();
 		};
