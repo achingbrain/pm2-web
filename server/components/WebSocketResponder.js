@@ -121,19 +121,19 @@ WebSocketResponder.prototype._broadcastLog = function(type, event) {
 			log = event.data.str
 		} else if(Array.isArray(event.data)) {
 			log = new Buffer(event.data).toString('utf8');
+		} else {
+			log = event.data.toString()
 		}
 	} else if(event.str) {
 		log = event.str;
-	} else {
+	}
+
+	if(!log) {
 		return;
 	}
 
 	if(log.trim) {
 		log = log.trim()
-	}
-
-	if(!log) {
-		return;
 	}
 
 	this._hostList.addLog(event.name, id, type, log);
