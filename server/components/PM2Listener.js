@@ -57,7 +57,7 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 			compatible: false
 		};
 
-		return this._addIncompatiblePm2(pm2Interface, pm2Interface.pm2.version, pm2Details);
+		return this._addIncompatiblePm2(pm2Interface, pm2Interface.pm2.version);
 	}
 
 	this._logger.info("PM2Listener", "Querying version number from", pm2Interface.bind_host);
@@ -98,7 +98,6 @@ PM2Listener.prototype._addIncompatiblePm2 = function(pm2Interface, version) {
 				total: 0
 			}
 		},
-		pm2: pm2Interface.pm2,
 		processes: []
 	});
 };

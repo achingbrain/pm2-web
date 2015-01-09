@@ -6,8 +6,8 @@
 </ul>
 <section class="system" ng-controller="SystemController">
 	<h2>{{hostData.system.hostname}}</h2>
-	<alert ng-hide={{hostData.pm2.compatible}} class="alert-error" type="error">The version of pm2 running on {{hostData.system.hostname}} is incompatible with pm2-web {{pm2WebVersion}} - please upgrade pm2 to {{pm2VersionRequired}} or higher.</alert>
-	<table class="table" ng-show={{hostData.pm2.compatible}}>
+	<alert ng-hide="{{hostData.pm2.compatible}}" class="alert-error" type="error">The version of pm2 running on {{hostData.system.hostname}} is incompatible with pm2-web {{pm2WebVersion}} - please upgrade pm2 to {{pm2VersionRequired}} or higher.</alert>
+	<table class="table" ng-show="{{hostData.pm2.compatible}}">
 		<thead>
 			<tr>
 				<th>Processes</th>
@@ -25,12 +25,12 @@
 			</tr>
 		</tbody>
 	</table>
-	<figure id="memory" ng-show={{hostData.pm2.compatible}}>
+	<figure id="memory" ng-show="{{hostData.pm2.compatible}}">
 		<figcaption>Memory ({{hostData.system.memory.total | memory}} total)</figcaption>
 		<div style="width: {{(hostData.system.memory.free / hostData.system.memory.total) * 100}}%">{{hostData.system.memory.free | memory}} Free</div><div style="width: {{100 - ((hostData.system.memory.free / hostData.system.memory.total) * 100)}}%">{{hostData.system.memory.used | memory}} Used</div>
 	</figure>
 </section>
-<section class="processes" ng-controller="ProcessListController" ng-show={{hostData.pm2.compatible}}>
+<section class="processes" ng-controller="ProcessListController" ng-show="{{hostData.pm2.compatible}}">
 	<h2>Processes</h2>
 	<p class="noprocesses" ng-show="processes.length == 0">There are no processes running.</p>
 	<article ng-repeat="process in processes">
@@ -97,7 +97,7 @@
 				<button ng-click="clearLogs(process)" class="btn btn-default btn-sm">Clear</button>
 			</div> -->
 			<ul scrollglue>
-				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml" />
+				<li ng-repeat="log in process.logs" class="{{log.type}}" ng-bind-html="log.data | ansiToHtml"></li>
 			</ul>
 		</div>
 	</article>

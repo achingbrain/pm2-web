@@ -73,7 +73,7 @@ PM2Web = function(options) {
 		if (message == "shutdown") {
 			this.stop();
 		}
-	});
+	}.bind(this));
 
 	// make sure we shut down cleanly
 	process.on("exit", this.stop.bind(this));
