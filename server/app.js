@@ -10,7 +10,7 @@ var winston = require("winston"),
 	fs = require("fs"),
 	methodOverride = require('method-override');
 
-var REQUIRED_PM2_VERSION = "0.11.0";
+var REQUIRED_PM2_VERSION = "0.12.0";
 
 PM2Web = function(options) {
 	EventEmitter.call(this);
