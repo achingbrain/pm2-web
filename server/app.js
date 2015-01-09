@@ -141,6 +141,7 @@ PM2Web.prototype._createExpress = function() {
 		express.use(Express.basicAuth(config.get("www:authentication:username"), config.get("www:authentication:password")));
 	}
 
+	express.use(Express.favicon(__dirname + "/public/img/favicon.png"));
 	express.use(Express.logger("dev"));
 	express.use(Express.urlencoded());
 	express.use(Express.json());
