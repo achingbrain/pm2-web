@@ -1,5 +1,10 @@
-@import url(//fonts.googleapis.com/css?family=Abel);
-@import url(font-awesome.min.css);
+@import url('font-awesome.min.css');
+@font-face {
+	font-family: 'Abel';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Abel'), local('Abel-Regular'), url('../font/abel-v6.woff') format('woff');
+}
 body {
   background: url(../img/satinweave.png);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
