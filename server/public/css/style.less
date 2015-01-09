@@ -1,10 +1,10 @@
-@import url('font-awesome.min.css');
+//@import url('font-awesome.min.css');
 //@import url(//fonts.googleapis.com/css?family=Abel);
 @font-face {
 	font-family: 'Abel';
 	font-style: normal;
 	font-weight: 400;
-	src: local('Abel'), local('Abel-Regular'), url('../font/abel-v6.woff') format('woff');
+	src: local('Abel'), local('Abel-Regular'), url('../fonts/abel-v6.woff') format('woff');
 }
 
 @blue: #9B9BAD;
@@ -97,7 +97,7 @@ article, footer {
 }
 
 footer {
-	padding-top: 0px;
+	padding-top: 0;
 }
 footer small {
 	font-size: 10px;
@@ -148,7 +148,7 @@ section {
 		margin-bottom: 10px;
 
 		figcaption {
-			border-bottom: 1px solid #DDD;
+			border-bottom: 2px solid #DDD;
 			padding-bottom: 9px;
 			margin-bottom: 17px;
 			font-weight: normal;
@@ -160,7 +160,7 @@ section {
 			height: 28px;
 			width: 50%;
 			text-align: center;
-			padding-top: 14px;
+			padding-top: 7px;
 			font-size: 14px;
 			text-transform: uppercase;
 			color: rgba(0,0,0,0.4);
@@ -279,19 +279,19 @@ section {
 		.status {
 			width: 50px;
 
-			i.icon-ok-circle {
+			i.fa-check-circle-o {
 				color: @processonline
 			}
 
-			i.icon-ban-circle {
+			i.fa-times-circle-o, i.fa-ban {
 				color: @processoffline
 			}
 
-			i.icon-exclamation-sign {
+			i.fa-exclamation-circle {
 				color: @processerror
 			}
 
-			i.icon-repeat {
+			i.fa-repeat {
 				color: @restartaction
 			}
 		}
@@ -303,23 +303,23 @@ section {
 				text-decoration: none;
 			}
 
-			a.icon-play:hover {
+			a.fa-play:hover {
 				color: @restartaction;
 			}
 
-			a.icon-remove:hover {
+			a.fa-remove:hover {
 				color: @killaction;
 			}
 
-			a.icon-refresh:hover {
+			a.fa-refresh:hover {
 				color: @restartaction;
 			}
 
-			a.icon-repeat:hover {
+			a.fa-repeat:hover {
 				color: @reloadaction;
 			}
 
-			a.icon-bug:hover {
+			a.fa-bug:hover {
 				color: @debugaction;
 			}
 		}

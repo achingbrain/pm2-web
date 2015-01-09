@@ -7,16 +7,24 @@ html(lang='en', ng-app='pm2-web')
       var settings = {
         version: '#{version}'
       };
-    script(type='text/javascript', src='/js/vendor/angular/angular.js')
-    script(type='text/javascript', src='/js/vendor/angular/angular-route.js')
-    script(type='text/javascript', src='/js/vendor/angular/angular-sanitize.js')
-    script(type='text/javascript', src='/js/vendor/bootstrap/ui-bootstrap-tpls-0.7.0.min.js')
+    script(type='text/javascript', src='/js/vendor/angular/angular.min.js')
+    script(type='text/javascript', src='/js/vendor/angular/angular-route.min.js')
+    script(type='text/javascript', src='/js/vendor/angular/angular-sanitize.min.js')
+    script(type='text/javascript', src='/js/vendor/bootstrap/ui-bootstrap-tpls.min.js')
     script(type='text/javascript', src='/js/vendor/reconnecting-websocket/reconnecting-websocket.min.js')
     script(type='text/javascript', src='/js/vendor/highcharts/highcharts-all.js')
     script(type='text/javascript', src='/js/vendor/highcharts-ng/highcharts-ng.min.js')
+    script.
+      Highcharts.setOptions({
+        global: {useUTC: false}
+      });
     script(type='text/javascript', src='/js/monitor.js')
     link(rel='stylesheet', href='/css/reset.css')
-    link(rel='stylesheet', href='/css/bootstrap.css')
+    link(rel='stylesheet', href='/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/css/font-awesome.min.css')
+    <!--[if IE 7]>
+    link(rel='stylesheet', href='/css/font-awesome-ie7.min.css')
+    <![endif]-->
     link(rel='stylesheet', href='/css/style.css')
     link(rel='icon', type='image/png', href='/img/favicon.png')
   body
