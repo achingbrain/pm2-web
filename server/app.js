@@ -1,5 +1,5 @@
 var winston = require("winston"),
-	Container = require("wantsit").Container
+	Container = require("wantsit").Container,
 	Express = require("express"),
 	http = require("http"),
 	https = require("https"),
@@ -118,7 +118,7 @@ PM2Web.prototype._createServer = function(express) {
 	}
 
 	return http.createServer(express);
-}
+};
 
 PM2Web.prototype._createExpress = function() {
 	var config = this._container.find("config");
@@ -142,8 +142,8 @@ PM2Web.prototype._createExpress = function() {
 	}
 
 	express.use(Express.logger("dev"));
-	express.use(Express.urlencoded())
-	express.use(Express.json())
+	express.use(Express.urlencoded());
+	express.use(Express.json());
 	express.use(methodOverride('X-HTTP-Method'));          // Microsoft
 	express.use(methodOverride('X-HTTP-Method-Override')); // Google/GData, default option
 	express.use(methodOverride('X-Method-Override'));      // IBM
@@ -154,7 +154,7 @@ PM2Web.prototype._createExpress = function() {
 	express.use(Express.errorHandler());
 
 	return express;
-}
+};
 
 PM2Web.prototype.setAddress = function(address) {
 	this._address = address;

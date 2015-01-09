@@ -54,7 +54,7 @@ WebSocketResponder.prototype._detectLocation = function(location) {
 	}
 
 	return protocol + "://" + location.hostname + ":" + location.port + "/ws";
-}
+};
 
 WebSocketResponder.prototype.isClosed = function() {
 	return this._ws.readyState == READYSTATE.CLOSED;
@@ -74,7 +74,7 @@ WebSocketResponder.prototype.onSystemData = function(data) {
 
 WebSocketResponder.prototype.onHosts = function(hosts) {
 	this.emit("hosts", hosts);
-}
+};
 
 WebSocketResponder.prototype.onConfig = function(config) {
 	this.emit("config", config);

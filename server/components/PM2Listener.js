@@ -14,20 +14,20 @@ var PM2Listener = function() {
 	this._pm2InterfaceFactory = Autowire;
 
 	this._pm2List = {};
-}
+};
 util.inherits(PM2Listener, EventEmitter);
 
 PM2Listener.prototype.afterPropertiesSet = function() {
 	this._config.get("pm2").forEach(function(pm2Details) {
 		this._connect(pm2Details);
 	}.bind(this));
-}
+};
 
 PM2Listener.prototype.close = function() {
 	Object.keys(this._pm2List).forEach(function(key) {
 		this._pm2List[key].disconnect();
 	}.bind(this));
-}
+};
 
 PM2Listener.prototype._connect = function(pm2Details) {
 	this._logger.debug("PM2Listener", "Connecting to", pm2Details.host, "RPC port", pm2Details.rpc, "Event port", pm2Details.events);
@@ -42,7 +42,7 @@ PM2Listener.prototype._connect = function(pm2Details) {
 	remote.on("closed", this._pm2RPCSocketClosed.bind(this, remote));
 	remote.on("close", this._pm2EventSocketClosed.bind(this, remote));
 	remote.on("reconnecting", this._pm2EventSocketReconnecting.bind(this, remote));
-}
+};
 
 PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 	if(this._pm2List[pm2Interface.bind_host]) {
@@ -65,7 +65,7 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 	pm2Interface.rpc.getVersion({}, function(err, version) {
 		pm2Interface.pm2 = {
 			version: version,
-      compatible: true
+			compatible: true
 		};
 
 		if(!semver.gte(version, this._config.get("requiredPm2Version"))) {
@@ -76,7 +76,7 @@ PM2Listener.prototype._pm2RPCSocketReady = function(pm2Interface, pm2Details) {
 
 		this._addCompatiblePm2(pm2Interface, version, pm2Details);
 	}.bind(this));
-}
+};
 
 PM2Listener.prototype._addIncompatiblePm2 = function(pm2Interface, version) {
 	if(version) {
@@ -87,21 +87,21 @@ PM2Listener.prototype._addIncompatiblePm2 = function(pm2Interface, version) {
 
 	this._pm2List[pm2Interface.bind_host] = pm2Interface;
 
-  this.emit("systemData", {
-    name: pm2Interface.bind_host,
-    pm2: pm2Interface.pm2,
-    system: {
-      hostname: pm2Interface.bind_host,
-      load: [],
-      memory: {
-        free: 0,
-        total: 0
-      }
-    },
-    pm2: pm2Interface.pm2,
-    processes: []
-  });
-}
+	this.emit("systemData", {
+		name: pm2Interface.bind_host,
+		pm2: pm2Interface.pm2,
+		system: {
+			hostname: pm2Interface.bind_host,
+			load: [],
+			memory: {
+				free: 0,
+				total: 0
+			}
+		},
+		pm2: pm2Interface.pm2,
+		processes: []
+	});
+};
 
 PM2Listener.prototype._addCompatiblePm2 = function(pm2Interface, version, pm2Details) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "is running pm2", version);
@@ -129,7 +129,7 @@ PM2Listener.prototype._addCompatiblePm2 = function(pm2Interface, version, pm2Det
 	getSystemData();
 
 	this._pm2List[pm2Interface.bind_host] = pm2Interface;
-}
+};
 
 PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) {
 	// support for pm2 < 0.7.2
@@ -184,7 +184,7 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 			status: process.pm2_env.status,
 			memory: process.monit.memory,
 			cpu: process.monit.cpu,
-      mode: process.pm2_env.exec_mode.substring(0, process.pm2_env.exec_mode.indexOf("_")),
+			mode: process.pm2_env.exec_mode.substring(0, process.pm2_env.exec_mode.indexOf("_")),
 			debugPort: this._findDebugPort(process.pm2_env.nodeArgs)
 		});
 	}.bind(this));
@@ -195,33 +195,33 @@ PM2Listener.prototype._mapSystemData = function(pm2Interface, data, pm2Details) 
 	});
 
 	return systemData;
-}
+};
 
 PM2Listener.prototype._pm2RPCSocketClosed = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "RPC socket closed");
 
 	delete this._pm2List[pm2Interface.bind_host];
-}
+};
 
 PM2Listener.prototype._pm2EventSocketClosed = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "event socket close");
-}
+};
 
 PM2Listener.prototype._pm2EventSocketReconnecting = function(pm2Interface) {
 	this._logger.info("PM2Listener", pm2Interface.bind_host, "event socket reconnecting");
-}
+};
 
 PM2Listener.prototype.stopProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "stopProcessId");
-}
+};
 
 PM2Listener.prototype.startProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "startProcessId");
-}
+};
 
 PM2Listener.prototype.restartProcess = function(host, pm_id) {
 	this._doByProcessId(host, pm_id, "restartProcessId");
-}
+};
 
 PM2Listener.prototype.reloadProcess = function(host, pm_id) {
 	if(this._config.get("forceHardReload")) {
@@ -229,7 +229,7 @@ PM2Listener.prototype.reloadProcess = function(host, pm_id) {
 	} else {
 		this._doByProcessId(host, pm_id, "softReloadProcessId");
 	}
-}
+};
 
 PM2Listener.prototype.debugProcess = function(host, pm_id) {
 	// put the remot process into debug mode
@@ -250,7 +250,7 @@ PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
 	this._pm2List[host].rpc[action](pm_id, function(error) {
 
 	});
-}
+};
 
 PM2Listener.prototype._findDebugPort = function(execArgv) {
 	var port = DEFAULT_DEBUG_PORT;
@@ -268,6 +268,6 @@ PM2Listener.prototype._findDebugPort = function(execArgv) {
 	}
 
 	return port;
-}
+};
 
 module.exports = PM2Listener;

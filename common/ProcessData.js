@@ -22,13 +22,13 @@ var ProcessData = function(config, data) {
 	}
 
 	this._map(data);
-}
+};
 
 ProcessData.prototype.update = function(data, system) {
 	this._map(data);
 
 	this._append((data.memory / system.memory.total) * 100, data.cpu, system.time);
-}
+};
 
 ProcessData.prototype.log = function(type, data) {
 	if(!type || !data) {
@@ -44,13 +44,13 @@ ProcessData.prototype.log = function(type, data) {
 	if(this.logs.length > this._config.get("logs:max")) {
 		this.logs.splice(0, this.logs.length - this._config.get("logs:max"));
 	}
-}
+};
 
 ProcessData.prototype._map = function(data) {
 	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "reloading", "debugPort", "mode"].forEach(function(key) {
 		this[key] = data[key];
 	}.bind(this));
-}
+};
 
 ProcessData.prototype._append = function(memory, cpu, time) {
 	this.usage.memory = this._compressResourceUsage(this.usage.memory, time);
@@ -58,7 +58,7 @@ ProcessData.prototype._append = function(memory, cpu, time) {
 
 	this._appendIfDifferent(this.usage.memory, memory, time);
 	this._appendIfDifferent(this.usage.cpu, cpu, time);
-}
+};
 
 ProcessData.prototype._appendIfDifferent = function(array, value, time) {
 	var rounded = ~~value;
@@ -76,7 +76,7 @@ ProcessData.prototype._appendIfDifferent = function(array, value, time) {
 		x: time,
 		y: rounded
 	});
-}
+};
 
 ProcessData.prototype._compressResourceUsage = function(data, time) {
 	var datapoints = this._config.get("graph:datapoints");
@@ -127,7 +127,7 @@ ProcessData.prototype._compressResourceUsage = function(data, time) {
 	}.bind(this));
 
 	return usage;
-}
+};
 
 ProcessData.prototype._compressDay = function(day, now, datapoints, distribution) {
 	if(day.length == 0) {
@@ -143,7 +143,7 @@ ProcessData.prototype._compressDay = function(day, now, datapoints, distribution
 	var percent = distribution[dayDifference];
 
 	return this._compress(day, (datapoints/100) * percent);
-}
+};
 
 ProcessData.prototype._compress = function(dataSet, maxSamples) {
 	var sampleSize = Math.ceil(dataSet.length/maxSamples);
@@ -181,6 +181,6 @@ ProcessData.prototype._compress = function(dataSet, maxSamples) {
 	}
 
 	return output;
-}
+};
 
 module.exports = ProcessData;

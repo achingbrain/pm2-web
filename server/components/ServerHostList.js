@@ -7,7 +7,7 @@ var ServerHostList = function() {
 	this._logger = Autowire;
 
 	this._hostData = {};
-}
+};
 
 ServerHostList.prototype.afterPropertiesSet = function() {
 	this._pm2Listener.on("systemData", this._onSystemData.bind(this));
@@ -62,6 +62,6 @@ ServerHostList.prototype.addLog = function(host, pm2_id, type, data) {
 	}
 
 	process.log(type, data);
-}
+};
 
 module.exports = ServerHostList;
