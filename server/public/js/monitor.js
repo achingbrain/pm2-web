@@ -9,7 +9,7 @@ var HostData = function(data, config) {
 
 	this.name = data.name;
 	this.inspector = data.inspector;
-	this.pm2 = data.pm2,
+	this.pm2 = data.pm2;
 	this.system = {};
 	this.processes = [];
 };
@@ -66,7 +66,7 @@ HostData.prototype.findProcessById = function(id) {
 	}
 
 	return null;
-}
+};
 
 module.exports = HostData;
 },{"./ProcessData":2}],2:[function(require,module,exports){
@@ -94,15 +94,19 @@ var ProcessData = function(config, data) {
 	}
 
 	this._map(data);
-}
+};
 
 ProcessData.prototype.update = function(data, system) {
 	this._map(data);
 
 	this._append((data.memory / system.memory.total) * 100, data.cpu, system.time);
-}
+};
 
 ProcessData.prototype.log = function(type, data) {
+	if(!type || !data) {
+		return;
+	}
+
 	this.logs.push({
 		type: type,
 		data: data
@@ -112,13 +116,13 @@ ProcessData.prototype.log = function(type, data) {
 	if(this.logs.length > this._config.get("logs:max")) {
 		this.logs.splice(0, this.logs.length - this._config.get("logs:max"));
 	}
-}
+};
 
 ProcessData.prototype._map = function(data) {
 	["id", "pid", "name", "script", "uptime", "restarts", "status", "memory", "cpu", "reloading", "debugPort", "mode"].forEach(function(key) {
 		this[key] = data[key];
 	}.bind(this));
-}
+};
 
 ProcessData.prototype._append = function(memory, cpu, time) {
 	this.usage.memory = this._compressResourceUsage(this.usage.memory, time);
@@ -126,7 +130,7 @@ ProcessData.prototype._append = function(memory, cpu, time) {
 
 	this._appendIfDifferent(this.usage.memory, memory, time);
 	this._appendIfDifferent(this.usage.cpu, cpu, time);
-}
+};
 
 ProcessData.prototype._appendIfDifferent = function(array, value, time) {
 	var rounded = ~~value;
@@ -144,7 +148,7 @@ ProcessData.prototype._appendIfDifferent = function(array, value, time) {
 		x: time,
 		y: rounded
 	});
-}
+};
 
 ProcessData.prototype._compressResourceUsage = function(data, time) {
 	var datapoints = this._config.get("graph:datapoints");
@@ -195,7 +199,7 @@ ProcessData.prototype._compressResourceUsage = function(data, time) {
 	}.bind(this));
 
 	return usage;
-}
+};
 
 ProcessData.prototype._compressDay = function(day, now, datapoints, distribution) {
 	if(day.length == 0) {
@@ -211,7 +215,7 @@ ProcessData.prototype._compressDay = function(day, now, datapoints, distribution
 	var percent = distribution[dayDifference];
 
 	return this._compress(day, (datapoints/100) * percent);
-}
+};
 
 ProcessData.prototype._compress = function(dataSet, maxSamples) {
 	var sampleSize = Math.ceil(dataSet.length/maxSamples);
@@ -249,7 +253,7 @@ ProcessData.prototype._compress = function(dataSet, maxSamples) {
 	}
 
 	return output;
-}
+};
 
 module.exports = ProcessData;
 },{"moment":20}],3:[function(require,module,exports){
@@ -365,12 +369,20 @@ module.exports = ProcessData;
       this.opts = extend({}, defaults, options);
       this.input = [];
       this.stack = [];
+      this.stickyStack = [];
     }
 
     Filter.prototype.toHtml = function(input) {
       var buf;
       this.input = typeof input === 'string' ? [input] : input;
       buf = [];
+      this.stickyStack.forEach((function(_this) {
+        return function(element) {
+          return _this.generateOutput(element.token, element.data, function(chunk) {
+            return buf.push(chunk);
+          });
+        };
+      })(this));
       this.forEach(function(chunk) {
         return buf.push(chunk);
       });
@@ -379,80 +391,126 @@ module.exports = ProcessData;
     };
 
     Filter.prototype.forEach = function(callback) {
-      var buf, handleDisplay;
+      var buf;
       buf = '';
-      handleDisplay = (function(_this) {
-        return function(code) {
-          code = parseInt(code, 10);
-          if (code === -1) {
-            callback('<br/>');
-          }
-          if (code === 0) {
-            if (_this.stack.length) {
-              callback(_this.resetStyles());
-            }
-          }
-          if (code === 1) {
-            callback(_this.pushTag('b'));
-          }
-          if (code === 2) {
-
-          }
-          if ((2 < code && code < 5)) {
-            callback(_this.pushTag('u'));
-          }
-          if ((4 < code && code < 7)) {
-            callback(_this.pushTag('blink'));
-          }
-          if (code === 7) {
-
-          }
-          if (code === 8) {
-            callback(_this.pushStyle('display:none'));
-          }
-          if (code === 9) {
-            callback(_this.pushTag('strike'));
-          }
-          if (code === 24) {
-            callback(_this.closeTag('u'));
-          }
-          if ((29 < code && code < 38)) {
-            callback(_this.pushStyle("ef" + (code - 30)));
-          }
-          if (code === 39) {
-            callback(_this.pushStyle("color:" + _this.opts.fg));
-          }
-          if ((39 < code && code < 48)) {
-            callback(_this.pushStyle("eb" + (code - 40)));
-          }
-          if (code === 49) {
-            callback(_this.pushStyle("background-color:" + _this.opts.bg));
-          }
-          if ((89 < code && code < 98)) {
-            callback(_this.pushStyle("ef" + (8 + (code - 90))));
-          }
-          if ((99 < code && code < 108)) {
-            return callback(_this.pushStyle("eb" + (8 + (code - 100))));
-          }
-        };
-      })(this);
       this.input.forEach((function(_this) {
         return function(chunk) {
           buf += chunk;
-          return _this.tokenize(buf, function(tok, data) {
-            switch (tok) {
-              case 'text':
-                return callback(_this.pushText(data));
-              case 'display':
-                return handleDisplay(data);
-              case 'xterm256':
-                return callback(_this.pushStyle("ef" + data));
+          return _this.tokenize(buf, function(token, data) {
+            _this.generateOutput(token, data, callback);
+            if (_this.opts.stream) {
+              return _this.updateStickyStack(token, data);
             }
           });
         };
       })(this));
       if (this.stack.length) {
         return callback(this.resetStyles());
+      }
+    };
+
+    Filter.prototype.generateOutput = function(token, data, callback) {
+      switch (token) {
+        case 'text':
+          return callback(this.pushText(data));
+        case 'display':
+          return this.handleDisplay(data, callback);
+        case 'xterm256':
+          return callback(this.pushStyle("ef" + data));
+      }
+    };
+
+    Filter.prototype.updateStickyStack = function(token, data) {
+      var notCategory;
+      notCategory = function(category) {
+        return function(e) {
+          return (category === null || e.category !== category) && category !== 'all';
+        };
+      };
+      if (token !== 'text') {
+        this.stickyStack = this.stickyStack.filter(notCategory(this.categoryForCode(data)));
+        return this.stickyStack.push({
+          token: token,
+          data: data,
+          category: this.categoryForCode(data)
+        });
+      }
+    };
+
+    Filter.prototype.handleDisplay = function(code, callback) {
+      code = parseInt(code, 10);
+      if (code === -1) {
+        callback('<br/>');
+      }
+      if (code === 0) {
+        if (this.stack.length) {
+          callback(this.resetStyles());
+        }
+      }
+      if (code === 1) {
+        callback(this.pushTag('b'));
+      }
+      if (code === 2) {
+
+      }
+      if ((2 < code && code < 5)) {
+        callback(this.pushTag('u'));
+      }
+      if ((4 < code && code < 7)) {
+        callback(this.pushTag('blink'));
+      }
+      if (code === 7) {
+
+      }
+      if (code === 8) {
+        callback(this.pushStyle('display:none'));
+      }
+      if (code === 9) {
+        callback(this.pushTag('strike'));
+      }
+      if (code === 24) {
+        callback(this.closeTag('u'));
+      }
+      if ((29 < code && code < 38)) {
+        callback(this.pushStyle("ef" + (code - 30)));
+      }
+      if (code === 39) {
+        callback(this.pushStyle("color:" + this.opts.fg));
+      }
+      if ((39 < code && code < 48)) {
+        callback(this.pushStyle("eb" + (code - 40)));
+      }
+      if (code === 49) {
+        callback(this.pushStyle("background-color:" + this.opts.bg));
+      }
+      if ((89 < code && code < 98)) {
+        callback(this.pushStyle("ef" + (8 + (code - 90))));
+      }
+      if ((99 < code && code < 108)) {
+        return callback(this.pushStyle("eb" + (8 + (code - 100))));
+      }
+    };
+
+    Filter.prototype.categoryForCode = function(code) {
+      code = parseInt(code, 10);
+      if (code === 0) {
+        return 'all';
+      } else if (code === 1) {
+        return 'bold';
+      } else if ((2 < code && code < 5)) {
+        return 'underline';
+      } else if ((4 < code && code < 7)) {
+        return 'blink';
+      } else if (code === 8) {
+        return 'hide';
+      } else if (code === 9) {
+        return 'strike';
+      } else if ((29 < code && code < 38) || code === 39 || (89 < code && code < 98)) {
+        return 'foreground-color';
+      } else if ((39 < code && code < 48) || code === 49 || (99 < code && code < 108)) {
+        return 'background-color';
+      } else {
+        return null;
       }
     };
 
@@ -1914,7 +1972,7 @@ module.exports = {
 },{}],20:[function(require,module,exports){
 (function (global){
 //! moment.js
-//! version : 2.8.3
+//! version : 2.8.4
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -1925,7 +1983,7 @@ module.exports = {
     ************************************/
 
     var moment,
-        VERSION = '2.8.3',
+        VERSION = '2.8.4',
         // the global-scope this is NOT the global object in Node.js
         globalScope = typeof global !== 'undefined' ? global : this,
         oldGlobalMoment,
@@ -1948,7 +2006,7 @@ module.exports = {
         momentProperties = [],
 
         // check for nodeJS
-        hasModule = (typeof module !== 'undefined' && module.exports),
+        hasModule = (typeof module !== 'undefined' && module && module.exports),
 
         // ASP.NET json date format regex
         aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
@@ -1959,8 +2017,8 @@ module.exports = {
         isoDurationRegex = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/,
 
         // format tokens
-        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Q|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,4}|X|zz?|ZZ?|.)/g,
-        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
+        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Q|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,4}|x|X|zz?|ZZ?|.)/g,
+        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g,
 
         // parsing token regexes
         parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
@@ -1971,8 +2029,8 @@ module.exports = {
         parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
         parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/gi, // +00:00 -00:00 +0000 -0000 or Z
         parseTokenT = /T/i, // T (ISO separator)
+        parseTokenOffsetMs = /[\+\-]?\d+/, // 1234567890123
         parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
-        parseTokenOrdinal = /\d{1,2}/,
 
         //strict parsing regexes
         parseTokenOneDigit = /\d/, // 0 - 9
@@ -2186,6 +2244,9 @@ module.exports = {
             },
             zz : function () {
                 return this.zoneName();
+            },
+            x    : function () {
+                return this.valueOf();
             },
             X    : function () {
                 return this.unix();
@@ -2613,7 +2674,10 @@ module.exports = {
             overflow =
                 m._a[MONTH] < 0 || m._a[MONTH] > 11 ? MONTH :
                 m._a[DATE] < 1 || m._a[DATE] > daysInMonth(m._a[YEAR], m._a[MONTH]) ? DATE :
-                m._a[HOUR] < 0 || m._a[HOUR] > 23 ? HOUR :
+                m._a[HOUR] < 0 || m._a[HOUR] > 24 ||
+                    (m._a[HOUR] === 24 && (m._a[MINUTE] !== 0 ||
+                                           m._a[SECOND] !== 0 ||
+                                           m._a[MILLISECOND] !== 0)) ? HOUR :
                 m._a[MINUTE] < 0 || m._a[MINUTE] > 59 ? MINUTE :
                 m._a[SECOND] < 0 || m._a[SECOND] > 59 ? SECOND :
                 m._a[MILLISECOND] < 0 || m._a[MILLISECOND] > 999 ? MILLISECOND :
@@ -2640,7 +2704,8 @@ module.exports = {
             if (m._strict) {
                 m._isValid = m._isValid &&
                     m._pf.charsLeftOver === 0 &&
-                    m._pf.unusedTokens.length === 0;
+                    m._pf.unusedTokens.length === 0 &&
+                    m._pf.bigHour === undefined;
             }
         }
         return m._isValid;
@@ -2692,8 +2757,18 @@ module.exports = {
 
     // Return a moment from input, that is local/utc/zone equivalent to model.
     function makeAs(input, model) {
-        return model._isUTC ? moment(input).zone(model._offset || 0) :
-            moment(input).local();
+        var res, diff;
+        if (model._isUTC) {
+            res = model.clone();
+            diff = (moment.isMoment(input) || isDate(input) ?
+                    +input : +moment(input)) - (+res);
+            // Use low-level api, because this fn is low-level api.
+            res._d.setTime(+res._d + diff);
+            moment.updateOffset(res, false);
+            return res;
+        } else {
+            return moment(input).local();
+        }
     }
 
     /************************************
@@ -2713,6 +2788,9 @@ module.exports = {
                     this['_' + i] = prop;
                 }
             }
+            // Lenient ordinal parsing accepts just a number in addition to
+            // number + (possibly) stuff coming from _ordinalParseLenient.
+            this._ordinalParseLenient = new RegExp(this._ordinalParse.source + '|' + /\d{1,2}/.source);
         },
 
         _months : 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
@@ -2725,22 +2803,32 @@ module.exports = {
             return this._monthsShort[m.month()];
         },
 
-        monthsParse : function (monthName) {
+        monthsParse : function (monthName, format, strict) {
             var i, mom, regex;
 
             if (!this._monthsParse) {
                 this._monthsParse = [];
+                this._longMonthsParse = [];
+                this._shortMonthsParse = [];
             }
 
             for (i = 0; i < 12; i++) {
                 // make the regex if we don't have it already
-                if (!this._monthsParse[i]) {
-                    mom = moment.utc([2000, i]);
+                mom = moment.utc([2000, i]);
+                if (strict && !this._longMonthsParse[i]) {
+                    this._longMonthsParse[i] = new RegExp('^' + this.months(mom, '').replace('.', '') + '$', 'i');
+                    this._shortMonthsParse[i] = new RegExp('^' + this.monthsShort(mom, '').replace('.', '') + '$', 'i');
+                }
+                if (!strict && !this._monthsParse[i]) {
                     regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
                     this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
                 }
                 // test the regex
-                if (this._monthsParse[i].test(monthName)) {
+                if (strict && format === 'MMMM' && this._longMonthsParse[i].test(monthName)) {
+                    return i;
+                } else if (strict && format === 'MMM' && this._shortMonthsParse[i].test(monthName)) {
+                    return i;
+                } else if (!strict && this._monthsParse[i].test(monthName)) {
                     return i;
                 }
             }
@@ -2783,6 +2871,7 @@ module.exports = {
         },
 
         _longDateFormat : {
+            LTS : 'h:mm:ss A',
             LT : 'h:mm A',
             L : 'MM/DD/YYYY',
             LL : 'MMMM D, YYYY',
@@ -2823,9 +2912,9 @@ module.exports = {
             lastWeek : '[Last] dddd [at] LT',
             sameElse : 'L'
         },
-        calendar : function (key, mom) {
+        calendar : function (key, mom, now) {
             var output = this._calendar[key];
-            return typeof output === 'function' ? output.apply(mom) : output;
+            return typeof output === 'function' ? output.apply(mom, [now]) : output;
         },
 
         _relativeTime : {
@@ -2860,6 +2949,7 @@ module.exports = {
             return this._ordinal.replace('%d', number);
         },
         _ordinal : '%d',
+        _ordinalParse : /\d{1,2}/,
 
         preparse : function (string) {
             return string;
@@ -3001,6 +3091,8 @@ module.exports = {
         case 'a':
         case 'A':
             return config._locale._meridiemParse;
+        case 'x':
+            return parseTokenOffsetMs;
         case 'X':
             return parseTokenTimestampMs;
         case 'Z':
@@ -3035,7 +3127,7 @@ module.exports = {
         case 'E':
             return parseTokenOneOrTwoDigits;
         case 'Do':
-            return parseTokenOrdinal;
+            return strict ? config._locale._ordinalParse : config._locale._ordinalParseLenient;
         default :
             a = new RegExp(regexpEscape(unescapeFormat(token.replace('\\', '')), 'i'));
             return a;
@@ -3072,7 +3164,7 @@ module.exports = {
             break;
         case 'MMM' : // fall through to MMMM
         case 'MMMM' :
-            a = config._locale.monthsParse(input);
+            a = config._locale.monthsParse(input, token, config._strict);
             // if we didn't find a month name, mark the date as invalid.
             if (a != null) {
                 datePartArray[MONTH] = a;
@@ -3089,7 +3181,8 @@ module.exports = {
             break;
         case 'Do' :
             if (input != null) {
-                datePartArray[DATE] = toInt(parseInt(input, 10));
+                datePartArray[DATE] = toInt(parseInt(
+                            input.match(/\d{1,2}/)[0], 10));
             }
             break;
         // DAY OF YEAR
@@ -3114,11 +3207,13 @@ module.exports = {
         case 'A' :
             config._isPm = config._locale.isPM(input);
             break;
-        // 24 HOUR
-        case 'H' : // fall through to hh
-        case 'HH' : // fall through to hh
+        // HOUR
         case 'h' : // fall through to hh
         case 'hh' :
+            config._pf.bigHour = true;
+            /* falls through */
+        case 'H' : // fall through to HH
+        case 'HH' :
             datePartArray[HOUR] = toInt(input);
             break;
         // MINUTE
@@ -3137,6 +3232,10 @@ module.exports = {
         case 'SSS' :
         case 'SSSS' :
             datePartArray[MILLISECOND] = toInt(('0.' + input) * 1000);
+            break;
+        // UNIX OFFSET (MILLISECONDS)
+        case 'x':
+            config._d = new Date(toInt(input));
             break;
         // UNIX TIMESTAMP WITH MS
         case 'X':
@@ -3274,11 +3373,24 @@ module.exports = {
             config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
         }
 
+        // Check for 24:00:00.000
+        if (config._a[HOUR] === 24 &&
+                config._a[MINUTE] === 0 &&
+                config._a[SECOND] === 0 &&
+                config._a[MILLISECOND] === 0) {
+            config._nextDay = true;
+            config._a[HOUR] = 0;
+        }
+
         config._d = (config._useUTC ? makeUTCDate : makeDate).apply(null, input);
         // Apply timezone offset from input. The actual zone can be changed
         // with parseZone.
         if (config._tzm != null) {
             config._d.setUTCMinutes(config._d.getUTCMinutes() + config._tzm);
+        }
+
+        if (config._nextDay) {
+            config._a[HOUR] = 24;
         }
     }
 
@@ -3293,7 +3405,7 @@ module.exports = {
         config._a = [
             normalizedInput.year,
             normalizedInput.month,
-            normalizedInput.day,
+            normalizedInput.day || normalizedInput.date,
             normalizedInput.hour,
             normalizedInput.minute,
             normalizedInput.second,
@@ -3366,6 +3478,10 @@ module.exports = {
             config._pf.unusedInput.push(string);
         }
 
+        // clear _12h flag if hour is <= 12
+        if (config._pf.bigHour === true && config._a[HOUR] <= 12) {
+            config._pf.bigHour = undefined;
+        }
         // handle am pm
         if (config._isPm && config._a[HOUR] < 12) {
             config._a[HOUR] += 12;
@@ -3374,7 +3490,6 @@ module.exports = {
         if (config._isPm === false && config._a[HOUR] === 12) {
             config._a[HOUR] = 0;
         }
-
         dateFromConfig(config);
         checkOverflow(config);
     }
@@ -3634,7 +3749,8 @@ module.exports = {
 
     function makeMoment(config) {
         var input = config._i,
-            format = config._f;
+            format = config._f,
+            res;
 
         config._locale = config._locale || moment.localeData(config._l);
 
@@ -3658,7 +3774,14 @@ module.exports = {
             makeDateFromInput(config);
         }
 
-        return new Moment(config);
+        res = new Moment(config);
+        if (res._nextDay) {
+            // Adding is smart enough around DST
+            res.add(1, 'd');
+            res._nextDay = undefined;
+        }
+
+        return res;
     }
 
     moment = function (input, format, locale, strict) {
@@ -3690,7 +3813,7 @@ module.exports = {
         'release. Please refer to ' +
         'https://github.com/moment/moment/issues/1407 for more info.',
         function (config) {
-            config._d = new Date(config._i);
+            config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
         }
     );
 
@@ -4002,7 +4125,12 @@ module.exports = {
         toISOString : function () {
             var m = moment(this).utc();
             if (0 < m.year() && m.year() <= 9999) {
-                return formatMoment(m, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+                if ('function' === typeof Date.prototype.toISOString) {
+                    // native implementation is ~50x faster, use it when we can
+                    return this.toDate().toISOString();
+                } else {
+                    return formatMoment(m, 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+                }
             } else {
                 return formatMoment(m, 'YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
             }
@@ -4121,7 +4249,7 @@ module.exports = {
                     diff < 1 ? 'sameDay' :
                     diff < 2 ? 'nextDay' :
                     diff < 7 ? 'nextWeek' : 'sameElse';
-            return this.format(this.localeData().calendar(format, this));
+            return this.format(this.localeData().calendar(format, this, moment(now)));
         },
 
         isLeapYear : function () {
@@ -4190,36 +4318,45 @@ module.exports = {
 
         endOf: function (units) {
             units = normalizeUnits(units);
+            if (units === undefined || units === 'millisecond') {
+                return this;
+            }
             return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
         },
 
         isAfter: function (input, units) {
+            var inputMs;
             units = normalizeUnits(typeof units !== 'undefined' ? units : 'millisecond');
             if (units === 'millisecond') {
                 input = moment.isMoment(input) ? input : moment(input);
                 return +this > +input;
             } else {
-                return +this.clone().startOf(units) > +moment(input).startOf(units);
+                inputMs = moment.isMoment(input) ? +input : +moment(input);
+                return inputMs < +this.clone().startOf(units);
             }
         },
 
         isBefore: function (input, units) {
+            var inputMs;
             units = normalizeUnits(typeof units !== 'undefined' ? units : 'millisecond');
             if (units === 'millisecond') {
                 input = moment.isMoment(input) ? input : moment(input);
                 return +this < +input;
             } else {
-                return +this.clone().startOf(units) < +moment(input).startOf(units);
+                inputMs = moment.isMoment(input) ? +input : +moment(input);
+                return +this.clone().endOf(units) < inputMs;
             }
         },
 
         isSame: function (input, units) {
+            var inputMs;
             units = normalizeUnits(units || 'millisecond');
             if (units === 'millisecond') {
                 input = moment.isMoment(input) ? input : moment(input);
                 return +this === +input;
             } else {
-                return +this.clone().startOf(units) === +makeAs(input, this).startOf(units);
+                inputMs = +moment(input);
+                return +(this.clone().startOf(units)) <= inputMs && inputMs <= +(this.clone().endOf(units));
             }
         },
 
@@ -4396,7 +4533,7 @@ module.exports = {
         },
 
         lang : deprecate(
-            'moment().lang() is deprecated. Use moment().localeData() instead.',
+            'moment().lang() is deprecated. Instead, use moment().localeData() to get the language configuration. Use moment().locale() to change languages.',
             function (key) {
                 if (key === undefined) {
                     return this.localeData();
@@ -4617,7 +4754,7 @@ module.exports = {
                 return units === 'month' ? months : months / 12;
             } else {
                 // handle milliseconds separately because of floating point math errors (issue #1867)
-                days = this._days + yearsToDays(this._months / 12);
+                days = this._days + Math.round(yearsToDays(this._months / 12));
                 switch (units) {
                     case 'week': return days / 7 + this._milliseconds / 6048e5;
                     case 'day': return days + this._milliseconds / 864e5;
@@ -4719,6 +4856,7 @@ module.exports = {
 
     // Set default locale, other locale will inherit from English.
     moment.locale('en', {
+        ordinalParse: /\d{1,2}(th|st|nd|rd)/,
         ordinal : function (number) {
             var b = number % 10,
                 output = (toInt(number % 100 / 10) === 1) ? 'th' :
@@ -4936,7 +5074,7 @@ Config.prototype.get = function(key) {
 	});
 
 	return value;
-}
+};
 
 module.exports = Config;
 
@@ -5035,13 +5173,13 @@ UIHostList.prototype.hosts = function() {
 };
 
 UIHostList.prototype._findByHostAndProcessId = function(host, pm_id) {
-	var host = this.find(host);
+	var _host = this.find(host);
 
-	if(!host) {
+	if(!_host) {
 		return;
 	}
 
-	return host.findProcessById(pm_id);
+	return _host.findProcessById(pm_id);
 };
 
 module.exports = UIHostList;
@@ -5103,7 +5241,7 @@ WebSocketResponder.prototype._detectLocation = function(location) {
 	}
 
 	return protocol + "://" + location.hostname + ":" + location.port + "/ws";
-}
+};
 
 WebSocketResponder.prototype.isClosed = function() {
 	return this._ws.readyState == READYSTATE.CLOSED;
@@ -5123,7 +5261,7 @@ WebSocketResponder.prototype.onSystemData = function(data) {
 
 WebSocketResponder.prototype.onHosts = function(hosts) {
 	this.emit("hosts", hosts);
-}
+};
 
 WebSocketResponder.prototype.onConfig = function(config) {
 	this.emit("config", config);
