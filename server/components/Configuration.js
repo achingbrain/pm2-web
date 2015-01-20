@@ -122,11 +122,11 @@ Configuration.prototype._normaliseHosts = function() {
 		host.rpc = host.rpc || "~/.pm2/rpc.sock";
 		host.events = host.events || "~/.pm2/pub.sock";
 
-		if(host.rpc.substring(0, 1) == "~") {
+		if(typeof host.rpc == 'string' && host.rpc.substring(0, 1) == "~") {
 			host.rpc = userDetails.dir + host.rpc.substring(1)
 		}
 
-		if(host.events.substring(0, 1) == "~") {
+		if(typeof host.events == 'string' && host.events.substring(0, 1) == "~") {
 			host.events = userDetails.dir + host.events.substring(1)
 		}
 
