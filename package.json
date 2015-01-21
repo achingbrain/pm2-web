@@ -25,7 +25,7 @@
 		"cjson": "^0.3",
 		"minimist": "^1.0",
 		"semver": "^3.0",
-		"pwuid": "^1.0",
+		"path-extra": "^0.2.0",
 
 		"zepto-browserify": "^1.0",
 		"moment": "^2.5",

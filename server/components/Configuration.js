@@ -2,7 +2,7 @@ var Autowire = require("wantsit").Autowire,
 	cjson = require("cjson"),
 	fs = require("fs"),
 	argv = require("minimist")(process.argv.slice(2)),
-	pwuid = require('pwuid');
+	userPath = require('path-extra');
 
 var DEFAULT_CONFIG_FILE = __dirname + "/../../config.json";
 var GLOBAL_CONFIG_FILE = "/etc/pm2-web/config.json";
@@ -114,8 +114,6 @@ Configuration.prototype._normaliseHosts = function() {
 		args = [args];
 	}
 
-	var userDetails = pwuid();
-
 	// ensure data is correct for each host
 	args.forEach(function(host) {
 		host.host = host.host || "localhost";
@@ -123,11 +121,11 @@ Configuration.prototype._normaliseHosts = function() {
 		host.events = host.events || "~/.pm2/pub.sock";
 
 		if(typeof host.rpc == 'string' && host.rpc.substring(0, 1) == "~") {
-			host.rpc = userDetails.dir + host.rpc.substring(1)
+			host.rpc = userPath.homedir() + host.rpc.substring(1)
 		}
 
 		if(typeof host.events == 'string' && host.events.substring(0, 1) == "~") {
-			host.events = userDetails.dir + host.events.substring(1)
+			host.events = userPath.homedir() + host.events.substring(1)
 		}
 
 		if(host.inspector === undefined) {
