@@ -30,7 +30,7 @@
 		"zepto-browserify": "^1.0",
 		"moment": "^2.5",
 		"mustache": "^0.8",
-		"ansi-to-html": "^0.2",
+		"ansi-html": "~0.0.4",
 		"html-entities": "^1.0",
 		"method-override": "^2.1.2"
 	},
