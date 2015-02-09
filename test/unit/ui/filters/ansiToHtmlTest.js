@@ -20,7 +20,7 @@ module.exports = {
 	},
 
 	"Should convert colours": function( test ) {
-		this._ansiToHtml("[32minfo[39").should.equal("<span style=\"color:#0A0\">info</span>");
+		this._ansiToHtml("[32minfo[39m").should.equal("<span style=\"color:#209805;\">info</span>");
 
 		test.done();
 	}
