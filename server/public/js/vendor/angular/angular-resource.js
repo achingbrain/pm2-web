@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.2.3
+ * @license AngularJS v1.2.28
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -30,7 +30,26 @@ function lookupDottedPath(obj, path) {
 }
 
 /**
- * @ngdoc overview
+ * Create a shallow copy of an object and clear other fields from the destination
+ */
+function shallowClearAndCopy(src, dst) {
+  dst = dst || {};
+
+  angular.forEach(dst, function(value, key){
+    delete dst[key];
+  });
+
+  for (var key in src) {
+    if (src.hasOwnProperty(key) && !(key.charAt(0) === '$' && key.charAt(1) === '$')) {
+      dst[key] = src[key];
+    }
+  }
+
+  return dst;
+}
+
+/**
+ * @ngdoc module
  * @name ngResource
  * @description
  *
@@ -39,7 +58,6 @@ function lookupDottedPath(obj, path) {
  * The `ngResource` module provides interaction support with RESTful services
  * via the $resource service.
  *
- * {@installModule resource}
  *
  * <div doc-module-components="ngResource"></div>
  *
@@ -47,8 +65,8 @@ function lookupDottedPath(obj, path) {
  */
 
 /**
- * @ngdoc object
- * @name ngResource.$resource
+ * @ngdoc service
+ * @name $resource
  * @requires $http
  *
  * @description
@@ -81,11 +99,13 @@ function lookupDottedPath(obj, path) {
  *   Given a template `/path/:verb` and parameter `{verb:'greet', salutation:'Hello'}` results in
  *   URL `/path/greet?salutation=Hello`.
  *
- *   If the parameter value is prefixed with `@` then the value of that parameter is extracted from
- *   the data object (useful for non-GET operations).
+ *   If the parameter value is prefixed with `@` then the value for that parameter will be extracted
+ *   from the corresponding property on the `data` object (provided when calling an action method).  For
+ *   example, if the `defaultParam` object is `{someParam: '@someProp'}` then the value of `someParam`
+ *   will be `data.someProp`.
  *
- * @param {Object.<Object>=} actions Hash with declaration of custom action that should extend the
- *   default set of resource actions. The declaration should be created in the format of {@link
+ * @param {Object.<Object>=} actions Hash with declaration of custom action that should extend
+ *   the default set of resource actions. The declaration should be created in the format of {@link
  *   ng.$http#usage_parameters $http.config}:
  *
  *       {action1: {method:?, params:?, isArray:?, headers:?, ...},
@@ -96,8 +116,8 @@ function lookupDottedPath(obj, path) {
  *
  *   - **`action`** – {string} – The name of action. This name becomes the name of the method on
  *     your resource object.
- *   - **`method`** – {string} – HTTP request method. Valid methods are: `GET`, `POST`, `PUT`,
- *     `DELETE`, and `JSONP`.
+ *   - **`method`** – {string} – Case insensitive HTTP method (e.g. `GET`, `POST`, `PUT`,
+ *     `DELETE`, `JSONP`, etc).
  *   - **`params`** – {Object=} – Optional set of pre-bound parameters for this action. If any of
  *     the parameter value is a function, it will be executed every time when a param value needs to
  *     be obtained for a request (unless the param was overridden).
@@ -109,10 +129,16 @@ function lookupDottedPath(obj, path) {
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     request body and headers and returns its transformed (typically serialized) version.
+ *     By default, transformRequest will contain one function that checks if the request data is
+ *     an object and serializes to using `angular.toJson`. To prevent this behavior, set
+ *     `transformRequest` to an empty array: `transformRequest: []`
  *   - **`transformResponse`** –
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     response body and headers and returns its transformed (typically deserialized) version.
+ *     By default, transformResponse will contain one function that checks if the response looks like
+ *     a JSON string and deserializes it using `angular.fromJson`. To prevent this behavior, set
+ *     `transformResponse` to an empty array: `transformResponse: []`
  *   - **`cache`** – `{boolean|Cache}` – If true, a default $http cache will be used to cache the
  *     GET request, otherwise if a cache instance built with
  *     {@link ng.$cacheFactory $cacheFactory}, this cache will be used for
@@ -120,35 +146,37 @@ function lookupDottedPath(obj, path) {
  *   - **`timeout`** – `{number|Promise}` – timeout in milliseconds, or {@link ng.$q promise} that
  *     should abort the request when resolved.
  *   - **`withCredentials`** - `{boolean}` - whether to set the `withCredentials` flag on the
- *     XHR object. See {@link https://developer.mozilla.org/en/http_access_control#section_5
- *     requests with credentials} for more information.
- *   - **`responseType`** - `{string}` - see {@link
- *     https://developer.mozilla.org/en-US/docs/DOM/XMLHttpRequest#responseType requestType}.
+ *     XHR object. See
+ *     [requests with credentials](https://developer.mozilla.org/en/http_access_control#section_5)
+ *     for more information.
+ *   - **`responseType`** - `{string}` - see
+ *     [requestType](https://developer.mozilla.org/en-US/docs/DOM/XMLHttpRequest#responseType).
  *   - **`interceptor`** - `{Object=}` - The interceptor object has two optional methods -
  *     `response` and `responseError`. Both `response` and `responseError` interceptors get called
  *     with `http response` object. See {@link ng.$http $http interceptors}.
  *
  * @returns {Object} A resource "class" object with methods for the default set of resource actions
  *   optionally extended with custom `actions`. The default set contains these actions:
- *
- *       { 'get':    {method:'GET'},
- *         'save':   {method:'POST'},
- *         'query':  {method:'GET', isArray:true},
- *         'remove': {method:'DELETE'},
- *         'delete': {method:'DELETE'} };
+ *   ```js
+ *   { 'get':    {method:'GET'},
+ *     'save':   {method:'POST'},
+ *     'query':  {method:'GET', isArray:true},
+ *     'remove': {method:'DELETE'},
+ *     'delete': {method:'DELETE'} };
+ *   ```
  *
  *   Calling these methods invoke an {@link ng.$http} with the specified http method,
  *   destination and parameters. When the data is returned from the server then the object is an
  *   instance of the resource class. The actions `save`, `remove` and `delete` are available on it
  *   as  methods with the `$` prefix. This allows you to easily perform CRUD operations (create,
  *   read, update, delete) on server-side data like this:
- *   <pre>
-        var User = $resource('/user/:userId', {userId:'@id'});
-        var user = User.get({userId:123}, function() {
-          user.abc = true;
-          user.$save();
-        });
-     </pre>
+ *   ```js
+ *   var User = $resource('/user/:userId', {userId:'@id'});
+ *   var user = User.get({userId:123}, function() {
+ *     user.abc = true;
+ *     user.$save();
+ *   });
+ *   ```
  *
  *   It is important to realize that invoking a $resource object method immediately returns an
  *   empty reference (object or array depending on `isArray`). Once the data is returned from the
@@ -184,6 +212,9 @@ function lookupDottedPath(obj, path) {
  *     On failure, the promise is resolved with the {@link ng.$http http response} object, without
  *     the `resource` property.
  *
+ *     If an interceptor object was provided, the promise will instead be resolved with the value
+ *     returned by the interceptor.
+ *
  *   - `$resolved`: `true` after first server interaction is completed (either with success or
  *      rejection), `false` before that. Knowing if the Resource has been resolved is useful in
  *      data-binding.
@@ -192,7 +223,7 @@ function lookupDottedPath(obj, path) {
  *
  * # Credit card resource
  *
- * <pre>
+ * ```js
      // Define CreditCard class
      var CreditCard = $resource('/user/:userId/card/:cardId',
       {userId:123, cardId:'@id'}, {
@@ -223,9 +254,9 @@ function lookupDottedPath(obj, path) {
      newCard.name = "Mike Smith";
      newCard.$save();
      // POST: /user/123/card {number:'0123', name:'Mike Smith'}
-     // server returns: {id:789, number:'01234', name: 'Mike Smith'};
+     // server returns: {id:789, number:'0123', name: 'Mike Smith'};
      expect(newCard.id).toEqual(789);
- * </pre>
+ * ```
  *
  * The object returned from this function execution is a resource "class" which has "static" method
  * for each action in the definition.
@@ -236,19 +267,19 @@ function lookupDottedPath(obj, path) {
  * all of the non-GET methods are available with `$` prefix. This allows you to easily support CRUD
  * operations (create, read, update, delete) on server-side data.
 
-   <pre>
+   ```js
      var User = $resource('/user/:userId', {userId:'@id'});
-     var user = User.get({userId:123}, function() {
+     User.get({userId:123}, function(user) {
        user.abc = true;
        user.$save();
      });
-   </pre>
+   ```
  *
  * It's worth noting that the success callback for `get`, `query` and other methods gets passed
  * in the response that came from the server as well as $http header getter function, so one
  * could rewrite the above example and get access to http headers as:
  *
-   <pre>
+   ```js
      var User = $resource('/user/:userId', {userId:'@id'});
      User.get({userId:123}, function(u, getResponseHeaders){
        u.abc = true;
@@ -257,7 +288,46 @@ function lookupDottedPath(obj, path) {
          //putResponseHeaders => $http header getter
        });
      });
-   </pre>
+   ```
+ *
+ * You can also access the raw `$http` promise via the `$promise` property on the object returned
+ *
+   ```
+     var User = $resource('/user/:userId', {userId:'@id'});
+     User.get({userId:123})
+         .$promise.then(function(user) {
+           $scope.user = user;
+         });
+   ```
+
+ * # Creating a custom 'PUT' request
+ * In this example we create a custom method on our resource to make a PUT request
+ * ```js
+ *    var app = angular.module('app', ['ngResource', 'ngRoute']);
+ *
+ *    // Some APIs expect a PUT request in the format URL/object/ID
+ *    // Here we are creating an 'update' method
+ *    app.factory('Notes', ['$resource', function($resource) {
+ *    return $resource('/notes/:id', null,
+ *        {
+ *            'update': { method:'PUT' }
+ *        });
+ *    }]);
+ *
+ *    // In our controller we get the ID from the URL using ngRoute and $routeParams
+ *    // We pass in $routeParams and our Notes factory along with $scope
+ *    app.controller('NotesCtrl', ['$scope', '$routeParams', 'Notes',
+                                      function($scope, $routeParams, Notes) {
+ *    // First get a note object from the factory
+ *    var note = Notes.get({ id:$routeParams.id });
+ *    $id = note.id;
+ *
+ *    // Now call update passing in the ID first then the object you are updating
+ *    Notes.update({ id:$id }, note);
+ *
+ *    // This will PUT /notes/ID with the note object in the request payload
+ *    }]);
+ * ```
  */
 angular.module('ngResource', ['ng']).
   factory('$resource', ['$http', '$q', function($http, $q) {
@@ -344,7 +414,9 @@ angular.module('ngResource', ['ng']).
           val = params.hasOwnProperty(urlParam) ? params[urlParam] : self.defaults[urlParam];
           if (angular.isDefined(val) && val !== null) {
             encodedVal = encodeUriSegment(val);
-            url = url.replace(new RegExp(":" + urlParam + "(\\W|$)", "g"), encodedVal + "$1");
+            url = url.replace(new RegExp(":" + urlParam + "(\\W|$)", "g"), function(match, p1) {
+              return encodedVal + p1;
+            });
           } else {
             url = url.replace(new RegExp("(\/?):" + urlParam + "(\\W|$)", "g"), function(match,
                 leadingSlashes, tail) {
@@ -358,7 +430,7 @@ angular.module('ngResource', ['ng']).
         });
 
         // strip trailing slashes and set the url
-        url = url.replace(/\/+$/, '');
+        url = url.replace(/\/+$/, '') || '/';
         // then replace collapse `/.` if found in the last URL path segment before the query
         // E.g. `http://url.com/id./format?q=x` becomes `http://url.com/id.format?q=x`
         url = url.replace(/\/\.(?=\w+($|\?))/, '.');
@@ -398,7 +470,7 @@ angular.module('ngResource', ['ng']).
       }
 
       function Resource(value){
-        copy(value || {}, this);
+        shallowClearAndCopy(value || {}, this);
       }
 
       forEach(actions, function(action, name) {
@@ -463,26 +535,35 @@ angular.module('ngResource', ['ng']).
                              extend({}, extractParams(data, action.params || {}), params),
                              action.url);
 
-          var promise = $http(httpConfig).then(function(response) {
+          var promise = $http(httpConfig).then(function (response) {
             var data = response.data,
-                promise = value.$promise;
+              promise = value.$promise;
 
             if (data) {
               // Need to convert action.isArray to boolean in case it is undefined
               // jshint -W018
-              if ( angular.isArray(data) !== (!!action.isArray) ) {
-                throw $resourceMinErr('badcfg', 'Error in resource configuration. Expected ' +
-                  'response to contain an {0} but got an {1}',
-                  action.isArray?'array':'object', angular.isArray(data)?'array':'object');
+              if (angular.isArray(data) !== (!!action.isArray)) {
+                throw $resourceMinErr('badcfg',
+                    'Error in resource configuration. Expected ' +
+                    'response to contain an {0} but got an {1}',
+                  action.isArray ? 'array' : 'object',
+                  angular.isArray(data) ? 'array' : 'object');
               }
               // jshint +W018
               if (action.isArray) {
                 value.length = 0;
-                forEach(data, function(item) {
-                  value.push(new Resource(item));
+                forEach(data, function (item) {
+                  if (typeof item === "object") {
+                    value.push(new Resource(item));
+                  } else {
+                    // Valid JSON values may be string literals, and these should not be converted
+                    // into objects. These items will not have access to the Resource prototype
+                    // methods, but unfortunately there
+                    value.push(item);
+                  }
                 });
               } else {
-                copy(data, value);
+                shallowClearAndCopy(data, value);
                 value.$promise = promise;
               }
             }

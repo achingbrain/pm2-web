@@ -92,13 +92,13 @@ UIHostList.prototype.hosts = function() {
 };
 
 UIHostList.prototype._findByHostAndProcessId = function(host, pm_id) {
-	var host = this.find(host);
+	var _host = this.find(host);
 
-	if(!host) {
+	if(!_host) {
 		return;
 	}
 
-	return host.findProcessById(pm_id);
+	return _host.findProcessById(pm_id);
 };
 
 module.exports = UIHostList;

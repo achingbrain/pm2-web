@@ -1,5 +1,5 @@
 var winston = require("winston"),
-	Container = require("wantsit").Container
+	Container = require("wantsit").Container,
 	Express = require("express"),
 	http = require("http"),
 	https = require("https"),
@@ -10,7 +10,7 @@ var winston = require("winston"),
 	fs = require("fs"),
 	methodOverride = require('method-override');
 
-var REQUIRED_PM2_VERSION = "0.11.0";
+var REQUIRED_PM2_VERSION = "0.12.0";
 
 PM2Web = function(options) {
 	EventEmitter.call(this);
@@ -73,7 +73,7 @@ PM2Web = function(options) {
 		if (message == "shutdown") {
 			this.stop();
 		}
-	});
+	}.bind(this));
 
 	// make sure we shut down cleanly
 	process.on("exit", this.stop.bind(this));
@@ -118,7 +118,7 @@ PM2Web.prototype._createServer = function(express) {
 	}
 
 	return http.createServer(express);
-}
+};
 
 PM2Web.prototype._createExpress = function() {
 	var config = this._container.find("config");
@@ -141,9 +141,10 @@ PM2Web.prototype._createExpress = function() {
 		express.use(Express.basicAuth(config.get("www:authentication:username"), config.get("www:authentication:password")));
 	}
 
+	express.use(Express.favicon(__dirname + "/public/img/favicon.png"));
 	express.use(Express.logger("dev"));
-	express.use(Express.urlencoded())
-	express.use(Express.json())
+	express.use(Express.urlencoded());
+	express.use(Express.json());
 	express.use(methodOverride('X-HTTP-Method'));          // Microsoft
 	express.use(methodOverride('X-HTTP-Method-Override')); // Google/GData, default option
 	express.use(methodOverride('X-Method-Override'));      // IBM
@@ -154,7 +155,7 @@ PM2Web.prototype._createExpress = function() {
 	express.use(Express.errorHandler());
 
 	return express;
-}
+};
 
 PM2Web.prototype.setAddress = function(address) {
 	this._address = address;

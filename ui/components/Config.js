@@ -21,6 +21,6 @@ Config.prototype.get = function(key) {
 	});
 
 	return value;
-}
+};
 
 module.exports = Config;

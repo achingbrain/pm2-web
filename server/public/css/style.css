@@ -1,5 +1,9 @@
-@import url(//fonts.googleapis.com/css?family=Abel);
-@import url(font-awesome.min.css);
+@font-face {
+  font-family: 'Abel';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Abel'), local('Abel-Regular'), url('../fonts/abel-v6.woff') format('woff');
+}
 body {
   background: url(../img/satinweave.png);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -50,7 +54,7 @@ footer {
   padding: 10px;
 }
 footer {
-  padding-top: 0px;
+  padding-top: 0;
 }
 footer small {
   font-size: 10px;
@@ -100,7 +104,7 @@ section .logs h3 {
   margin-bottom: 10px;
 }
 .system figure figcaption {
-  border-bottom: 1px solid #DDD;
+  border-bottom: 2px solid #DDD;
   padding-bottom: 9px;
   margin-bottom: 17px;
   font-weight: normal;
@@ -111,7 +115,7 @@ section .logs h3 {
   height: 28px;
   width: 50%;
   text-align: center;
-  padding-top: 14px;
+  padding-top: 7px;
   font-size: 14px;
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.4);
@@ -225,16 +229,17 @@ section .logs h3 {
 .processes .information .status {
   width: 50px;
 }
-.processes .information .status i.icon-ok-circle {
+.processes .information .status i.fa-check-circle-o {
   color: #33b763;
 }
-.processes .information .status i.icon-ban-circle {
+.processes .information .status i.fa-times-circle-o,
+.processes .information .status i.fa-ban {
   color: #920e00;
 }
-.processes .information .status i.icon-exclamation-sign {
+.processes .information .status i.fa-exclamation-circle {
   color: #ff1100;
 }
-.processes .information .status i.icon-repeat {
+.processes .information .status i.fa-repeat {
   color: #33b763;
 }
 .processes .information .actions a {
@@ -242,19 +247,19 @@ section .logs h3 {
   cursor: pointer;
   text-decoration: none;
 }
-.processes .information .actions a.icon-play:hover {
+.processes .information .actions a.fa-play:hover {
   color: #33b763;
 }
-.processes .information .actions a.icon-remove:hover {
+.processes .information .actions a.fa-remove:hover {
   color: #ff1100;
 }
-.processes .information .actions a.icon-refresh:hover {
+.processes .information .actions a.fa-refresh:hover {
   color: #33b763;
 }
-.processes .information .actions a.icon-repeat:hover {
+.processes .information .actions a.fa-repeat:hover {
   color: #1597e0;
 }
-.processes .information .actions a.icon-bug:hover {
+.processes .information .actions a.fa-bug:hover {
   color: #c19600;
 }
 .processes .information:hover p {

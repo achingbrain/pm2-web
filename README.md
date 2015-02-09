@@ -11,6 +11,54 @@ With the release of 0.11 pm2 no longer uses TCP sockets for the event bus, inste
 
 Hopefully the pm2 team have a solution for this.
 
+There is a way to temporarily solve the problem that remote hosts access local unix sockets: use socat!
+
+Download socat to the machine that installed pm2:
+ - Ubuntu: `apt-get install socat`
+ - CentOS: `yum install socat`
+
+Use a tcp port to forward the requests to the unix sockets (rpc.sock using port 6666 and pub.sock using port 6667):
+
+```
+socat "TCP-LISTEN:6666,reuseaddr,fork" "UNIX-CONNECT:$HOME/.pm2/rpc.sock"
+
+socat "TCP-LISTEN:6667,reuseaddr,fork" "UNIX-CONNECT:$HOME/.pm2/pub.sock"
+```
+
+Tips: Path of UNIX-CONNECT cannot use ~, a **INCORRECT** example: UNIX-CONNECT:~/.pm2/rpc.sock
+
+If you do not want to bind all IP (0.0.0.0), but bind specified (e.g. 192.168.1.10), there will be some trouble.
+
+Because socat need to bind a local IP (127.0.0.1), and a bound IP, those IPs binding on different network adapter.
+
+```
+socat "TCP-LISTEN:6666,reuseaddr,fork,bind=192.168.1.10" "proxy:192.168.1.10:127.0.0.1:6666"
+socat "TCP-LISTEN:6666,reuseaddr,fork,bind=127.0.0.1" "UNIX-CONNECT:$HOME/.pm2/rpc.sock"
+
+socat "TCP-LISTEN:6667,reuseaddr,fork,bind=192.168.1.10" "proxy:192.168.1.10:127.0.0.1:6667"
+socat "TCP-LISTEN:6667,reuseaddr,fork,bind=127.0.0.1" "UNIX-CONNECT:$HOME/.pm2/pub.sock"
+```
+
+End of the command to add '&', it will run in the background.
+
+Then you need to modify pm2-web configuration file.
+
+And host to the remote host IP, rpc and events from sock file path to the port number (Note: The port number is a number, non-string).
+```
+    // To monitor multiple hosts, add extra entries to this array
+    "pm2": [{
+        "host": "localhost",
+        "rpc": "~/.pm2/rpc.sock",
+        "events": "~/.pm2/pub.sock"
+    },
+    {
+        "host": "192.168.1.10",
+        "rpc": 6666,
+        "events": 6667
+    }],
+```
+
+
 ## Prerequisites
 
 For debugging to work, [node-inspector](https://www.npmjs.org/package/node-inspector) must be installed and running on the same machine as pm2 (not necessarily the same as pm2-web).

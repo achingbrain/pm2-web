@@ -1,8 +1,8 @@
 var Autowire = require("wantsit").Autowire,
 	cjson = require("cjson"),
 	fs = require("fs"),
-  argv = require("minimist")(process.argv.slice(2)),
-	pwuid = require('pwuid');
+	argv = require("minimist")(process.argv.slice(2)),
+	userPath = require('path-extra');
 
 var DEFAULT_CONFIG_FILE = __dirname + "/../../config.json";
 var GLOBAL_CONFIG_FILE = "/etc/pm2-web/config.json";
@@ -37,7 +37,7 @@ var Configuration = function(options) {
 	this._override(options || {}, this._config);
 
 	this._normaliseHosts();
-}
+};
 
 Configuration.prototype.afterPropertiesSet = function() {
 	// need to rethink this
@@ -56,7 +56,7 @@ Configuration.prototype.afterPropertiesSet = function() {
 
 	this._logger.info("Configuration", "Loaded default configuration from", DEFAULT_CONFIG_FILE);
 	this._logger.info("Configuration", "Final configuration:", JSON.stringify(config, null, 2));
-}
+};
 
 Configuration.prototype._loadConfigFile = function() {
 	// try to find a config file
@@ -75,7 +75,7 @@ Configuration.prototype._loadConfigFile = function() {
 	}
 
 	return {};
-}
+};
 
 Configuration.prototype._normaliseHosts = function() {
 	var args = this.get("pm2");
@@ -114,20 +114,18 @@ Configuration.prototype._normaliseHosts = function() {
 		args = [args];
 	}
 
-	var userDetails = pwuid()
-
 	// ensure data is correct for each host
 	args.forEach(function(host) {
 		host.host = host.host || "localhost";
 		host.rpc = host.rpc || "~/.pm2/rpc.sock";
 		host.events = host.events || "~/.pm2/pub.sock";
 
-		if(host.rpc.substring(0, 1) == "~") {
-			host.rpc = userDetails.dir + host.rpc.substring(1)
+		if(typeof host.rpc == 'string' && host.rpc.substring(0, 1) == "~") {
+			host.rpc = userPath.homedir() + host.rpc.substring(1)
 		}
 
-		if(host.events.substring(0, 1) == "~") {
-			host.events = userDetails.dir + host.events.substring(1)
+		if(typeof host.events == 'string' && host.events.substring(0, 1) == "~") {
+			host.events = userPath.homedir() + host.events.substring(1)
 		}
 
 		if(host.inspector === undefined) {
@@ -136,7 +134,7 @@ Configuration.prototype._normaliseHosts = function() {
 	});
 
 	this.set("pm2", args);
-}
+};
 
 Configuration.prototype._arrayify = function(arg) {
 	if(!arg) {
@@ -148,7 +146,7 @@ Configuration.prototype._arrayify = function(arg) {
 	}
 
 	return [arg];
-}
+};
 
 Configuration.prototype.get = function(key) {
 	if(!this._config || !key) {
@@ -166,7 +164,7 @@ Configuration.prototype.get = function(key) {
 	});
 
 	return value;
-}
+};
 
 Configuration.prototype.set = function(key, value) {
 	if(!this._config || !key) {
@@ -174,7 +172,7 @@ Configuration.prototype.set = function(key, value) {
 	}
 
 	this._apply(key, value, this._config);
-}
+};
 
 Configuration.prototype._apply = function(key, value, target) {
 	var parts;
@@ -196,7 +194,7 @@ Configuration.prototype._apply = function(key, value, target) {
 			target = target[property];
 		}
 	});
-}
+};
 
 Configuration.prototype._defaults = function(object, defaults) {
 	if(typeof object == "undefined" || object == null) {
@@ -236,7 +234,7 @@ Configuration.prototype._defaults = function(object, defaults) {
 	}
 
 	this._logger.error("Configuration", "Don't know what to do with", object, "expected", defaults);
-}
+};
 
 Configuration.prototype._override = function(source, target) {
 	Object.keys(source).forEach(function(key) {
@@ -256,6 +254,6 @@ Configuration.prototype._override = function(source, target) {
 			this._override(source[key], target[key]);
 		}
 	}.bind(this));
-}
+};
 
 module.exports = Configuration;
