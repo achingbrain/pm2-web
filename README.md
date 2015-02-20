@@ -2,7 +2,7 @@
 
 Since it's no longer possible to monitor `pm2` running on multiple machines I'm not really working on `pm2-web` any more.
 
-For an alternative, check out [boss](https://www.npmjs.com/package/process-boss) - a process manager with support for multiple hosts, unix based permissions, a far more capable web interface and more.
+For an alternative, check out [Guvnor](https://www.npmjs.com/package/guvnor) - a process manager with support for multiple hosts, unix based permissions, a far more capable web interface and more.
 
 # pm2-web
 [![Dependency Status](https://david-dm.org/achingbrain/pm2-web.svg?theme=shields.io)](https://david-dm.org/achingbrain/pm2-web) [![devDependency Status](https://david-dm.org/achingbrain/pm2-web/dev-status.svg?theme=shields.io)](https://david-dm.org/achingbrain/pm2-web#info=devDependencies) [![Build Status](https://img.shields.io/travis/achingbrain/pm2-web/master.svg)](https://travis-ci.org/achingbrain/pm2-web) [![Coverage Status](http://img.shields.io/coveralls/achingbrain/pm2-web/master.svg)](https://coveralls.io/r/achingbrain/pm2-web)
