@@ -14,9 +14,6 @@ var Configuration = function(options) {
 	// load defaults from bundled config file
 	this._config = cjson.load(DEFAULT_CONFIG_FILE);
 
-	// override defaults with config file
-	this._override(this._loadConfigFile(), this._config);
-
 	// remove extra bits from command line arguments
 	if(argv) {
 		delete argv._;
@@ -32,6 +29,9 @@ var Configuration = function(options) {
 		// override config file with command line
 		this._override(commandLine, this._config);
 	}
+
+    	// override defaults with config file
+    	this._override(this._loadConfigFile(), this._config);
 
 	// override everything with passed arguments
 	this._override(options || {}, this._config);
