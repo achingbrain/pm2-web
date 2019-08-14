@@ -246,6 +246,14 @@ PM2Listener.prototype._doByProcessId = function(host, pm_id, action) {
 		return this._logger.info("PM2Listener", "Invalid host", host, "not in", Object.keys(this._pm2List));
 	}
 
+	if (
+		action === 'restartProcessId'
+		|| action === 'reloadProcessId'
+		|| action === 'softReloadProcessId'
+	) {
+		pm_id = { id: pm_id };
+	}
+
 	this._logger.info("PM2Listener", host, pm_id, action);
 	this._pm2List[host].rpc[action](pm_id, function(error) {
 
