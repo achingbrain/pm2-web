@@ -389,6 +389,7 @@ module.exports = {
 		this._listener.reloadProcess(host, pm_id);
 
 		this._listener._pm2List[host].rpc.softReloadProcessId.callCount.should.equal(1);
+		console.log(this._listener._pm2List[host].rpc.softReloadProcessId.getCall(0).args[0]);
 		this._listener._pm2List[host].rpc.softReloadProcessId.getCall(0).args[0].id.should.equal(pm_id);
 
 		test.done();
