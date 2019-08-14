@@ -262,7 +262,7 @@ module.exports = {
 		this._listener.restartProcess(host, pm_id);
 
 		this._listener._pm2List[host].rpc.restartProcessId.callCount.should.equal(1);
-		this._listener._pm2List[host].rpc.restartProcessId.getCall(0).args[0].should.equal(pm_id);
+		this._listener._pm2List[host].rpc.restartProcessId.getCall(0).args[0].id.should.equal(pm_id);
 
 		test.done();
 	},
@@ -370,7 +370,7 @@ module.exports = {
 		this._listener.reloadProcess(host, pm_id);
 
 		this._listener._pm2List[host].rpc.reloadProcessId.callCount.should.equal(1);
-		this._listener._pm2List[host].rpc.reloadProcessId.getCall(0).args[0].should.equal(pm_id);
+		this._listener._pm2List[host].rpc.reloadProcessId.getCall(0).args[0].id.should.equal(pm_id);
 
 		test.done();
 	},
@@ -389,7 +389,7 @@ module.exports = {
 		this._listener.reloadProcess(host, pm_id);
 
 		this._listener._pm2List[host].rpc.softReloadProcessId.callCount.should.equal(1);
-		this._listener._pm2List[host].rpc.softReloadProcessId.getCall(0).args[0].should.equal(pm_id);
+		this._listener._pm2List[host].rpc.softReloadProcessId.getCall(0).args[0].id.should.equal(pm_id);
 
 		test.done();
 	},
