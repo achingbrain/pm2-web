@@ -20,7 +20,7 @@
     "underscore.string": "^2.3",
     "wantsit": "^1.0",
     "pm2-interface": "^2.0",
-    "ws": "^0.4",
+    "ws": "^7.2",
     "wildemitter": "^1.0",
     "cjson": "^0.3",
     "minimist": "^1.0",
