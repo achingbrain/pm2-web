@@ -33,9 +33,7 @@
     "html-entities": "^1.0",
     "method-override": "^2.1.2"
   },
-  "optionalDependencies": {
-    "mdns2": "^2.1.0"
-  },
+  "optionalDependencies": {},
   "devDependencies": {
     "grunt-browserify": "^2.0",
     "grunt-contrib-watch": "^0.6",

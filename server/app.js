@@ -10,7 +10,7 @@ var winston = require("winston"),
 	fs = require("fs"),
 	methodOverride = require('method-override');
 
-var REQUIRED_PM2_VERSION = "0.11.0";
+var REQUIRED_PM2_VERSION = "3.5.1";
 
 PM2Web = function(options) {
 	EventEmitter.call(this);
@@ -176,21 +176,21 @@ PM2Web.prototype.start = function() {
 			this.emit("start");
 		}.bind(this));
 
-		if(config.get("mdns:enabled")) {
-			try {
-				var mdns = require("mdns2");
+		// if(config.get("mdns:enabled")) {
+		// 	try {
+		// 		var mdns = require("mdns");
 
-				this._container.find("logger").info("Starting MDNS adverisment with name", this._container.find("config").get("mdns:name"));
+		// 		this._container.find("logger").info("Starting MDNS adverisment with name", this._container.find("config").get("mdns:name"));
 
-				// publish via Bonjour
-				this._advert = mdns.createAdvertisement(mdns.tcp("http"), this._express.get("port"), {
-					name: config.get("mdns:name")
-				});
-				this._advert.start();
-			} catch(e) {
-				this._container.find("logger").warn("Could not start mdns argument - did mdns2 install correctly?", e.message);
-			}
-		}
+		// 		// publish via Bonjour
+		// 		this._advert = mdns.createAdvertisement(mdns.tcp("http"), this._express.get("port"), {
+		// 			name: config.get("mdns:name")
+		// 		});
+		// 		this._advert.start();
+		// 	} catch(e) {
+		// 		this._container.find("logger").warn("Could not start mdns argument - did mdns2 install correctly?", e.message);
+		// 	}
+		// }
 	}.bind(this));
 };
 
