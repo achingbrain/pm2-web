@@ -1,8 +1,7 @@
 var Autowire = require("wantsit").Autowire,
 	cjson = require("cjson"),
 	fs = require("fs"),
-  argv = require("minimist")(process.argv.slice(2)),
-	pwuid = require('pwuid');
+  argv = require("minimist")(process.argv.slice(2));
 
 var DEFAULT_CONFIG_FILE = __dirname + "/../../config.json";
 var GLOBAL_CONFIG_FILE = "/etc/pm2-web/config.json";
@@ -114,7 +113,9 @@ Configuration.prototype._normaliseHosts = function() {
 		args = [args];
 	}
 
-	var userDetails = pwuid()
+	var userDetails = {
+		dir:process.env['HOME']
+	}
 
 	// ensure data is correct for each host
 	args.forEach(function(host) {
